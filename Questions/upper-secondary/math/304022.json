@@ -1,0 +1,77 @@
+{
+  "title": "Chapter 2: Probability Applications",
+  "subject": "Mathematics",
+  "grade": "Secondary 4",
+  "questions": [
+    {
+      "question": "Factory defect rate is 2.5%. In 800 items, estimate defectives.",
+      "options": ["20", "25", "15", "30"],
+      "correct": 0,
+      "points": 10,
+      "explanation": "Expected = 0.025 × 800 = 20 defective items."
+    },
+    {
+      "question": "Spinner A: 1-4, Spinner B: 1-3. Both fair. P(sum = 6)?",
+      "options": ["1/12", "1/6", "1/4", "1/3"],
+      "correct": 0,
+      "points": 20,
+      "explanation": "Sum = 6: (3,3),(4,2) only. Total outcomes = 4×3 = 12. P = 2/12 = 1/6."
+    },
+    {
+      "question": "Survey: 40% play football, 35% play basketball. Independent. Estimate % playing neither.",
+      "options": ["39%", "61%", "75%", "25%"],
+      "correct": 0,
+      "points": 20,
+      "explanation": "P(neither) = (1-0.4) × (1-0.35) = 0.6 × 0.65 = 0.39 = 39%."
+    },
+    {
+      "question": "P(rain Saturday) = 0.3, P(rain Sunday) = 0.2 (independent). P(rain on exactly one day)?",
+      "options": ["0.38", "0.5", "0.44", "0.06"],
+      "correct": 0,
+      "points": 25,
+      "explanation": "P(exactly one) = (0.3×0.8) + (0.7×0.2) = 0.24 + 0.14 = 0.38."
+    },
+    {
+      "question": "Test has 4 MC questions with 5 options each. Random guessing. P(all correct)?",
+      "options": ["1/625", "1/20", "1/1024", "1/256"],
+      "correct": 0,
+      "points": 25,
+      "explanation": "Independent: P(all correct) = (1/5)⁴ = 1/625."
+    },
+    {
+      "question": "Coin flipped 2000 times, 980 heads. Estimate P(heads).",
+      "options": ["0.49", "0.5", "0.51", "0.48"],
+      "correct": 0,
+      "points": 10,
+      "explanation": "Estimated P(heads) = 980/2000 = 0.49."
+    },
+    {
+      "question": "Two investments each have 0.75 success probability. Independent. P(at least one succeeds)?",
+      "options": ["15/16", "9/16", "3/4", "7/16"],
+      "correct": 1,
+      "points": 20,
+      "explanation": "P(at least one) = 1 - P(both fail) = 1 - (0.25×0.25) = 1 - 0.0625 = 0.9375 = 15/16."
+    },
+    {
+      "question": "From a deck, draw one card. A = diamond, B = queen. Are A and B independent?",
+      "options": ["Yes", "No", "Sometimes", "Cannot determine"],
+      "correct": 0,
+      "points": 25,
+      "explanation": "P(A) = 13/52, P(B) = 4/52, P(A∩B) = 1/52. Check: (13/52)×(4/52) = 52/2704 = 1/52 = P(A∩B). Yes, independent."
+    },
+    {
+      "question": "Basketball player makes shots with P=0.8. Takes 5 independent shots. Estimate makes.",
+      "options": ["4", "3", "5", "2"],
+      "correct": 0,
+      "points": 15,
+      "explanation": "Expected makes = 0.8 × 5 = 4."
+    },
+    {
+      "question": "Events: P(M)=0.5, P(N)=0.6, P(M∩N)=0.3. Are M and N independent?",
+      "options": ["Yes", "No", "Cannot determine", "Sometimes"],
+      "correct": 0,
+      "points": 20,
+      "explanation": "Check: 0.5×0.6 = 0.3 = P(M∩N). Yes, independent."
+    }
+  ]
+}

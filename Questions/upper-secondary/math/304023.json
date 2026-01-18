@@ -1,0 +1,77 @@
+{
+  "title": "Chapter 2: Probability Practice",
+  "subject": "Mathematics",
+  "grade": "Secondary 4",
+  "questions": [
+    {
+      "question": "P(R) = 0.4, P(S) = 0.5, independent. Find P(R and S).",
+      "options": ["0.2", "0.9", "0.1", "0.6"],
+      "correct": 0,
+      "points": 10,
+      "explanation": "P(R and S) = 0.4 × 0.5 = 0.2."
+    },
+    {
+      "question": "Class of 25: 15 girls. Random student. P(boy)?",
+      "options": ["0.4", "0.6", "0.5", "0.3"],
+      "correct": 0,
+      "points": 10,
+      "explanation": "Boys = 25 - 15 = 10. P(boy) = 10/25 = 0.4."
+    },
+    {
+      "question": "Two coins flipped. P(exactly one head)?",
+      "options": ["1/2", "3/4", "1/4", "1"],
+      "correct": 0,
+      "points": 15,
+      "explanation": "Sample space: {HH, HT, TH, TT}. Exactly one head in 2 of 4 outcomes. P = 2/4 = 1/2."
+    },
+    {
+      "question": "30 out of 150 items defective. Estimate P(defective).",
+      "options": ["0.2", "0.3", "0.1", "0.05"],
+      "correct": 0,
+      "points": 10,
+      "explanation": "Estimated P(defective) = 30/150 = 0.2."
+    },
+    {
+      "question": "Independent: P(E) = 0.3, P(F) = 0.7. Find P(E or F).",
+      "options": ["0.79", "0.21", "1.0", "0.91"],
+      "correct": 0,
+      "points": 20,
+      "explanation": "P(E or F) = 0.3 + 0.7 - (0.3×0.7) = 1.0 - 0.21 = 0.79."
+    },
+    {
+      "question": "Number 1-20 chosen randomly. P(even or multiple of 5)?",
+      "options": ["3/5", "1/2", "11/20", "13/20"],
+      "correct": 0,
+      "points": 20,
+      "explanation": "Evens: 10 numbers. Multiples of 5: 4 numbers (5,10,15,20). Overlap: 10,20. P = (10+4-2)/20 = 12/20 = 3/5."
+    },
+    {
+      "question": "P(success) = 0.72. In 50 trials, estimate successes.",
+      "options": ["36", "35", "37", "34"],
+      "correct": 0,
+      "points": 15,
+      "explanation": "Expected = 0.72 × 50 = 36."
+    },
+    {
+      "question": "Two dice rolled. P(sum > 9)?",
+      "options": ["1/6", "5/36", "1/9", "1/12"],
+      "correct": 0,
+      "points": 15,
+      "explanation": "Sum > 9: 10, 11, 12. Ways: (4,6),(5,5),(6,4),(5,6),(6,5),(6,6) = 6 ways. P = 6/36 = 1/6."
+    },
+    {
+      "question": "P(G) = 0.6, P(H) = 0.4, independent. P(neither G nor H)?",
+      "options": ["0.24", "0.36", "0.4", "0.16"],
+      "correct": 0,
+      "points": 20,
+      "explanation": "P(neither) = (1-0.6) × (1-0.4) = 0.4 × 0.6 = 0.24."
+    },
+    {
+      "question": "Survey: 55% like apples, 40% like oranges. Independent. Estimate % liking both.",
+      "options": ["22%", "95%", "15%", "33%"],
+      "correct": 0,
+      "points": 15,
+      "explanation": "P(both) = 0.55 × 0.40 = 0.22 = 22%."
+    }
+  ]
+}
