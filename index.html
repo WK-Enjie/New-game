@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Battle: Chance & Control</title>
+    <title>Brain Battle: Smart Quiz Game</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,69 +13,184 @@
         <div id="start-screen" class="screen active">
             <div class="start-content">
                 <div class="logo">
-                    <div class="logo-icon">🎮</div>
-                    <h1>Brain Battle</h1>
+                    <div class="logo-icon">🧠</div>
+                    <h1>Smart Quiz</h1>
+                    <p class="tagline">6-Digit Code • Auto-Scan • Organized Folders</p>
                 </div>
-                <p class="tagline">Test Your Knowledge & Luck!</p>
                 
                 <div class="age-banner">
-                    <span class="age-badge">Ages 10-16</span>
+                    <span class="age-badge">Level: P1-S4</span>
                     <span class="players-badge">👥 2 Players</span>
+                    <span class="scan-badge" id="scan-count">Scanning...</span>
                 </div>
                 
                 <div class="game-rules">
-                    <h3>🎯 How to Play</h3>
+                    <h3>🎯 How It Works</h3>
                     <div class="rules-grid">
                         <div class="rule">
-                            <div class="rule-icon">📚</div>
-                            <h4>Answer Questions</h4>
-                            <p>Test your knowledge for points</p>
+                            <div class="rule-icon">📁</div>
+                            <h4>Auto-Scan Folders</h4>
+                            <p>Scans organized folder structure</p>
                         </div>
                         <div class="rule">
-                            <div class="rule-icon">🎲</div>
-                            <h4>Use Chance</h4>
-                            <p>Roll dice & draw cards for bonuses</p>
+                            <div class="rule-icon">🔢</div>
+                            <h4>Enter 6-Digit Code</h4>
+                            <p>Uses format: 334161</p>
                         </div>
                         <div class="rule">
                             <div class="rule-icon">⚡</div>
-                            <h4>Manage Power</h4>
-                            <p>Use Power Points wisely</p>
+                            <h4>Play & Battle</h4>
+                            <p>2-player game with chance elements</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="upload-section">
-                    <h3>📂 Add Your Own Quiz</h3>
-                    <div class="upload-box">
-                        <input type="file" id="quiz-file" accept=".json" class="file-input">
-                        <label for="quiz-file" class="upload-btn">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            Choose Quiz File
-                        </label>
-                        <div id="file-name" class="file-name">No file selected</div>
+                <!-- Code Input Section -->
+                <div class="code-section">
+                    <h3>🔑 Enter Quiz Code</h3>
+                    
+                    <div class="code-input-group">
+                        <div class="code-display" id="code-display">
+                            <div class="code-digit" data-index="0">_</div>
+                            <div class="code-digit" data-index="1">_</div>
+                            <div class="code-digit" data-index="2">_</div>
+                            <div class="code-digit" data-index="3">_</div>
+                            <div class="code-digit" data-index="4">_</div>
+                            <div class="code-digit" data-index="5">_</div>
+                        </div>
+                        
+                        <div class="code-keypad">
+                            <div class="keypad-row">
+                                <button class="keypad-btn" data-key="1">1</button>
+                                <button class="keypad-btn" data-key="2">2</button>
+                                <button class="keypad-btn" data-key="3">3</button>
+                            </div>
+                            <div class="keypad-row">
+                                <button class="keypad-btn" data-key="4">4</button>
+                                <button class="keypad-btn" data-key="5">5</button>
+                                <button class="keypad-btn" data-key="6">6</button>
+                            </div>
+                            <div class="keypad-row">
+                                <button class="keypad-btn" data-key="7">7</button>
+                                <button class="keypad-btn" data-key="8">8</button>
+                                <button class="keypad-btn" data-key="9">9</button>
+                            </div>
+                            <div class="keypad-row">
+                                <button class="keypad-btn" data-key="0">0</button>
+                                <button class="keypad-btn" id="backspace">
+                                    <i class="fas fa-backspace"></i>
+                                </button>
+                                <button class="keypad-btn" id="clear">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="code-actions">
+                            <button id="validate-code" class="btn primary-btn" disabled>
+                                <span class="btn-emoji">✅</span>
+                                Validate Code
+                            </button>
+                            <button id="rescan-quizzes" class="btn secondary-btn">
+                                <span class="btn-emoji">🔄</span>
+                                Rescan Folders
+                            </button>
+                        </div>
                     </div>
-                    <div class="file-help">
-                        <p>Need help? <button id="show-format" class="help-btn">See JSON format</button></p>
+                    
+                    <div class="code-info">
+                        <h4>📖 Code Format Guide</h4>
+                        <div class="format-grid">
+                            <div class="format-item">
+                                <div class="format-digit">1</div>
+                                <div class="format-desc"><strong>Level:</strong> 1=Pri, 2=LowSec, 3=UpSec</div>
+                            </div>
+                            <div class="format-item">
+                                <div class="format-digit">2</div>
+                                <div class="format-desc"><strong>Subject:</strong> 0=Math, 1=Science, etc.</div>
+                            </div>
+                            <div class="format-item">
+                                <div class="format-digit">3</div>
+                                <div class="format-desc"><strong>Grade:</strong> 1-6=Primary, 7-10=Secondary</div>
+                            </div>
+                            <div class="format-item">
+                                <div class="format-digit">4</div>
+                                <div class="format-desc"><strong>Chapter Tens</strong> Digit</div>
+                            </div>
+                            <div class="format-item">
+                                <div class="format-digit">5</div>
+                                <div class="format-desc"><strong>Chapter Ones</strong> Digit</div>
+                            </div>
+                            <div class="format-item">
+                                <div class="format-digit">6</div>
+                                <div class="format-desc"><strong>Worksheet</strong> Number</div>
+                            </div>
+                        </div>
+                        <div class="folder-guide">
+                            <h5>📁 Folder Structure:</h5>
+                            <pre>Questions/
+├── primary/
+│   ├── math/
+│   └── science/
+├── lower-secondary/
+│   ├── math/
+│   └── science/
+└── upper-secondary/
+    ├── math/
+    ├── pure-chem/
+    ├── pure-physics/
+    ├── combined-physics/
+    └── combined-chem/</pre>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="start-buttons">
-                    <button id="sample-quiz" class="btn fun-btn">
-                        <span class="btn-emoji">🎯</span>
-                        Quick Play
-                    </button>
-                    <button id="start-game" class="btn primary-btn" disabled>
+                <!-- Quiz Info Display -->
+                <div id="quiz-info" class="quiz-info" style="display: none;">
+                    <h4>📋 Selected Quiz</h4>
+                    <div class="quiz-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Title:</span>
+                            <span id="quiz-title-display" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Folder:</span>
+                            <span id="quiz-folder-display" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Grade/Subject:</span>
+                            <span id="quiz-grade-display" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Questions:</span>
+                            <span id="quiz-count-display" class="detail-value">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Start Button -->
+                <div class="start-action">
+                    <button id="start-game" class="btn start-btn" disabled>
                         <span class="btn-emoji">🚀</span>
                         Start Game
                     </button>
+                    <div id="start-error" class="error-message"></div>
                 </div>
                 
-                <div class="difficulty">
-                    <h4>Choose Difficulty:</h4>
-                    <div class="difficulty-buttons">
-                        <button class="diff-btn active" data-diff="easy">Easy</button>
-                        <button class="diff-btn" data-diff="medium">Medium</button>
-                        <button class="diff-btn" data-diff="hard">Hard</button>
+                <!-- Available Quizzes Display -->
+                <div id="available-quizzes" class="available-quizzes" style="display: none;">
+                    <h4>📚 Available Quizzes <span id="quiz-count">(0)</span></h4>
+                    <div class="quiz-filter">
+                        <input type="text" id="quiz-search" placeholder="🔍 Search by code, subject, or grade...">
+                        <select id="quiz-filter">
+                            <option value="all">All Categories</option>
+                            <option value="primary">Primary</option>
+                            <option value="lower-secondary">Lower Secondary</option>
+                            <option value="upper-secondary">Upper Secondary</option>
+                        </select>
+                    </div>
+                    <div id="quiz-list" class="quiz-list">
+                        <!-- Quizzes will be listed here -->
                     </div>
                 </div>
             </div>
@@ -85,7 +200,7 @@
         <div id="game-screen" class="screen">
             <div class="game-topbar">
                 <div class="quiz-title">
-                    <span id="quiz-title">Quiz Title</span>
+                    <span id="game-quiz-title">Quiz Title</span>
                     <span class="question-counter">Q: <span id="current-q">1</span>/<span id="total-q">5</span></span>
                 </div>
                 <div class="power-display">
@@ -207,7 +322,7 @@
                 </button>
                 <button id="home-btn" class="btn home-btn">
                     <span class="btn-emoji">🏠</span>
-                    Menu
+                    Back to Code
                 </button>
             </div>
             
@@ -261,47 +376,19 @@
                         Play Again
                     </button>
                     <button id="new-quiz" class="btn fun-btn">
-                        <span class="btn-emoji">🎯</span>
-                        New Quiz
-                    </button>
-                    <button id="share-score" class="btn share-btn">
-                        <span class="btn-emoji">📤</span>
-                        Share Score
+                        <span class="btn-emoji">🔢</span>
+                        New Code
                     </button>
                 </div>
             </div>
         </div>
         
-        <!-- JSON Format Help -->
-        <div id="json-help" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>📝 Quiz JSON Format</h3>
-                    <button id="close-help" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <pre><code>{
-  "title": "Your Quiz Title",
-  "questions": [
-    {
-      "question": "What is 2 + 2?",
-      "options": ["3", "4", "5", "6"],
-      "correct": 1,
-      "points": 10,
-      "explanation": "Optional explanation here"
-    }
-  ]
-}</code></pre>
-                    <div class="tips">
-                        <p><strong>💡 Tips:</strong></p>
-                        <ul>
-                            <li>"correct" is the option number (0-3)</li>
-                            <li>Points can be 5, 10, 15, or 20</li>
-                            <li>Save file as .json (e.g., "my-quiz.json")</li>
-                            <li>Upload it to play!</li>
-                        </ul>
-                    </div>
-                </div>
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div id="loading-text" class="loading-text">Scanning folder structure...</div>
+                <div id="loading-details" class="loading-details"></div>
             </div>
         </div>
     </div>

@@ -1,6 +1,7 @@
 // Game State
 let currentGame = {
     quizData: null,
+    allQuizzes: {}, // Store all loaded quizzes by code
     currentQuestionIndex: 0,
     players: [
         { name: "Player 1", score: 0, power: 5, isActive: true, effects: [] },
@@ -17,63 +18,107 @@ let currentGame = {
     }
 };
 
-// Sample Quiz Data (Fallback)
-const sampleQuiz = {
-    "title": "Chapter 16: Introduction to Electricity",
-    "subject": "Science",
-    "grade": "Secondary 1",
-    "questions": [
-        {
-            "question": "What are the two types of electric charge?",
-            "options": ["Hot and cold", "Positive and negative", "Strong and weak", "Large and small"],
-            "correct": 1,
-            "points": 5,
-            "explanation": "There are two types of charge: positive and negative."
-        },
-        {
-            "question": "What happens when you rub a balloon on your hair?",
-            "options": [
-                "Balloon becomes magnetic",
-                "Balloon gains electric charge",
-                "Hair loses all its color",
-                "Nothing happens"
-            ],
-            "correct": 1,
-            "points": 5,
-            "explanation": "Rubbing transfers electrons, giving the balloon an electric charge."
-        },
-        {
-            "question": "Which materials allow electric charges to move easily?",
-            "options": ["Insulators", "Conductors", "Semiconductors", "Resistors"],
-            "correct": 1,
-            "points": 5,
-            "explanation": "Conductors (like metals) allow charges to move freely."
-        },
-        {
-            "question": "Why can you get a shock after walking on carpet?",
-            "options": [
-                "Carpet is electrically alive",
-                "Static charge builds up and discharges",
-                "Shoes generate electricity",
-                "Body produces extra charge"
-            ],
-            "correct": 1,
-            "points": 10,
-            "explanation": "Friction builds static charge, which discharges when you touch metal."
-        },
-        {
-            "question": "What is lightning?",
-            "options": [
-                "A chemical reaction",
-                "A giant static electricity discharge",
-                "Heat from the sun",
-                "Sound in the clouds"
-            ],
-            "correct": 1,
-            "points": 10,
-            "explanation": "Lightning is a massive spark caused by static electricity in clouds."
-        }
-    ]
+// Category mappings for folder structure
+const CATEGORIES = {
+    level: {
+        '1': { name: 'Primary School', short: 'Pri', folder: 'primary' },
+        '2': { name: 'Lower Secondary', short: 'LowSec', folder: 'lower-secondary' },
+        '3': { name: 'Upper Secondary', short: 'UpSec', folder: 'upper-secondary' }
+    },
+    subject: {
+        '0': { name: 'Mathematics', short: 'Math', folder: 'math' },
+        '1': { name: 'Science (General)', short: 'Science', folder: 'science' },
+        '2': { name: 'Combined Physics', short: 'CombPhys', folder: 'combined-physics' },
+        '3': { name: 'Pure Physics', short: 'PurePhys', folder: 'pure-physics' },
+        '4': { name: 'Combined Chemistry', short: 'CombChem', folder: 'combined-chem' },
+        '5': { name: 'Pure Chemistry', short: 'PureChem', folder: 'pure-chem' }
+    },
+    grade: {
+        '1': 'Primary 1',
+        '2': 'Primary 2',
+        '3': 'Primary 3',
+        '4': 'Primary 4',
+        '5': 'Primary 5',
+        '6': 'Primary 6',
+        '7': 'Secondary 1',
+        '8': 'Secondary 2',
+        '9': 'Secondary 3',
+        '10': 'Secondary 4'
+    }
+};
+
+// Pre-loaded quiz data for demonstration
+const QUIZ_LIBRARY = {
+    '334161': {
+        title: "Chapter 16: Static Electricity",
+        subject: "Pure Physics",
+        grade: "Secondary 4",
+        questions: [
+            {
+                question: "What is the SI unit of electric charge?",
+                options: ["Ampere", "Volt", "Coulomb", "Ohm"],
+                correct: 2,
+                points: 10,
+                explanation: "Electric charge is measured in coulombs (C)."
+            },
+            {
+                question: "What happens when two negatively charged objects are brought close together?",
+                options: ["They attract", "They repel", "They become neutral", "They exchange protons"],
+                correct: 1,
+                points: 10,
+                explanation: "Like charges repel each other."
+            },
+            {
+                question: "Which of these best describes an electric field?",
+                options: ["A region where magnetic forces act", "A region where an electric charge experiences a force", "The path of electric current", "A conductor's surface charge"],
+                correct: 1,
+                points: 10,
+                explanation: "An electric field is a region where a charge experiences force."
+            }
+        ]
+    },
+    '334162': {
+        title: "Chapter 16: Static Electricity Applications",
+        subject: "Pure Physics",
+        grade: "Secondary 4",
+        questions: [
+            {
+                question: "Why do fuel tanker trucks have metal chains touching the ground?",
+                options: ["To improve aerodynamics", "To ground the vehicle and prevent static sparks", "To make noise for safety", "To measure speed"],
+                correct: 1,
+                points: 10,
+                explanation: "Grounding prevents static buildup that could cause sparks."
+            },
+            {
+                question: "How does a photocopier use electrostatic principles?",
+                options: ["By heating toner particles", "By charging drum with light pattern, attracting opposite toner", "Using magnetic attraction", "By mechanical pressure"],
+                correct: 1,
+                points: 15,
+                explanation: "Light creates charge pattern on drum."
+            }
+        ]
+    },
+    '217051': {
+        title: "Chapter 5: Basic Science",
+        subject: "Science (General)",
+        grade: "Secondary 1",
+        questions: [
+            {
+                question: "What are the two types of electric charge?",
+                options: ["Hot and cold", "Positive and negative", "Strong and weak", "Large and small"],
+                correct: 1,
+                points: 5,
+                explanation: "There are two types of charge: positive and negative."
+            },
+            {
+                question: "What happens when you rub a balloon on your hair?",
+                options: ["Balloon becomes magnetic", "Balloon gains electric charge", "Hair loses all its color", "Nothing happens"],
+                correct: 1,
+                points: 5,
+                explanation: "Rubbing transfers electrons."
+            }
+        ]
+    }
 };
 
 // Chance Cards
@@ -90,34 +135,47 @@ const chanceCards = [
 const screens = {
     start: document.getElementById('start-screen'),
     game: document.getElementById('game-screen'),
-    gameOver: document.getElementById('game-over'),
-    jsonHelp: document.getElementById('json-help')
+    gameOver: document.getElementById('game-over')
 };
+
+// Code input state
+let currentCode = ['_', '_', '_', '_', '_', '_'];
+let currentDigitIndex = 0;
 
 // Initialize Game
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
-    loadSampleQuiz(); // Load sample quiz by default
+    updateCodeDisplay();
+    
+    // Auto-scan for quizzes on page load
+    setTimeout(() => {
+        scanAvailableQuizzes();
+    }, 1000);
 });
 
 function initializeEventListeners() {
-    // Start screen buttons
-    document.getElementById('sample-quiz').addEventListener('click', loadSampleQuiz);
-    document.getElementById('start-game').addEventListener('click', startGame);
-    document.getElementById('show-format').addEventListener('click', showJSONFormat);
-    document.getElementById('close-help').addEventListener('click', hideJSONFormat);
-    
-    // File upload
-    document.getElementById('quiz-file').addEventListener('change', handleFileUpload);
-    
-    // Difficulty buttons
-    document.querySelectorAll('.diff-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            currentGame.difficulty = e.target.dataset.diff;
-        });
+    // Keypad buttons
+    document.querySelectorAll('.keypad-btn').forEach(btn => {
+        if (btn.id !== 'backspace' && btn.id !== 'clear') {
+            btn.addEventListener('click', (e) => {
+                const digit = e.target.dataset.key;
+                enterDigit(digit);
+            });
+        }
     });
+    
+    // Special keys
+    document.getElementById('backspace').addEventListener('click', backspaceDigit);
+    document.getElementById('clear').addEventListener('click', clearCode);
+    
+    // Action buttons
+    document.getElementById('validate-code').addEventListener('click', validateCode);
+    document.getElementById('rescan-quizzes').addEventListener('click', scanAvailableQuizzes);
+    document.getElementById('start-game').addEventListener('click', startGame);
+    
+    // Quiz list filtering
+    document.getElementById('quiz-search').addEventListener('input', filterQuizList);
+    document.getElementById('quiz-filter').addEventListener('change', filterQuizList);
     
     // Game screen buttons
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
@@ -138,60 +196,296 @@ function initializeEventListeners() {
     // Game over buttons
     document.getElementById('play-again').addEventListener('click', playAgain);
     document.getElementById('new-quiz').addEventListener('click', newQuiz);
-    document.getElementById('share-score').addEventListener('click', shareScore);
 }
 
-// File Upload Functions
-function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+// Code Input Functions
+function enterDigit(digit) {
+    if (currentDigitIndex >= 6) return;
     
-    document.getElementById('file-name').textContent = file.name;
+    currentCode[currentDigitIndex] = digit;
+    currentDigitIndex++;
+    updateCodeDisplay();
     
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const quizData = JSON.parse(e.target.result);
-            if (validateQuizData(quizData)) {
-                currentGame.quizData = quizData;
-                document.getElementById('start-game').disabled = false;
-                showFeedback("✅ Quiz loaded successfully!", "success");
-            } else {
-                showFeedback("❌ Invalid quiz format. Please check the JSON structure.", "error");
+    if (currentDigitIndex === 6) {
+        document.getElementById('validate-code').disabled = false;
+    }
+}
+
+function backspaceDigit() {
+    if (currentDigitIndex > 0) {
+        currentDigitIndex--;
+        currentCode[currentDigitIndex] = '_';
+        updateCodeDisplay();
+    }
+    document.getElementById('validate-code').disabled = true;
+}
+
+function clearCode() {
+    currentCode = ['_', '_', '_', '_', '_', '_'];
+    currentDigitIndex = 0;
+    updateCodeDisplay();
+    document.getElementById('validate-code').disabled = true;
+}
+
+function updateCodeDisplay() {
+    const digits = document.querySelectorAll('.code-digit');
+    digits.forEach((digit, index) => {
+        digit.textContent = currentCode[index];
+        digit.classList.toggle('active', index === currentDigitIndex);
+    });
+    
+    // Update validate button
+    const validateBtn = document.getElementById('validate-code');
+    validateBtn.disabled = currentDigitIndex !== 6;
+}
+
+// Quiz Scanning Functions
+async function scanAvailableQuizzes() {
+    showLoading(true, "Scanning folder structure...");
+    
+    try {
+        // Simulate scanning the folder structure
+        await simulateFolderScan();
+        
+        // For demonstration, load from QUIZ_LIBRARY
+        // In production, this would scan actual folders
+        currentGame.allQuizzes = {};
+        
+        for (const [code, quizData] of Object.entries(QUIZ_LIBRARY)) {
+            const metadata = decodeCode(code);
+            if (metadata) {
+                currentGame.allQuizzes[code] = {
+                    ...quizData,
+                    code: code,
+                    metadata: metadata,
+                    folderPath: getFolderPath(metadata)
+                };
             }
-        } catch (error) {
-            showFeedback("❌ Error reading file. Please check if it's valid JSON.", "error");
         }
+        
+        showLoading(false);
+        updateScanCount();
+        showAvailableQuizzes();
+        showFeedback(`✅ Found ${Object.keys(currentGame.allQuizzes).length} quizzes in folder structure`, 'success');
+        
+    } catch (error) {
+        console.error('Error scanning quizzes:', error);
+        showError("Error scanning folder structure. Using demo quizzes.");
+        showLoading(false);
+    }
+}
+
+function simulateFolderScan() {
+    return new Promise((resolve) => {
+        const folders = [
+            'Questions/primary/math/',
+            'Questions/primary/science/',
+            'Questions/lower-secondary/math/',
+            'Questions/lower-secondary/science/',
+            'Questions/upper-secondary/math/',
+            'Questions/upper-secondary/pure-physics/',
+            'Questions/upper-secondary/pure-chem/',
+            'Questions/upper-secondary/combined-physics/',
+            'Questions/upper-secondary/combined-chem/'
+        ];
+        
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 20;
+            const details = folders.slice(0, Math.floor(progress/20)).join('<br>');
+            showLoading(true, `Scanning... (${progress}%)`, details);
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                showLoading(true, "Loading quiz files...");
+                setTimeout(resolve, 800);
+            }
+        }, 300);
+    });
+}
+
+function decodeCode(code) {
+    if (code.length !== 6 || !/^\d{6}$/.test(code)) return null;
+    
+    const digits = code.split('').map(Number);
+    
+    // Get level (1st digit)
+    const level = CATEGORIES.level[digits[0]];
+    if (!level) return null;
+    
+    // Get subject (2nd digit)
+    const subject = CATEGORIES.subject[digits[1]];
+    if (!subject) return null;
+    
+    // Get grade (3rd digit)
+    const gradeCode = digits[2];
+    let grade = '';
+    if (digits[0] === 1) {
+        // Primary (1-6)
+        grade = CATEGORIES.grade[gradeCode] || `Primary ${gradeCode}`;
+    } else if (digits[0] === 2 || digits[0] === 3) {
+        // Secondary (7-10 corresponds to 1-4)
+        const secGrade = gradeCode + 6;
+        grade = CATEGORIES.grade[secGrade] || `Secondary ${gradeCode}`;
+    } else {
+        return null;
+    }
+    
+    // Get chapter (4th and 5th digits)
+    const chapter = digits[3] === 0 ? digits[4].toString() : (digits[3] * 10 + digits[4]).toString();
+    
+    // Get worksheet (6th digit)
+    const worksheet = digits[5];
+    
+    return {
+        level: level.name,
+        levelShort: level.short,
+        levelFolder: level.folder,
+        subject: subject.name,
+        subjectShort: subject.short,
+        subjectFolder: subject.folder,
+        grade: grade,
+        chapter: chapter,
+        worksheet: worksheet,
+        fullCode: code
     };
-    reader.readAsText(file);
 }
 
-function validateQuizData(data) {
-    return data && 
-           data.title && 
-           data.questions && 
-           Array.isArray(data.questions) && 
-           data.questions.length > 0;
+function getFolderPath(metadata) {
+    return `Questions/${metadata.levelFolder}/${metadata.subjectFolder}/`;
 }
 
-function loadSampleQuiz() {
-    currentGame.quizData = sampleQuiz;
+function updateScanCount() {
+    const count = Object.keys(currentGame.allQuizzes).length;
+    document.getElementById('scan-count').textContent = `${count} Quizzes`;
+    document.getElementById('quiz-count').textContent = `(${count})`;
+}
+
+function showAvailableQuizzes() {
+    const quizListDiv = document.getElementById('quiz-list');
+    const availableDiv = document.getElementById('available-quizzes');
+    
+    if (Object.keys(currentGame.allQuizzes).length === 0) {
+        quizListDiv.innerHTML = '<div class="no-quizzes">No quizzes found. Please add JSON files to the Questions folder structure.</div>';
+        availableDiv.style.display = 'block';
+        return;
+    }
+    
+    availableDiv.style.display = 'block';
+    filterQuizList(); // This will populate the list
+}
+
+function filterQuizList() {
+    const searchTerm = document.getElementById('quiz-search').value.toLowerCase();
+    const filterValue = document.getElementById('quiz-filter').value;
+    const quizListDiv = document.getElementById('quiz-list');
+    
+    let filteredQuizzes = Object.values(currentGame.allQuizzes);
+    
+    // Apply category filter
+    if (filterValue !== 'all') {
+        filteredQuizzes = filteredQuizzes.filter(quiz => {
+            if (filterValue === 'primary') return quiz.metadata.levelFolder === 'primary';
+            if (filterValue === 'lower-secondary') return quiz.metadata.levelFolder === 'lower-secondary';
+            if (filterValue === 'upper-secondary') return quiz.metadata.levelFolder === 'upper-secondary';
+            return true;
+        });
+    }
+    
+    // Apply search filter
+    if (searchTerm) {
+        filteredQuizzes = filteredQuizzes.filter(quiz => {
+            return quiz.code.includes(searchTerm) ||
+                   quiz.title.toLowerCase().includes(searchTerm) ||
+                   quiz.metadata.subject.toLowerCase().includes(searchTerm) ||
+                   quiz.metadata.grade.toLowerCase().includes(searchTerm);
+        });
+    }
+    
+    // Sort by code
+    filteredQuizzes.sort((a, b) => a.code.localeCompare(b.code));
+    
+    // Display quizzes
+    if (filteredQuizzes.length === 0) {
+        quizListDiv.innerHTML = '<div class="no-quizzes">No quizzes match your search.</div>';
+        return;
+    }
+    
+    let html = '';
+    filteredQuizzes.forEach(quiz => {
+        const meta = quiz.metadata;
+        html += `
+            <div class="quiz-item" data-code="${quiz.code}">
+                <div class="quiz-code">${quiz.code}</div>
+                <div class="quiz-desc">
+                    <strong>${quiz.title}</strong><br>
+                    ${meta.levelShort} • ${meta.subjectShort} • ${meta.grade}<br>
+                    Chapter ${meta.chapter}, Worksheet ${meta.worksheet}
+                </div>
+                <div class="quiz-folder">${quiz.folderPath}</div>
+            </div>
+        `;
+    });
+    
+    quizListDiv.innerHTML = html;
+    
+    // Add click handlers
+    document.querySelectorAll('.quiz-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const code = item.dataset.code;
+            currentCode = code.split('');
+            currentDigitIndex = 6;
+            updateCodeDisplay();
+            validateCode();
+            
+            // Highlight selected
+            document.querySelectorAll('.quiz-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            // Scroll to validation section
+            item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    });
+}
+
+function validateCode() {
+    const code = currentCode.join('');
+    
+    if (!currentGame.allQuizzes[code]) {
+        showError(`Quiz code ${code} not found. Available quizzes are listed below.`);
+        return;
+    }
+    
+    // Load the quiz
+    currentGame.quizData = currentGame.allQuizzes[code];
+    
+    // Update quiz info display
+    updateQuizInfoDisplay();
+    
+    // Enable start button
     document.getElementById('start-game').disabled = false;
-    showFeedback("✅ Sample quiz loaded. Ready to play!", "success");
+    document.getElementById('start-error').textContent = '';
+    
+    showFeedback(`✅ Quiz "${currentGame.quizData.title}" loaded from ${currentGame.quizData.folderPath}`, 'success');
 }
 
-function showJSONFormat() {
-    screens.jsonHelp.classList.add('active');
-}
-
-function hideJSONFormat() {
-    screens.jsonHelp.classList.remove('active');
+function updateQuizInfoDisplay() {
+    const infoDiv = document.getElementById('quiz-info');
+    const metadata = currentGame.quizData.metadata;
+    
+    document.getElementById('quiz-title-display').textContent = currentGame.quizData.title;
+    document.getElementById('quiz-folder-display').textContent = currentGame.quizData.folderPath;
+    document.getElementById('quiz-grade-display').textContent = `${metadata.grade} • ${metadata.subject}`;
+    document.getElementById('quiz-count-display').textContent = `${currentGame.quizData.questions.length} questions`;
+    
+    infoDiv.style.display = 'block';
+    infoDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // Game Functions
 function startGame() {
     if (!currentGame.quizData) {
-        showFeedback("❌ Please load a quiz first!", "error");
+        showError("No quiz loaded. Please enter a valid code.");
         return;
     }
     
@@ -201,11 +495,21 @@ function startGame() {
     currentGame.players[1].score = 0;
     currentGame.players[0].power = 5;
     currentGame.players[1].power = 5;
+    currentGame.players[0].isActive = true;
+    currentGame.players[1].isActive = false;
+    currentGame.players[0].effects = [];
+    currentGame.players[1].effects = [];
     currentGame.selectedAnswer = null;
     currentGame.isAnswerSubmitted = false;
+    currentGame.gameStats = {
+        questionsAnswered: 0,
+        correctAnswers: 0,
+        diceRolls: 0,
+        cardsDrawn: 0
+    };
     
     // Update UI
-    document.getElementById('quiz-title').textContent = currentGame.quizData.title;
+    document.getElementById('game-quiz-title').textContent = currentGame.quizData.title;
     document.getElementById('total-q').textContent = currentGame.quizData.questions.length;
     
     // Switch screens
@@ -247,6 +551,11 @@ function loadQuestion() {
     currentGame.isAnswerSubmitted = false;
     document.getElementById('submit-answer').disabled = true;
     document.getElementById('next-question').style.display = 'none';
+    
+    // Reset chance elements
+    document.getElementById('dice').textContent = '?';
+    document.getElementById('dice-result').innerHTML = '';
+    document.getElementById('card-result').innerHTML = '';
     
     // Update feedback
     document.getElementById('feedback').innerHTML = `
@@ -293,7 +602,7 @@ function submitAnswer() {
                 player.effects.splice(index, 1);
             }
             if (effect.type === 'shield' && !isCorrect) {
-                pointsEarned = 0; // No point loss with shield
+                pointsEarned = 0;
                 player.effects.splice(index, 1);
             }
         });
@@ -312,7 +621,6 @@ function submitAnswer() {
                 <div class="explanation">${question.explanation || ''}</div>
             </div>
         `;
-        showFeedback(`✨ ${activePlayer.name} earned ${Math.round(pointsEarned)} points!`, "success");
     } else {
         feedback.innerHTML = `
             <div class="feedback-incorrect">
@@ -322,7 +630,6 @@ function submitAnswer() {
                 <div class="correct-answer">Correct answer: ${question.options[question.correct]}</div>
             </div>
         `;
-        showFeedback(`😢 ${activePlayer.name} answered incorrectly`, "warning");
     }
     
     // Highlight correct/incorrect answers
@@ -377,7 +684,7 @@ function updateUI() {
         player.effects.forEach(effect => {
             const effectElement = document.createElement('div');
             effectElement.className = 'effect-item';
-            effectElement.textContent = effect.message;
+            effectElement.innerHTML = `${effect.message}`;
             effectsList.appendChild(effectElement);
         });
     });
@@ -393,10 +700,10 @@ function rollDice() {
     
     // Deduct power
     activePlayer.power -= 1;
+    currentGame.gameStats.diceRolls++;
     
     // Roll dice (1-6)
     const diceRoll = Math.floor(Math.random() * 6) + 1;
-    currentGame.gameStats.diceRolls++;
     
     // Update dice display
     const diceElement = document.getElementById('dice');
@@ -408,7 +715,7 @@ function rollDice() {
         diceElement.style.animation = 'bounce 0.5s';
     }, 10);
     
-    // Calculate bonus based on dice roll
+    // Calculate bonus
     let bonus = 0;
     let message = "";
     
@@ -426,7 +733,7 @@ function rollDice() {
             message = `🎲 Rolled ${diceRoll}! +${bonus} points`;
     }
     
-    activePlayer.score += bonus;
+    activePlayer.score = Math.max(0, activePlayer.score + bonus);
     resultElement.innerHTML = `<strong>${message}</strong>`;
     
     updateUI();
@@ -444,10 +751,10 @@ function drawCard() {
     
     // Deduct power
     activePlayer.power -= 2;
+    currentGame.gameStats.cardsDrawn++;
     
     // Draw random card
     const card = chanceCards[Math.floor(Math.random() * chanceCards.length)];
-    currentGame.gameStats.cardsDrawn++;
     
     // Update card display
     const resultElement = document.getElementById('card-result');
@@ -571,27 +878,12 @@ function newQuiz() {
     screens.gameOver.classList.remove('active');
     screens.start.classList.add('active');
     
-    // Reset file input
-    document.getElementById('quiz-file').value = '';
-    document.getElementById('file-name').textContent = 'No file selected';
-    document.getElementById('start-game').disabled = true;
-}
-
-function shareScore() {
-    const scoreText = `🎮 Brain Battle Score: Player 1: ${currentGame.players[0].score} | Player 2: ${currentGame.players[1].score}`;
+    // Reset code
+    clearCode();
     
-    if (navigator.share) {
-        navigator.share({
-            title: 'Brain Battle Results',
-            text: scoreText,
-            url: window.location.href
-        });
-    } else {
-        // Fallback: Copy to clipboard
-        navigator.clipboard.writeText(scoreText).then(() => {
-            showFeedback("📋 Score copied to clipboard!", "success");
-        });
-    }
+    // Hide quiz info
+    document.getElementById('quiz-info').style.display = 'none';
+    document.getElementById('start-game').disabled = true;
 }
 
 // Utility Functions
@@ -612,61 +904,86 @@ function showFeedback(message, type) {
     }, 3000);
 }
 
+function showError(message) {
+    const errorDiv = document.getElementById('start-error');
+    errorDiv.textContent = message;
+    errorDiv.style.color = '#f44336';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function showLoading(show, text = "Loading...", details = "") {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingText = document.getElementById('loading-text');
+    const loadingDetails = document.getElementById('loading-details');
+    
+    if (show) {
+        loadingText.textContent = text;
+        loadingDetails.innerHTML = details;
+        loadingOverlay.classList.add('active');
+    } else {
+        loadingOverlay.classList.remove('active');
+    }
+}
+
 // Add CSS for feedback toasts
 const style = document.createElement('style');
 style.textContent = `
     .feedback-toast {
         position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 25px;
-        border-radius: 10px;
+        top: 25px;
+        right: 25px;
+        padding: 18px 28px;
+        border-radius: 12px;
         color: white;
-        font-weight: bold;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        font-weight: 600;
+        z-index: 2000;
+        animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.25);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 15px;
+        max-width: 450px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255,255,255,0.1);
     }
-    
-    .feedback-success { background: #4CAF50; }
-    .feedback-error { background: #F44336; }
-    .feedback-warning { background: #FF9800; }
-    .feedback-info { background: #2196F3; }
     
     @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
     }
     
-    .feedback-correct, .feedback-incorrect {
-        padding: 15px;
-        border-radius: 10px;
-        margin: 10px 0;
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
     }
     
-    .feedback-correct {
-        background: #E8F5E9;
-        border-left: 5px solid #4CAF50;
+    .feedback-success { 
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.95), rgba(56, 142, 60, 0.95));
+        border-left: 6px solid #2e7d32;
     }
     
-    .feedback-incorrect {
-        background: #FFEBEE;
-        border-left: 5px solid #F44336;
+    .feedback-error { 
+        background: linear-gradient(135deg, rgba(244, 67, 54, 0.95), rgba(211, 47, 47, 0.95));
+        border-left: 6px solid #c62828;
     }
     
-    .explanation {
-        margin-top: 10px;
-        font-size: 0.9rem;
+    .feedback-warning { 
+        background: linear-gradient(135deg, rgba(255, 152, 0, 0.95), rgba(245, 124, 0, 0.95));
+        border-left: 6px solid #ef6c00;
+    }
+    
+    .feedback-info { 
+        background: linear-gradient(135deg, rgba(33, 150, 243, 0.95), rgba(25, 118, 210, 0.95));
+        border-left: 6px solid #1565c0;
+    }
+    
+    .no-quizzes {
+        text-align: center;
+        padding: 40px 30px;
         color: #666;
-    }
-    
-    .correct-answer {
-        margin-top: 10px;
-        font-weight: bold;
-        color: #388E3C;
+        font-style: italic;
+        font-size: 1.1rem;
+        grid-column: 1 / -1;
     }
 `;
 document.head.appendChild(style);
