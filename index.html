@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Battle: Chance & Control</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="start-content">
+                <div class="logo">
+                    <div class="logo-icon">🎮</div>
+                    <h1>Brain Battle</h1>
+                </div>
+                <p class="tagline">Test Your Knowledge & Luck!</p>
+                
+                <div class="age-banner">
+                    <span class="age-badge">Ages 10-16</span>
+                    <span class="players-badge">👥 2 Players</span>
+                </div>
+                
+                <div class="game-rules">
+                    <h3>🎯 How to Play</h3>
+                    <div class="rules-grid">
+                        <div class="rule">
+                            <div class="rule-icon">📚</div>
+                            <h4>Answer Questions</h4>
+                            <p>Test your knowledge for points</p>
+                        </div>
+                        <div class="rule">
+                            <div class="rule-icon">🎲</div>
+                            <h4>Use Chance</h4>
+                            <p>Roll dice & draw cards for bonuses</p>
+                        </div>
+                        <div class="rule">
+                            <div class="rule-icon">⚡</div>
+                            <h4>Manage Power</h4>
+                            <p>Use Power Points wisely</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="upload-section">
+                    <h3>📂 Add Your Own Quiz</h3>
+                    <div class="upload-box">
+                        <input type="file" id="quiz-file" accept=".json" class="file-input">
+                        <label for="quiz-file" class="upload-btn">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Choose Quiz File
+                        </label>
+                        <div id="file-name" class="file-name">No file selected</div>
+                    </div>
+                    <div class="file-help">
+                        <p>Need help? <button id="show-format" class="help-btn">See JSON format</button></p>
+                    </div>
+                </div>
+                
+                <div class="start-buttons">
+                    <button id="sample-quiz" class="btn fun-btn">
+                        <span class="btn-emoji">🎯</span>
+                        Quick Play
+                    </button>
+                    <button id="start-game" class="btn primary-btn" disabled>
+                        <span class="btn-emoji">🚀</span>
+                        Start Game
+                    </button>
+                </div>
+                
+                <div class="difficulty">
+                    <h4>Choose Difficulty:</h4>
+                    <div class="difficulty-buttons">
+                        <button class="diff-btn active" data-diff="easy">Easy</button>
+                        <button class="diff-btn" data-diff="medium">Medium</button>
+                        <button class="diff-btn" data-diff="hard">Hard</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-topbar">
+                <div class="quiz-title">
+                    <span id="quiz-title">Quiz Title</span>
+                    <span class="question-counter">Q: <span id="current-q">1</span>/<span id="total-q">5</span></span>
+                </div>
+                <div class="power-display">
+                    <div class="power-item">
+                        <span class="power-icon">⚡</span>
+                        <span id="power-count">5</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="players-display">
+                <div class="player active" id="player1">
+                    <div class="player-header">
+                        <span class="player-emoji">👦</span>
+                        <span class="player-name">Player 1</span>
+                        <span class="turn-indicator">✨</span>
+                    </div>
+                    <div class="player-score">0</div>
+                    <div class="score-label">Score</div>
+                </div>
+                
+                <div class="vs">VS</div>
+                
+                <div class="player" id="player2">
+                    <div class="player-header">
+                        <span class="player-emoji">👧</span>
+                        <span class="player-name">Player 2</span>
+                        <span class="turn-indicator">✨</span>
+                    </div>
+                    <div class="player-score">0</div>
+                    <div class="score-label">Score</div>
+                </div>
+            </div>
+            
+            <div class="game-content">
+                <!-- Main Question -->
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="q-label">Question</span>
+                        <span class="points-badge" id="question-points">10 pts</span>
+                    </div>
+                    <div id="question-text" class="question-text">
+                        Question will appear here...
+                    </div>
+                    
+                    <div id="options-container" class="options-grid">
+                        <!-- Options will be added here -->
+                    </div>
+                </div>
+                
+                <!-- Chance Elements -->
+                <div class="chance-section">
+                    <div class="chance-header">
+                        <h3><span class="chance-icon">🎲</span> Chance Zone</h3>
+                        <div class="chance-help">Use Power Points to activate</div>
+                    </div>
+                    
+                    <div class="chance-actions">
+                        <!-- Dice Roll -->
+                        <div class="chance-action dice-action">
+                            <div class="action-header">
+                                <span class="action-emoji">🎲</span>
+                                <span class="action-name">Roll Dice</span>
+                                <span class="action-cost">Cost: 1 ⚡</span>
+                            </div>
+                            <div class="dice-display">
+                                <div id="dice" class="dice">?</div>
+                                <button id="roll-dice" class="action-btn">Roll Dice!</button>
+                            </div>
+                            <div id="dice-result" class="action-result"></div>
+                        </div>
+                        
+                        <!-- Chance Card -->
+                        <div class="chance-action card-action">
+                            <div class="action-header">
+                                <span class="action-emoji">🃏</span>
+                                <span class="action-name">Chance Card</span>
+                                <span class="action-cost">Cost: 2 ⚡</span>
+                            </div>
+                            <div class="card-display">
+                                <div class="card-back">?</div>
+                                <button id="draw-card" class="action-btn">Draw Card!</button>
+                            </div>
+                            <div id="card-result" class="action-result"></div>
+                        </div>
+                        
+                        <!-- Risk Level -->
+                        <div class="chance-action risk-action">
+                            <div class="action-header">
+                                <span class="action-emoji">⚖️</span>
+                                <span class="action-name">Risk Level</span>
+                            </div>
+                            <div class="risk-buttons">
+                                <button class="risk-btn active" data-risk="1">Low (x1)</button>
+                                <button class="risk-btn" data-risk="2">Med (x1.5)</button>
+                                <button class="risk-btn" data-risk="3">High (x2)</button>
+                            </div>
+                            <div class="risk-help">Higher risk = bigger rewards!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Effects -->
+            <div id="active-effects" class="effects-bar">
+                <div class="effects-title">Active Effects:</div>
+                <div id="effects-list" class="effects-list"></div>
+            </div>
+            
+            <!-- Game Controls -->
+            <div class="game-controls">
+                <button id="submit-answer" class="btn primary-btn" disabled>
+                    <span class="btn-emoji">📤</span>
+                    Submit Answer
+                </button>
+                <button id="next-question" class="btn secondary-btn" style="display: none;">
+                    <span class="btn-emoji">➡️</span>
+                    Next Question
+                </button>
+                <button id="home-btn" class="btn home-btn">
+                    <span class="btn-emoji">🏠</span>
+                    Menu
+                </button>
+            </div>
+            
+            <!-- Feedback -->
+            <div id="feedback" class="feedback-area">
+                <div class="feedback-placeholder">
+                    <span class="feedback-icon">💡</span>
+                    Select an answer to begin!
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="game-over" class="screen">
+            <div class="game-over-content">
+                <div class="victory-banner">
+                    <div id="winner-trophy" class="trophy">🏆</div>
+                    <div id="winner-message" class="winner-message">Game Over!</div>
+                </div>
+                
+                <div class="final-scores">
+                    <div class="final-player">
+                        <div class="final-player-header">
+                            <span class="final-emoji">👦</span>
+                            <span class="final-name">Player 1</span>
+                        </div>
+                        <div id="final-score1" class="final-score">0</div>
+                    </div>
+                    
+                    <div class="vs-final">VS</div>
+                    
+                    <div class="final-player">
+                        <div class="final-player-header">
+                            <span class="final-emoji">👧</span>
+                            <span class="final-name">Player 2</span>
+                        </div>
+                        <div id="final-score2" class="final-score">0</div>
+                    </div>
+                </div>
+                
+                <div class="achievements">
+                    <h3>🏅 Game Stats</h3>
+                    <div id="game-stats" class="stats-grid">
+                        <!-- Stats will be added here -->
+                    </div>
+                </div>
+                
+                <div class="game-over-buttons">
+                    <button id="play-again" class="btn primary-btn">
+                        <span class="btn-emoji">🔄</span>
+                        Play Again
+                    </button>
+                    <button id="new-quiz" class="btn fun-btn">
+                        <span class="btn-emoji">🎯</span>
+                        New Quiz
+                    </button>
+                    <button id="share-score" class="btn share-btn">
+                        <span class="btn-emoji">📤</span>
+                        Share Score
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- JSON Format Help -->
+        <div id="json-help" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📝 Quiz JSON Format</h3>
+                    <button id="close-help" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <pre><code>{
+  "title": "Your Quiz Title",
+  "questions": [
+    {
+      "question": "What is 2 + 2?",
+      "options": ["3", "4", "5", "6"],
+      "correct": 1,
+      "points": 10,
+      "explanation": "Optional explanation here"
+    }
+  ]
+}</code></pre>
+                    <div class="tips">
+                        <p><strong>💡 Tips:</strong></p>
+                        <ul>
+                            <li>"correct" is the option number (0-3)</li>
+                            <li>Points can be 5, 10, 15, or 20</li>
+                            <li>Save file as .json (e.g., "my-quiz.json")</li>
+                            <li>Upload it to play!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
