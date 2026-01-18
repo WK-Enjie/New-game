@@ -133,6 +133,11 @@ body {
     margin-bottom: 8px;
 }
 
+.rule p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
 .upload-section {
     background: #E3F2FD;
     border-radius: 20px;
@@ -151,6 +156,10 @@ body {
     border-radius: 15px;
     padding: 20px;
     border: 2px dashed #64B5F6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
 }
 
 .file-input {
@@ -177,14 +186,15 @@ body {
 }
 
 .file-name {
-    margin-top: 15px;
     color: #666;
     font-size: 0.9rem;
+    min-height: 20px;
 }
 
 .file-help {
     margin-top: 15px;
     color: #666;
+    font-size: 0.9rem;
 }
 
 .help-btn {
@@ -194,6 +204,10 @@ body {
     text-decoration: underline;
     cursor: pointer;
     font-size: inherit;
+}
+
+.help-btn:hover {
+    color: #0d47a1;
 }
 
 .start-buttons {
@@ -210,6 +224,7 @@ body {
 .difficulty h4 {
     color: #666;
     margin-bottom: 15px;
+    font-size: 1.1rem;
 }
 
 .difficulty-buttons {
@@ -260,6 +275,10 @@ body {
     align-items: center;
     gap: 8px;
     color: #333;
+}
+
+.power-icon {
+    font-size: 1.2rem;
 }
 
 .players-display {
@@ -389,6 +408,7 @@ body {
     background: white;
     border-radius: 15px;
     border-left: 5px solid #4CAF50;
+    min-height: 100px;
 }
 
 .options-grid {
@@ -437,6 +457,22 @@ body {
     background: #FFEBEE;
 }
 
+.option-letter {
+    width: 30px;
+    height: 30px;
+    background: #2196F3;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.option-text {
+    flex: 1;
+}
+
 /* Chance Section */
 .chance-section {
     background: linear-gradient(135deg, #9C27B0, #673AB7);
@@ -479,17 +515,24 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    font-size: 0.9rem;
 }
 
 .action-emoji {
     font-size: 1.5rem;
 }
 
+.action-name {
+    flex: 1;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
 .action-cost {
     background: rgba(255,255,255,0.2);
     padding: 5px 10px;
     border-radius: 10px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .dice-display, .card-display {
@@ -512,6 +555,11 @@ body {
     font-weight: bold;
     color: #9C27B0;
     cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.dice:hover {
+    transform: rotate(15deg);
 }
 
 .card-back {
@@ -525,6 +573,11 @@ body {
     font-size: 2rem;
     color: #9C27B0;
     cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.card-back:hover {
+    transform: rotate(-5deg);
 }
 
 .action-btn {
@@ -536,6 +589,7 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s;
+    font-size: 0.9rem;
 }
 
 .action-btn:hover:not(:disabled) {
@@ -555,6 +609,9 @@ body {
     padding: 10px;
     margin-top: 10px;
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .risk-buttons {
@@ -572,15 +629,22 @@ body {
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.risk-btn:hover {
+    background: rgba(255,255,255,0.2);
 }
 
 .risk-btn.active {
     background: #FF9800;
     border-color: #FF9800;
+    font-weight: bold;
 }
 
 .risk-help {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     opacity: 0.8;
     text-align: center;
     margin-top: 10px;
@@ -600,12 +664,14 @@ body {
 .effects-title {
     font-weight: bold;
     margin-right: 15px;
+    min-width: 120px;
 }
 
 .effects-list {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    flex: 1;
 }
 
 .effect-item {
@@ -613,6 +679,9 @@ body {
     padding: 5px 15px;
     border-radius: 20px;
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 /* Game Controls */
@@ -636,11 +705,15 @@ body {
     color: #666;
     text-align: center;
     padding: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.1rem;
 }
 
 .feedback-icon {
     font-size: 1.5rem;
-    margin-right: 10px;
 }
 
 /* Game Over Screen */
@@ -659,6 +732,7 @@ body {
 .trophy {
     font-size: 5rem;
     margin-bottom: 15px;
+    animation: bounce 2s infinite;
 }
 
 .winner-message {
@@ -680,6 +754,7 @@ body {
     border-radius: 20px;
     padding: 25px;
     min-width: 200px;
+    border: 4px solid #E0E0E0;
 }
 
 .final-player-header {
@@ -692,6 +767,12 @@ body {
 
 .final-emoji {
     font-size: 2rem;
+}
+
+.final-name {
+    font-weight: bold;
+    font-size: 1.3rem;
+    color: #333;
 }
 
 .final-score {
@@ -716,6 +797,7 @@ body {
 .achievements h3 {
     color: #1976D2;
     margin-bottom: 20px;
+    font-size: 1.5rem;
 }
 
 .stats-grid {
@@ -729,6 +811,19 @@ body {
     padding: 15px;
     border-radius: 15px;
     text-align: center;
+    border: 2px solid #E0E0E0;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2196F3;
 }
 
 .game-over-buttons {
@@ -750,10 +845,12 @@ body {
     z-index: 1000;
     align-items: center;
     justify-content: center;
+    padding: 20px;
 }
 
 .modal.active {
     display: flex;
+    animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
@@ -761,9 +858,10 @@ body {
     border-radius: 20px;
     padding: 30px;
     max-width: 600px;
-    width: 90%;
+    width: 100%;
     max-height: 80vh;
     overflow-y: auto;
+    position: relative;
 }
 
 .modal-header {
@@ -773,16 +871,45 @@ body {
     margin-bottom: 20px;
 }
 
+.modal-header h3 {
+    color: #1976D2;
+    font-size: 1.5rem;
+}
+
 .close-btn {
     background: none;
     border: none;
     font-size: 2rem;
     cursor: pointer;
     color: #666;
+    line-height: 1;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    color: #333;
 }
 
 .modal-body {
     font-family: 'Courier New', monospace;
+}
+
+.modal-body pre {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+}
+
+.modal-body code {
+    color: #d63384;
 }
 
 .tips {
@@ -790,11 +917,23 @@ body {
     padding: 15px;
     background: #FFF3E0;
     border-radius: 10px;
+    text-align: left;
+}
+
+.tips p {
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #FF9800;
 }
 
 .tips ul {
-    text-align: left;
     margin-left: 20px;
+    color: #666;
+}
+
+.tips li {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
 }
 
 /* Buttons */
@@ -810,6 +949,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
+    min-width: 150px;
 }
 
 .btn:hover:not(:disabled) {
@@ -820,6 +960,8 @@ body {
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .btn-emoji {
@@ -859,6 +1001,11 @@ body {
     cursor: pointer;
     font-weight: bold;
     transition: all 0.3s;
+    min-width: 100px;
+}
+
+.diff-btn:hover {
+    background: #d5d5d5;
 }
 
 .diff-btn.active {
@@ -866,10 +1013,11 @@ body {
     color: white;
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
     .container {
         border-radius: 15px;
+        border-width: 3px;
     }
     
     .game-content {
@@ -885,12 +1033,107 @@ body {
         gap: 20px;
     }
     
+    .player {
+        min-width: 100%;
+    }
+    
     .final-scores {
         flex-direction: column;
         gap: 20px;
     }
     
+    .final-player {
+        min-width: 100%;
+    }
+    
     .game-over-buttons {
         flex-direction: column;
+    }
+    
+    .start-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .difficulty-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .game-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .logo h1 {
+        font-size: 2.5rem;
+    }
+    
+    .question-text {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
+    
+    .option {
+        padding: 15px;
+        font-size: 1rem;
+    }
+    
+    .chance-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        border-radius: 10px;
+    }
+    
+    .screen {
+        padding: 15px;
+    }
+    
+    .logo h1 {
+        font-size: 2rem;
+    }
+    
+    .logo-icon {
+        font-size: 3rem;
+    }
+    
+    .game-topbar {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .quiz-title {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .question-text {
+        font-size: 1.1rem;
+    }
+    
+    .player-score {
+        font-size: 2.5rem;
+    }
+    
+    .final-score {
+        font-size: 2.8rem;
     }
 }
