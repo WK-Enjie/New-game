@@ -1,4 +1,4 @@
-// Brain Battle Card Game - With Randomized Questions from JSON
+// Brain Battle Card Game - Simplified Version
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
     let currentScreen = 'start';
@@ -48,6 +48,178 @@ document.addEventListener('DOMContentLoaded', function() {
             type: "skip"
         }
     ];
+
+    // BUILT-IN QUIZZES (No JSON files needed!)
+    const BUILT_IN_QUIZZES = {
+        "334151": {
+            code: "334151",
+            title: "Static Electricity (Physics)",
+            subject: "Pure Physics",
+            level: "Secondary 4",
+            questions: [
+                {
+                    id: 1,
+                    question: "What is the SI unit for measuring electric charge?",
+                    options: [
+                        "Coulomb",
+                        "Newton",
+                        "Joule",
+                        "Watt"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 2,
+                    question: "When a plastic rod is rubbed with wool, the plastic becomes negatively charged. What has been transferred?",
+                    options: [
+                        "Electrons from wool to plastic",
+                        "Protons from plastic to wool",
+                        "Electrons from plastic to wool",
+                        "Protons from wool to plastic"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 3,
+                    question: "What happens when a negatively charged balloon is brought near a neutral wall?",
+                    options: [
+                        "The wall becomes positively charged by induction",
+                        "The wall becomes negatively charged by conduction",
+                        "Nothing happens because the wall is neutral",
+                        "The balloon loses its charge immediately"
+                    ],
+                    correctAnswer: 0,
+                    points: 15
+                },
+                {
+                    id: 4,
+                    question: "Why are fuel trucks grounded with a metal chain during refueling?",
+                    options: [
+                        "To prevent static charge buildup",
+                        "To increase fuel flow rate",
+                        "To measure fuel quantity",
+                        "To stabilize the truck"
+                    ],
+                    correctAnswer: 0,
+                    points: 15
+                },
+                {
+                    id: 5,
+                    question: "In an electrostatic precipitator, how are smoke particles removed?",
+                    options: [
+                        "They are charged and attracted to oppositely charged plates",
+                        "They are filtered through fine mesh",
+                        "They are dissolved in water spray",
+                        "They are burned at high temperature"
+                    ],
+                    correctAnswer: 0,
+                    points: 15
+                }
+            ]
+        },
+        "123456": {
+            code: "123456",
+            title: "General Science Trivia",
+            subject: "Science",
+            level: "Mixed",
+            questions: [
+                {
+                    id: 1,
+                    question: "What planet is known as the Red Planet?",
+                    options: [
+                        "Mars",
+                        "Venus",
+                        "Jupiter",
+                        "Saturn"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 2,
+                    question: "What is the chemical symbol for gold?",
+                    options: [
+                        "Au",
+                        "Ag",
+                        "Fe",
+                        "Pb"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 3,
+                    question: "How many bones are in the adult human body?",
+                    options: [
+                        "206",
+                        "196",
+                        "216",
+                        "226"
+                    ],
+                    correctAnswer: 0,
+                    points: 15
+                },
+                {
+                    id: 4,
+                    question: "What gas do plants absorb from the atmosphere?",
+                    options: [
+                        "Carbon dioxide",
+                        "Oxygen",
+                        "Nitrogen",
+                        "Hydrogen"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                }
+            ]
+        },
+        "789012": {
+            code: "789012",
+            title: "Mathematics Basics",
+            subject: "Mathematics",
+            level: "Primary 6",
+            questions: [
+                {
+                    id: 1,
+                    question: "What is 15% of 200?",
+                    options: [
+                        "30",
+                        "15",
+                        "20",
+                        "25"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 2,
+                    question: "Solve for x: 2x + 5 = 15",
+                    options: [
+                        "5",
+                        "10",
+                        "7.5",
+                        "8"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 3,
+                    question: "What is the area of a square with side length 5cm?",
+                    options: [
+                        "25 cm²",
+                        "20 cm²",
+                        "10 cm²",
+                        "15 cm²"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                }
+            ]
+        }
+    };
 
     // DOM Elements
     const elements = {
@@ -130,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
     init();
 
     function init() {
-        console.log('Brain Battle Game - Randomized Questions');
+        console.log('Brain Battle Game - Simplified Version');
         setupEventListeners();
         initCodeInput();
         console.log('Game initialized successfully');
@@ -263,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function() {
         validateCode();
     }
 
-    async function validateCode() {
+    function validateCode() {
         const code = getCurrentCode();
         
         if (code.length !== 6) {
@@ -274,90 +446,38 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show loading indicator
         showLoading(true);
         
-        try {
-            // Try to load from JSON file first
-            const filePath = `Questions/${code}.json`;
-            console.log('Attempting to load from:', filePath);
-            
-            const response = await fetch(filePath);
-            
-            if (!response.ok) {
-                throw new Error(`Quiz not found (Error ${response.status})`);
+        // Simulate loading delay
+        setTimeout(() => {
+            // Check if it's a valid quiz code
+            if (BUILT_IN_QUIZZES[code]) {
+                console.log('Loading built-in quiz:', code);
+                
+                quizData = BUILT_IN_QUIZZES[code];
+                selectedQuiz = {
+                    code: code,
+                    title: quizData.title,
+                    subject: quizData.subject,
+                    level: quizData.level || 'Not specified',
+                    questions: quizData.questions.length
+                };
+                
+                // Shuffle questions immediately when loaded
+                shuffleQuestions();
+                
+                // Update UI
+                showQuizInfo(selectedQuiz);
+                elements.startError.textContent = '';
+                elements.startGameBtn.disabled = false;
+                showLoading(false);
+                
+                console.log('Quiz loaded successfully with', quizData.questions.length, 'questions');
+                console.log('Questions shuffled for this session');
+                
+            } else {
+                showError('Quiz not found. Try: 334151, 123456, or 789012');
+                showLoading(false);
             }
-            
-            const data = await response.json();
-            
-            // Validate the quiz data structure
-            if (!validateQuizData(data, code)) {
-                throw new Error('Invalid quiz data format');
-            }
-            
-            // Store quiz data
-            quizData = data;
-            selectedQuiz = {
-                code: code,
-                title: quizData.title,
-                subject: quizData.subject,
-                level: quizData.level || 'Not specified',
-                questions: quizData.questions.length
-            };
-            
-            // Shuffle questions immediately when loaded
-            shuffleQuestions();
-            
-            // Update UI
-            showQuizInfo(selectedQuiz);
-            elements.startError.textContent = '';
-            elements.startGameBtn.disabled = false;
-            showLoading(false);
-            
-            console.log('Quiz loaded successfully with', quizData.questions.length, 'questions');
-            console.log('Questions shuffled for this session');
-            
-        } catch (error) {
-            console.error('Error loading quiz:', error);
-            showError('Quiz not found. Please check the code and ensure JSON file exists.');
-            showLoading(false);
-        }
-    }
-
-    function validateQuizData(data, expectedCode) {
-        // Basic validation
-        if (!data || typeof data !== 'object') {
-            console.error('Quiz data is not an object');
-            return false;
-        }
-        
-        if (data.code !== expectedCode) {
-            console.error(`Code mismatch: expected ${expectedCode}, got ${data.code}`);
-            return false;
-        }
-        
-        if (!data.title || !data.subject) {
-            console.error('Missing title or subject');
-            return false;
-        }
-        
-        if (!Array.isArray(data.questions) || data.questions.length === 0) {
-            console.error('Invalid or empty questions array');
-            return false;
-        }
-        
-        // Validate each question
-        for (let i = 0; i < data.questions.length; i++) {
-            const q = data.questions[i];
-            if (!q.question || !Array.isArray(q.options) || q.options.length !== 4) {
-                console.error(`Invalid question at index ${i}`);
-                return false;
-            }
-            
-            if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer > 3) {
-                console.error(`Invalid correctAnswer at index ${i}`);
-                return false;
-            }
-        }
-        
-        return true;
+        }, 500); // 0.5 second loading delay
     }
 
     function shuffleQuestions() {
