@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Battle: Quiz Game</title>
+    <title>Brain Battle: Card Quiz Game</title>
     
     <!-- MathJax for fractions -->
     <script>
@@ -11,12 +11,6 @@
       tex: {
         inlineMath: [['\\(', '\\)']],
         displayMath: [['\\[', '\\]']]
-      },
-      startup: {
-        ready: () => {
-          MathJax.startup.defaultReady();
-          console.log('MathJax loaded');
-        }
       }
     };
     </script>
@@ -35,7 +29,7 @@
                 <div class="logo">
                     <div class="logo-icon">🧠</div>
                     <h1>Brain Battle</h1>
-                    <p class="tagline">Test Your Knowledge • Earn Points</p>
+                    <p class="tagline">Answer Questions • Pick Cards • Win Points</p>
                 </div>
                 
                 <div class="code-section">
@@ -75,7 +69,7 @@
                     
                     <div class="code-actions">
                         <button id="validate-code" class="btn primary-btn" disabled>
-                            <i class="fas fa-check"></i> Validate Code
+                            <i class="fas fa-check"></i> Load Quiz
                         </button>
                     </div>
                     
@@ -107,13 +101,10 @@
                 </div>
                 
                 <div class="demo-section">
-                    <h4><i class="fas fa-bolt"></i> Demo Quizzes</h4>
+                    <h4><i class="fas fa-bolt"></i> Try Demo Quizzes</h4>
                     <div class="demo-buttons">
                         <button class="demo-btn" data-code="106011">
-                            <i class="fas fa-calculator"></i> Fractions 1
-                        </button>
-                        <button class="demo-btn" data-code="106012">
-                            <i class="fas fa-calculator"></i> Fractions 2
+                            <i class="fas fa-calculator"></i> Fractions Quiz
                         </button>
                     </div>
                 </div>
@@ -132,101 +123,89 @@
                 </div>
                 
                 <div class="players-score">
-                    <div class="player-score">
+                    <div class="player-score" id="player1-display">
                         <div class="player-name">Player 1</div>
                         <div class="score-value" id="player1-score">0</div>
                     </div>
                     <div class="vs">VS</div>
-                    <div class="player-score">
+                    <div class="player-score" id="player2-display">
                         <div class="player-name">Player 2</div>
                         <div class="score-value" id="player2-score">0</div>
                     </div>
                 </div>
-                
-                <div class="current-player">
-                    Current Turn: <span id="current-player-name">Player 1</span>
-                </div>
             </div>
             
-            <div class="main-content">
-                <div class="question-section">
-                    <div class="question-card">
+            <div class="game-content">
+                <!-- Question Card -->
+                <div class="question-card">
+                    <div class="question-header">
                         <div class="question-points">
-                            <i class="fas fa-star"></i> Points: <span id="base-points">10</span>
+                            <i class="fas fa-star"></i> Base: <span id="base-points">10</span> points
                         </div>
-                        <div id="question-text" class="question-text">
-                            Question will appear here...
+                        <div class="current-turn">
+                            <i class="fas fa-user"></i> Turn: <span id="current-player-name">Player 1</span>
                         </div>
-                        
-                        <div id="options-container" class="options-container">
-                            <!-- Options will be added here -->
-                        </div>
+                    </div>
+                    
+                    <div id="question-text" class="question-text">
+                        Question will appear here...
+                    </div>
+                    
+                    <!-- Answer Options -->
+                    <div id="options-container" class="options-container">
+                        <!-- Options will be added here -->
                     </div>
                 </div>
                 
-                <div class="risk-section">
-                    <div class="risk-header">
-                        <h3><i class="fas fa-dice"></i> Risk Boxes</h3>
-                        <p>Select 1-3 boxes. High risk = bigger rewards/penalties!</p>
+                <!-- Points Cards -->
+                <div class="cards-section">
+                    <div class="cards-header">
+                        <h3><i class="fas fa-cards"></i> Points Cards</h3>
+                        <p class="cards-instruction">Select 1 card after answering</p>
                     </div>
                     
-                    <div class="risk-grid">
-                        <div class="risk-zone low-risk">
-                            <div class="zone-label">Low Risk</div>
-                            <div class="boxes-grid" id="low-risk-boxes">
-                                <!-- Boxes will be added here -->
-                            </div>
-                        </div>
-                        
-                        <div class="risk-zone high-risk">
-                            <div class="zone-label">High Risk</div>
-                            <div class="boxes-grid" id="high-risk-boxes">
-                                <!-- Boxes will be added here -->
-                            </div>
-                        </div>
+                    <div class="cards-grid" id="cards-grid">
+                        <!-- Cards will be added here -->
                     </div>
                     
-                    <div class="selection-info">
-                        <div class="selected-count">
-                            <i class="fas fa-check-circle"></i>
-                            Selected: <span id="selected-count">0</span>/3 boxes
+                    <div class="selected-card-info" id="selected-card-info" style="display: none;">
+                        <div class="selected-card">
+                            <span class="selected-label">Selected Card:</span>
+                            <span class="card-points" id="selected-card-points">+10</span>
                         </div>
-                        <button id="clear-selections" class="btn small-btn">
-                            <i class="fas fa-times"></i> Clear
-                        </button>
                     </div>
                 </div>
             </div>
             
+            <!-- Game Controls -->
             <div class="game-controls">
-                <div class="left-controls">
-                    <button id="submit-answer" class="btn primary-btn" disabled>
-                        <i class="fas fa-paper-plane"></i> Submit Answer
-                    </button>
-                    <button id="next-question" class="btn secondary-btn" style="display: none;">
-                        <i class="fas fa-arrow-right"></i> Next Question
-                    </button>
-                </div>
-                
-                <div class="right-controls">
-                    <button id="home-btn" class="btn home-btn">
-                        <i class="fas fa-home"></i> Home
-                    </button>
-                </div>
+                <button id="submit-answer" class="btn primary-btn" disabled>
+                    <i class="fas fa-paper-plane"></i> Submit Answer
+                </button>
+                <button id="next-question" class="btn secondary-btn" style="display: none;">
+                    <i class="fas fa-arrow-right"></i> Next Question
+                </button>
+                <button id="home-btn" class="btn home-btn">
+                    <i class="fas fa-home"></i> Home
+                </button>
             </div>
             
-            <div id="feedback" class="feedback-area">
-                <div class="feedback-placeholder">
-                    <i class="fas fa-lightbulb"></i> Select boxes and choose an answer
-                </div>
-            </div>
-            
+            <!-- Results Display -->
             <div id="results-display" class="results-area" style="display: none;">
-                <h3><i class="fas fa-chart-bar"></i> Results</h3>
-                <div id="box-results" class="box-results-grid"></div>
-                <div class="total-points">
-                    <i class="fas fa-trophy"></i>
-                    Points earned: <span id="points-earned">0</span>
+                <h3><i class="fas fa-chart-bar"></i> Round Results</h3>
+                <div class="result-details">
+                    <div class="result-item">
+                        <span class="result-label">Answer:</span>
+                        <span id="answer-result" class="result-value correct">Correct</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Card Points:</span>
+                        <span id="card-points-result" class="result-value positive">+15</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Total Earned:</span>
+                        <span id="total-earned" class="result-value total">+25</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -251,6 +230,17 @@
                     <div class="final-player">
                         <div class="final-player-name">Player 2</div>
                         <div id="final-score2" class="final-score">0</div>
+                    </div>
+                </div>
+                
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Questions Answered:</span>
+                        <span id="questions-answered" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Correct Answers:</span>
+                        <span id="correct-answers" class="stat-value">0</span>
                     </div>
                 </div>
                 
