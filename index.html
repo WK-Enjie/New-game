@@ -5,7 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brain Battle: Quiz & Risk Game</title>
     
-    <!-- MathJax for LaTeX math rendering -->
+    <!-- MathJax Configuration -->
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      startup: {
+        ready: () => {
+          MathJax.startup.defaultReady();
+          console.log('MathJax is ready!');
+        }
+      }
+    };
+    </script>
+    
+    <!-- MathJax Library -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
@@ -110,11 +126,11 @@
                 <div class="demo-section">
                     <h4><i class="fas fa-bolt"></i> Try Demo Quizzes</h4>
                     <div class="demo-buttons">
-                        <button class="demo-btn" data-code="MATH001">
-                            <i class="fas fa-calculator"></i> Math: Fractions
+                        <button class="demo-btn" data-code="106011">
+                            <i class="fas fa-calculator"></i> P6 Fractions
                         </button>
-                        <button class="demo-btn" data-code="SCI001">
-                            <i class="fas fa-flask"></i> Science: Basics
+                        <button class="demo-btn" data-code="106015">
+                            <i class="fas fa-flask"></i> P6 Fractions 2
                         </button>
                     </div>
                 </div>
@@ -281,6 +297,8 @@
         </div>
     </div>
 
+    <!-- Loading Overlay (Added dynamically) -->
+    
     <script src="script.js"></script>
 </body>
 </html>

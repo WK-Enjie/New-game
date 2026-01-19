@@ -1,4 +1,4 @@
-// Brain Battle Game - JSON Loading Version
+// Brain Battle Game - Complete Fixed Version
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
     const gameState = {
@@ -16,34 +16,34 @@ document.addEventListener('DOMContentLoaded', function() {
     // Points configuration
     const BOX_POINTS = {
         lowRisk: [
-            { min: 5, max: 15 },   // Box 1
-            { min: 8, max: 18 },   // Box 2
-            { min: 6, max: 12 },   // Box 3
-            { min: 4, max: 10 },   // Box 4
-            { min: 7, max: 14 },   // Box 5
-            { min: 9, max: 20 }    // Box 6
+            { min: 5, max: 15 },
+            { min: 8, max: 18 },
+            { min: 6, max: 12 },
+            { min: 4, max: 10 },
+            { min: 7, max: 14 },
+            { min: 9, max: 20 }
         ],
         highRisk: [
-            { min: -10, max: 30 },  // Box 7
-            { min: -15, max: 40 },  // Box 8
-            { min: -20, max: 50 },  // Box 9
-            { min: -25, max: 60 },  // Box 10
-            { min: -30, max: 70 },  // Box 11
-            { min: -40, max: 100 }  // Box 12
+            { min: -10, max: 30 },
+            { min: -15, max: 40 },
+            { min: -20, max: 50 },
+            { min: -25, max: 60 },
+            { min: -30, max: 70 },
+            { min: -40, max: 100 }
         ]
     };
 
-    // Quiz directory structure based on your design
+    // Quiz directory structure
     const QUIZ_PATHS = {
-        '1': { // Primary (Level 1)
+        '1': { // Primary
             '0': 'Questions/primary/math/',
             '1': 'Questions/primary/science/'
         },
-        '2': { // Lower Secondary (Level 2)
+        '2': { // Lower Secondary
             '0': 'Questions/lower-secondary/math/',
             '1': 'Questions/lower-secondary/science/'
         },
-        '3': { // Upper Secondary (Level 3)
+        '3': { // Upper Secondary
             '0': 'Questions/upper-secondary/math/',
             '2': 'Questions/upper-secondary/combined-physics/',
             '3': 'Questions/upper-secondary/pure-physics/',
@@ -54,12 +54,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // DOM Elements
     const elements = {
-        // Start screen
         startScreen: document.getElementById('start-screen'),
         gameScreen: document.getElementById('game-screen'),
         gameOverScreen: document.getElementById('game-over'),
-        
-        // Code input
         codeDigits: document.querySelectorAll('.code-digit'),
         keypadButtons: document.querySelectorAll('.keypad-btn'),
         backspaceBtn: document.getElementById('backspace'),
@@ -67,44 +64,30 @@ document.addEventListener('DOMContentLoaded', function() {
         validateBtn: document.getElementById('validate-code'),
         startGameBtn: document.getElementById('start-game'),
         startError: document.getElementById('start-error'),
-        
-        // Quiz info
         quizInfo: document.getElementById('quiz-info'),
         quizTitleDisplay: document.getElementById('quiz-title-display'),
         quizSubjectDisplay: document.getElementById('quiz-subject-display'),
         quizCountDisplay: document.getElementById('quiz-count-display'),
-        
-        // Game screen
         gameQuizTitle: document.getElementById('game-quiz-title'),
         currentQ: document.getElementById('current-q'),
         totalQ: document.getElementById('total-q'),
         currentPlayerName: document.getElementById('current-player-name'),
         player1Score: document.getElementById('player1-score'),
         player2Score: document.getElementById('player2-score'),
-        
-        // Question elements
         questionText: document.getElementById('question-text'),
         optionsContainer: document.getElementById('options-container'),
         basePoints: document.getElementById('base-points'),
-        
-        // Box elements
         lowRiskBoxes: document.getElementById('low-risk-boxes'),
         highRiskBoxes: document.getElementById('high-risk-boxes'),
         selectedCount: document.getElementById('selected-count'),
         clearSelectionsBtn: document.getElementById('clear-selections'),
-        
-        // Game controls
         submitBtn: document.getElementById('submit-answer'),
         nextBtn: document.getElementById('next-question'),
         homeBtn: document.getElementById('home-btn'),
-        
-        // Feedback & Results
         feedback: document.getElementById('feedback'),
         resultsDisplay: document.getElementById('results-display'),
         boxResults: document.getElementById('box-results'),
         pointsEarned: document.getElementById('points-earned'),
-        
-        // Game over
         winnerTrophy: document.getElementById('winner-trophy'),
         winnerTitle: document.getElementById('winner-title'),
         winnerMessage: document.getElementById('winner-message'),
@@ -112,17 +95,16 @@ document.addEventListener('DOMContentLoaded', function() {
         finalScore2: document.getElementById('final-score2'),
         playAgainBtn: document.getElementById('play-again'),
         newGameBtn: document.getElementById('new-game'),
-        
-        // Demo buttons
         demoButtons: document.querySelectorAll('.demo-btn')
     };
 
-    // Initialize the game
+    // Initialize
     initGame();
 
     function initGame() {
         setupEventListeners();
         initCodeInput();
+        console.log('Game initialized with MathJax support');
     }
 
     function setupEventListeners() {
@@ -156,7 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function initCodeInput() {
         elements.codeDigits[0].classList.add('active');
-        
         elements.codeDigits.forEach(digit => {
             digit.addEventListener('click', function() {
                 elements.codeDigits.forEach(d => d.classList.remove('active'));
@@ -244,25 +225,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const code = getCurrentCode();
         if (code.length !== 6) return;
         
+        showLoading('Loading quiz...', `Code: ${code}`);
+        
         try {
-            // Parse the code to determine file path
-            const level = code[0]; // First digit: 1, 2, or 3
-            const subject = code[1]; // Second digit: 0-5
-            const grade = code[2]; // Third digit: grade level
-            const chapter = code.substring(3, 5); // Fourth and fifth: chapter
-            const worksheet = code[5]; // Sixth: worksheet
+            const level = code[0];
+            const subject = code[1];
             
-            // Get base path from mapping
             const basePath = QUIZ_PATHS[level]?.[subject];
             if (!basePath) {
                 throw new Error('Invalid quiz code format');
             }
             
-            // Construct full file path
             const filePath = `${basePath}${code}.json`;
-            
-            // Set loading state
-            showLoading('Loading quiz...', `Code: ${code}`);
             
             // Fetch the JSON file
             const response = await fetch(filePath);
@@ -273,14 +247,27 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const quizData = await response.json();
             
+            // Validate required fields
+            if (!quizData.questions || !Array.isArray(quizData.questions)) {
+                throw new Error('Invalid quiz format: missing questions array');
+            }
+            
+            // Validate each question
+            quizData.questions.forEach((q, index) => {
+                if (q.correctAnswer === undefined) {
+                    throw new Error(`Question ${index + 1} missing correctAnswer field`);
+                }
+                if (!q.options || !Array.isArray(q.options)) {
+                    throw new Error(`Question ${index + 1} missing options array`);
+                }
+            });
+            
             // Store quiz info
             gameState.selectedQuiz = {
                 code: code,
                 path: filePath,
-                title: quizData.title,
-                subject: quizData.subject,
-                grade: quizData.grade,
-                chapter: quizData.chapter,
+                title: quizData.title || `Quiz ${code}`,
+                subject: quizData.subject || 'Mathematics',
                 questionCount: quizData.questions.length
             };
             
@@ -304,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showQuizInfo(quiz) {
         elements.quizTitleDisplay.textContent = quiz.title;
-        elements.quizSubjectDisplay.textContent = `${quiz.subject} - ${quiz.grade}`;
+        elements.quizSubjectDisplay.textContent = quiz.subject;
         elements.quizCountDisplay.textContent = quiz.questionCount;
         elements.quizInfo.style.display = 'block';
     }
@@ -321,19 +308,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Reset game state
         resetGameState();
-        
-        // Switch to game screen
         switchScreen('game');
-        
-        // Initialize game display
         initializeGameDisplay();
-        
-        // Load first question
         loadQuestion(0);
-        
-        // Initialize risk boxes
         initializeRiskBoxes();
     }
 
@@ -347,12 +325,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function switchScreen(screenName) {
-        // Hide all screens
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
         
-        // Show selected screen
         const screen = document.getElementById(`${screenName}-screen`);
         if (screen) {
             screen.classList.add('active');
@@ -376,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const playerName = `Player ${gameState.currentPlayer}`;
         elements.currentPlayerName.textContent = playerName;
         
-        // Update player highlights
         document.querySelectorAll('.player-score').forEach((el, index) => {
             if (index + 1 === gameState.currentPlayer) {
                 el.style.transform = 'scale(1.1)';
@@ -388,7 +363,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadQuestion(index) {
-        if (!gameState.quizData || !gameState.quizData.questions[index]) return;
+        if (!gameState.quizData || !gameState.quizData.questions[index]) {
+            console.error('Question not found at index:', index);
+            return;
+        }
         
         const question = gameState.quizData.questions[index];
         
@@ -398,8 +376,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set base points
         elements.basePoints.textContent = question.points || 10;
         
-        // Set question text
-        renderQuestionText(question.question);
+        // Set question text - CRITICAL: Use innerHTML for LaTeX
+        elements.questionText.innerHTML = question.question;
         
         // Clear and add options
         elements.optionsContainer.innerHTML = '';
@@ -439,25 +417,33 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.submitBtn.style.display = 'flex';
         elements.nextBtn.style.display = 'none';
         
-        // Re-render MathJax for any LaTeX
-        if (window.MathJax) {
-            setTimeout(() => {
-                MathJax.typesetPromise();
-            }, 100);
-        }
+        // Process MathJax after a short delay
+        setTimeout(renderMathJax, 100);
     }
 
-    function renderQuestionText(text) {
-        // Check if text contains LaTeX
-        if (text.includes('\\(') || text.includes('$') || text.includes('\\frac')) {
-            elements.questionText.innerHTML = `<div class="math-content">${text}</div>`;
-        } else {
-            elements.questionText.textContent = text;
+    function renderMathJax() {
+        if (window.MathJax && MathJax.typesetPromise) {
+            try {
+                MathJax.typesetPromise()
+                    .then(() => {
+                        console.log('MathJax rendering successful');
+                    })
+                    .catch(err => {
+                        console.warn('MathJax typeset warning:', err);
+                        // Try again after another short delay
+                        setTimeout(() => {
+                            if (MathJax.typesetPromise) {
+                                MathJax.typesetPromise();
+                            }
+                        }, 200);
+                    });
+            } catch (error) {
+                console.error('MathJax error:', error);
+            }
         }
     }
 
     function initializeRiskBoxes() {
-        // Clear existing boxes
         elements.lowRiskBoxes.innerHTML = '';
         elements.highRiskBoxes.innerHTML = '';
         
@@ -490,7 +476,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         box.addEventListener('click', () => selectRiskBox(box, number, riskLevel));
         
-        // Add to appropriate container
         if (riskLevel === 'low') {
             elements.lowRiskBoxes.appendChild(box);
         } else {
@@ -501,20 +486,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function selectRiskBox(box, number, riskLevel) {
-        // Check if box is already selected
         if (box.classList.contains('selected')) {
-            // Deselect the box
             box.classList.remove('selected');
             box.querySelector('.box-question').textContent = '?';
             gameState.selectedBoxes = gameState.selectedBoxes.filter(n => n !== number);
         } else {
-            // Check selection limit
             if (gameState.selectedBoxes.length >= 3) {
                 showFeedback('Maximum 3 boxes allowed!', 'warning');
                 return;
             }
             
-            // Select the box
             box.classList.add('selected');
             box.querySelector('.box-question').textContent = '✓';
             gameState.selectedBoxes.push(number);
@@ -529,12 +510,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function selectOption(optionElement) {
-        // Deselect all options
         document.querySelectorAll('.option').forEach(opt => {
             opt.classList.remove('selected');
         });
         
-        // Select clicked option
         optionElement.classList.add('selected');
         gameState.selectedOption = parseInt(optionElement.dataset.index);
         
@@ -555,10 +534,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const question = gameState.quizData.questions[gameState.currentQuestion];
         const isCorrect = gameState.selectedOption === question.correctAnswer;
         
-        // Process box points
         const results = processBoxPoints(isCorrect);
         
-        // Show feedback
         if (isCorrect) {
             showFeedback('Correct answer! Check your box results.', 'correct');
         } else {
@@ -566,10 +543,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showFeedback(`Incorrect. The right answer was: ${correctAnswer}`, 'incorrect');
         }
         
-        // Show results
         showResults(results);
         
-        // Update game controls
         elements.submitBtn.style.display = 'none';
         elements.nextBtn.style.display = 'flex';
     }
@@ -586,18 +561,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const index = (boxNumber - 1) % 6;
             const range = BOX_POINTS[riskLevel][index];
             
-            // Generate random points within range
             let points = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
             
-            // If answer is wrong, points are negative
             if (!isCorrect) {
                 points = -Math.abs(points);
             }
             
-            // Apply base points multiplier
             points = Math.round(points * (basePointsValue / 10));
             
-            // Store result
             results.push({
                 boxNumber: boxNumber,
                 points: points,
@@ -606,7 +577,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             totalPoints += points;
             
-            // Update box display
             const box = document.querySelector(`.risk-box[data-box-number="${boxNumber}"]`);
             if (box) {
                 const boxContent = box.querySelector('.box-question');
@@ -616,7 +586,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Update player score if correct
         if (isCorrect) {
             gameState.scores[gameState.currentPlayer] += totalPoints;
             updateScores();
@@ -649,11 +618,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function nextQuestion() {
-        // Switch to next player
         gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
         updateCurrentPlayer();
         
-        // Check if there are more questions
         if (gameState.currentQuestion < gameState.quizData.questions.length - 1) {
             gameState.currentQuestion++;
             loadQuestion(gameState.currentQuestion);
@@ -663,7 +630,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function clearSelections() {
-        // Clear box selections
         document.querySelectorAll('.risk-box').forEach(box => {
             box.classList.remove('selected');
             const content = box.querySelector('.box-question');
@@ -671,16 +637,13 @@ document.addEventListener('DOMContentLoaded', function() {
             content.textContent = '?';
         });
         
-        // Clear option selection
         document.querySelectorAll('.option').forEach(opt => {
             opt.classList.remove('selected');
         });
         
-        // Reset state
         gameState.selectedBoxes = [];
         gameState.selectedOption = null;
         
-        // Update UI
         updateSelectionInfo();
         updateSubmitButton();
     }
@@ -691,7 +654,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function endGame() {
-        // Determine winner
         let winner = 0;
         let winnerText = "It's a Tie!";
         let message = "Both players played well!";
@@ -706,13 +668,11 @@ document.addEventListener('DOMContentLoaded', function() {
             message = "Congratulations Player 2!";
         }
         
-        // Update game over screen
         elements.winnerTitle.textContent = winnerText;
         elements.winnerMessage.textContent = message;
         elements.finalScore1.textContent = gameState.scores[1];
         elements.finalScore2.textContent = gameState.scores[2];
         
-        // Update trophy
         if (winner === 0) {
             elements.winnerTrophy.textContent = "🤝";
         } else {
@@ -770,7 +730,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Loading functions
     function showLoading(message, details = '') {
-        // Create loading overlay if it doesn't exist
         let loadingOverlay = document.getElementById('loading-overlay');
         if (!loadingOverlay) {
             loadingOverlay = document.createElement('div');
@@ -790,51 +749,18 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             
             const loadingContent = document.createElement('div');
-            loadingContent.style.cssText = `
-                text-align: center;
-                background: rgba(255, 255, 255, 0.1);
-                padding: 50px;
-                border-radius: 12px;
-                border: 2px solid #2ec4b6;
-                backdrop-filter: blur(10px);
-            `;
+            loadingContent.className = 'loading-content';
             
             const spinner = document.createElement('div');
-            spinner.style.cssText = `
-                width: 80px;
-                height: 80px;
-                border: 8px solid rgba(255, 255, 255, 0.1);
-                border-top: 8px solid #2ec4b6;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-                margin: 0 auto 30px;
-            `;
+            spinner.className = 'loading-spinner';
             
             const text = document.createElement('div');
+            text.className = 'loading-text';
             text.id = 'loading-text';
-            text.style.cssText = `
-                font-size: 1.5rem;
-                color: #2ec4b6;
-                margin-bottom: 15px;
-                font-weight: 600;
-            `;
             
             const detailsEl = document.createElement('div');
+            detailsEl.className = 'loading-details';
             detailsEl.id = 'loading-details';
-            detailsEl.style.cssText = `
-                color: rgba(255, 255, 255, 0.7);
-                font-size: 1rem;
-            `;
-            
-            // Add CSS animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `;
-            document.head.appendChild(style);
             
             loadingContent.appendChild(spinner);
             loadingContent.appendChild(text);
@@ -845,13 +771,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.getElementById('loading-text').textContent = message;
         document.getElementById('loading-details').textContent = details;
-        loadingOverlay.style.display = 'flex';
+        loadingOverlay.classList.add('active');
     }
 
     function hideLoading() {
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) {
-            loadingOverlay.style.display = 'none';
+            loadingOverlay.classList.remove('active');
         }
     }
 });

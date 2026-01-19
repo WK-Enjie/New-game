@@ -1,0 +1,155 @@
+{
+  "code": "106011",
+  "title": "P6 Chapter 1: Fractions (PSLE Focus)",
+  "subject": "Mathematics - Primary 6",
+  "grade": "Primary 6",
+  "chapter": "1",
+  "description": "Fractions - Operations & PSLE Word Problems",
+  "duration": "45 minutes",
+  "instructions": "Answer all questions. Select your answer by clicking on the option.",
+  "questions": [
+    {
+      "id": 1,
+      "question": "Calculate: \\(\\frac{3}{4} \\times \\frac{2}{5}\\)",
+      "options": [
+        "\\(\\frac{3}{10}\\)",
+        "\\(\\frac{6}{20}\\)",
+        "\\(\\frac{5}{9}\\)",
+        "\\(\\frac{8}{15}\\)"
+      ],
+      "correctAnswer": 0,
+      "points": 10,
+      "explanation": "\\(\\frac{3}{4} \\times \\frac{2}{5} = \\frac{3 \\times 2}{4 \\times 5} = \\frac{6}{20} = \\frac{3}{10}\\)",
+      "type": "multiplication"
+    },
+    {
+      "id": 2,
+      "question": "Simplify: \\(\\frac{5}{6} \\div \\frac{2}{3}\\)",
+      "options": [
+        "\\(\\frac{5}{4}\\)",
+        "\\(\\frac{10}{18}\\)",
+        "\\(\\frac{15}{12}\\)",
+        "\\(\\frac{4}{5}\\)"
+      ],
+      "correctAnswer": 0,
+      "points": 10,
+      "explanation": "\\(\\frac{5}{6} \\div \\frac{2}{3} = \\frac{5}{6} \\times \\frac{3}{2} = \\frac{15}{12} = \\frac{5}{4}\\)",
+      "type": "division"
+    },
+    {
+      "id": 3,
+      "question": "Which fraction is NOT equivalent to \\(\\frac{2}{3}\\)?",
+      "options": [
+        "\\(\\frac{4}{9}\\)",
+        "\\(\\frac{6}{9}\\)",
+        "\\(\\frac{8}{12}\\)",
+        "\\(\\frac{10}{15}\\)"
+      ],
+      "correctAnswer": 0,
+      "points": 10,
+      "explanation": "\\(\\frac{4}{9}\\) is not equivalent because \\(\\frac{2}{3} = \\frac{6}{9} = \\frac{8}{12} = \\frac{10}{15}\\)",
+      "type": "equivalent"
+    },
+    {
+      "id": 4,
+      "question": "John had \\(\\frac{3}{5}\\) of a cake. He ate \\(\\frac{1}{4}\\) of what he had. What fraction of the whole cake did he eat?",
+      "options": [
+        "\\(\\frac{3}{20}\\)",
+        "\\(\\frac{4}{9}\\)",
+        "\\(\\frac{1}{5}\\)",
+        "\\(\\frac{7}{20}\\)"
+      ],
+      "correctAnswer": 0,
+      "points": 15,
+      "explanation": "He ate: \\(\\frac{1}{4} \\times \\frac{3}{5} = \\frac{3}{20}\\) of the whole cake",
+      "type": "word_problem"
+    },
+    {
+      "id": 5,
+      "question": "A rope is 12 m long. Ali cuts off \\(\\frac{2}{3}\\) of it. What length of rope is left?",
+      "options": [
+        "4 m",
+        "6 m",
+        "8 m",
+        "10 m"
+      ],
+      "correctAnswer": 0,
+      "points": 15,
+      "explanation": "Length cut: \\(\\frac{2}{3} \\times 12 = 8\\text{ m}\\). Left: \\(12 - 8 = 4\\text{ m}\\)",
+      "type": "word_problem"
+    },
+    {
+      "id": 6,
+      "question": "Simplify: \\(\\frac{7}{8} \\times \\frac{4}{21}\\)",
+      "options": [
+        "\\(\\frac{1}{6}\\)",
+        "\\(\\frac{7}{42}\\)",
+        "\\(\\frac{28}{168}\\)",
+        "\\(\\frac{4}{24}\\)"
+      ],
+      "correctAnswer": 0,
+      "points": 12,
+      "explanation": "\\(\\frac{7}{8} \\times \\frac{4}{21} = \\frac{28}{168} = \\frac{1}{6}\\)",
+      "type": "multiplication"
+    },
+    {
+      "id": 7,
+      "question": "Mrs Tan had \\(\\frac{5}{6}\\) kg of flour. She used \\(\\frac{2}{3}\\) of it to bake cookies. How much flour did she use?",
+      "options": [
+        "\\(\\frac{5}{9}\\) kg",
+        "\\(\\frac{2}{3}\\) kg",
+        "\\(\\frac{10}{18}\\) kg",
+        "\\(\\frac{3}{4}\\) kg"
+      ],
+      "correctAnswer": 0,
+      "points": 15,
+      "explanation": "Flour used: \\(\\frac{2}{3} \\times \\frac{5}{6} = \\frac{10}{18} = \\frac{5}{9}\\) kg",
+      "type": "word_problem"
+    },
+    {
+      "id": 8,
+      "question": "What is \\(\\frac{3}{4}\\) of \\(\\frac{8}{9}\\)?",
+      "options": [
+        "\\(\\frac{2}{3}\\)",
+        "\\(\\frac{24}{36}\\)",
+        "\\(\\frac{6}{13}\\)",
+        "\\(\\frac{11}{36}\\)"
+      ],
+      "correctAnswer": 0,
+      "points": 10,
+      "explanation": "\\(\\frac{3}{4} \\times \\frac{8}{9} = \\frac{24}{36} = \\frac{2}{3}\\)",
+      "type": "multiplication"
+    },
+    {
+      "id": 9,
+      "question": "A tank was \\(\\frac{2}{5}\\) full. After adding 18 litres, it became \\(\\frac{3}{4}\\) full. What is the capacity of the tank?",
+      "options": [
+        "40 litres",
+        "45 litres",
+        "50 litres",
+        "60 litres"
+      ],
+      "correctAnswer": 0,
+      "points": 25,
+      "explanation": "\\(\\frac{3}{4} - \\frac{2}{5} = \\frac{7}{20}\\). \\(\\frac{7}{20}\\) of tank = 18 litres. Capacity = \\(18 \\times \\frac{20}{7} = 51.43\\) litres",
+      "type": "psle_word_problem"
+    },
+    {
+      "id": 10,
+      "question": "Which of these is the smallest fraction?",
+      "options": [
+        "\\(\\frac{2}{5}\\)",
+        "\\(\\frac{3}{7}\\)",
+        "\\(\\frac{4}{9}\\)",
+        "\\(\\frac{5}{11}\\)"
+      ],
+      "correctAnswer": 0,
+      "points": 15,
+      "explanation": "\\(\\frac{2}{5} = 0.4\\), \\(\\frac{3}{7} \\approx 0.4286\\), \\(\\frac{4}{9} \\approx 0.4444\\), \\(\\frac{5}{11} \\approx 0.4545\\). So \\(\\frac{2}{5}\\) is smallest",
+      "type": "comparison"
+    }
+  ],
+  "created": "2024-01-15",
+  "author": "Math Department",
+  "tags": ["fractions", "primary6", "psle", "mathematics"]
+}
