@@ -1,12 +1,12 @@
 {
   "code": "106012",
   "title": "P6 Fractions: Verified Questions",
-  "subject": "Mathematics",
+  "subject": "Mathematics - Primary 6",
   "grade": "Primary 6",
   "chapter": "1",
   "description": "100% correct fraction questions with working",
   "duration": "45 minutes",
-  "instructions": "Answer all questions. Select your answer by clicking on the option. You can select up to 3 risk boxes for extra points.",
+  "instructions": "Answer all questions. Select your answer by clicking on the option.",
   "questions": [
     {
       "id": 1,
@@ -66,7 +66,7 @@
     },
     {
       "id": 5,
-      "question": "In a class, \\(\\frac{3}{7}\\) of the students are boys. If there are 12 more girls than boys, how many students are in the class?",
+      "question": "In a class, \\(\\frac{3}{7}\\) of the students are boys. If there are 6 more girls than boys, how many students are in the class?",
       "options": [
         "42",
         "49",
@@ -75,7 +75,7 @@
       ],
       "correctAnswer": 0,
       "points": 20,
-      "explanation": "Let total students = x\nBoys = \\(\\frac{3}{7}x\\), Girls = \\(\\frac{4}{7}x\\)\nDifference: \\(\\frac{4}{7}x - \\frac{3}{7}x = \\frac{1}{7}x\\)\nGiven \\(\\frac{1}{7}x = 12\\), so \\(x = 12 \\times 7 = 84\\)\nBut 84 is not an option! Let's check the given options:\nFor 42: Boys = 18, Girls = 24, Difference = 6\nFor 49: Boys = 21, Girls = 28, Difference = 7\nFor 56: Boys = 24, Girls = 32, Difference = 8\nFor 63: Boys = 27, Girls = 36, Difference = 9\nNone have difference of 12. However, 42 is correct if the difference was 6 instead of 12.",
+      "explanation": "Boys = \\(\\frac{3}{7}\\), Girls = \\(\\frac{4}{7}\\)\nDifference: \\(\\frac{4}{7} - \\frac{3}{7} = \\frac{1}{7}\\)\nIf \\(\\frac{1}{7}\\) of total = 6 students\nThen total students = \\(6 \\times 7 = 42\\)\nCheck: 42 students → Boys: \\(\\frac{3}{7} \\times 42 = 18\\), Girls: \\(\\frac{4}{7} \\times 42 = 24\\), Difference: 6",
       "type": "difference_problem"
     }
   ],
