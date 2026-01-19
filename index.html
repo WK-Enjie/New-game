@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Battle: Quiz & Risk Game</title>
+    <title>Brain Battle: Quiz Game</title>
     
-    <!-- MathJax Configuration -->
+    <!-- MathJax for fractions -->
     <script>
     window.MathJax = {
       tex: {
@@ -15,88 +15,73 @@
       startup: {
         ready: () => {
           MathJax.startup.defaultReady();
-          console.log('MathJax is ready!');
+          console.log('MathJax loaded');
         }
       }
     };
     </script>
-    
-    <!-- MathJax Library -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <!-- Start Screen -->
         <div id="start-screen" class="screen active">
             <div class="start-content">
-                <!-- Logo -->
                 <div class="logo">
-                    <div class="logo-icon">🎯</div>
+                    <div class="logo-icon">🧠</div>
                     <h1>Brain Battle</h1>
-                    <p class="tagline">Test Your Knowledge • Take Risks • Earn Points</p>
+                    <p class="tagline">Test Your Knowledge • Earn Points</p>
                 </div>
                 
-                <!-- Code Input Section -->
                 <div class="code-section">
                     <h3><i class="fas fa-key"></i> Enter Quiz Code</h3>
                     
-                    <div class="code-input-group">
-                        <!-- Code Display -->
-                        <div class="code-display" id="code-display">
-                            <div class="code-digit" data-index="0">_</div>
-                            <div class="code-digit" data-index="1">_</div>
-                            <div class="code-digit" data-index="2">_</div>
-                            <div class="code-digit" data-index="3">_</div>
-                            <div class="code-digit" data-index="4">_</div>
-                            <div class="code-digit" data-index="5">_</div>
+                    <div class="code-display" id="code-display">
+                        <div class="code-digit" data-index="0">_</div>
+                        <div class="code-digit" data-index="1">_</div>
+                        <div class="code-digit" data-index="2">_</div>
+                        <div class="code-digit" data-index="3">_</div>
+                        <div class="code-digit" data-index="4">_</div>
+                        <div class="code-digit" data-index="5">_</div>
+                    </div>
+                    
+                    <div class="code-keypad">
+                        <div class="keypad-row">
+                            <button class="keypad-btn" data-key="1">1</button>
+                            <button class="keypad-btn" data-key="2">2</button>
+                            <button class="keypad-btn" data-key="3">3</button>
                         </div>
-                        
-                        <!-- Virtual Keypad -->
-                        <div class="code-keypad">
-                            <div class="keypad-row">
-                                <button class="keypad-btn" data-key="1">1</button>
-                                <button class="keypad-btn" data-key="2">2</button>
-                                <button class="keypad-btn" data-key="3">3</button>
-                            </div>
-                            <div class="keypad-row">
-                                <button class="keypad-btn" data-key="4">4</button>
-                                <button class="keypad-btn" data-key="5">5</button>
-                                <button class="keypad-btn" data-key="6">6</button>
-                            </div>
-                            <div class="keypad-row">
-                                <button class="keypad-btn" data-key="7">7</button>
-                                <button class="keypad-btn" data-key="8">8</button>
-                                <button class="keypad-btn" data-key="9">9</button>
-                            </div>
-                            <div class="keypad-row">
-                                <button class="keypad-btn" data-key="0">0</button>
-                                <button class="keypad-btn" id="backspace">
-                                    <i class="fas fa-backspace"></i>
-                                </button>
-                                <button class="keypad-btn" id="clear">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
+                        <div class="keypad-row">
+                            <button class="keypad-btn" data-key="4">4</button>
+                            <button class="keypad-btn" data-key="5">5</button>
+                            <button class="keypad-btn" data-key="6">6</button>
                         </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="code-actions">
-                            <button id="validate-code" class="btn primary-btn" disabled>
-                                <i class="fas fa-check"></i> Validate Code
-                            </button>
+                        <div class="keypad-row">
+                            <button class="keypad-btn" data-key="7">7</button>
+                            <button class="keypad-btn" data-key="8">8</button>
+                            <button class="keypad-btn" data-key="9">9</button>
+                        </div>
+                        <div class="keypad-row">
+                            <button class="keypad-btn" data-key="0">0</button>
+                            <button class="keypad-btn" id="backspace"><i class="fas fa-backspace"></i></button>
+                            <button class="keypad-btn" id="clear"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
                     
-                    <!-- Error Message -->
+                    <div class="code-actions">
+                        <button id="validate-code" class="btn primary-btn" disabled>
+                            <i class="fas fa-check"></i> Validate Code
+                        </button>
+                    </div>
+                    
                     <div id="start-error" class="error-message"></div>
                 </div>
                 
-                <!-- Selected Quiz Info -->
                 <div id="quiz-info" class="quiz-info" style="display: none;">
                     <h4><i class="fas fa-clipboard-list"></i> Selected Quiz</h4>
                     <div class="quiz-details">
@@ -115,22 +100,20 @@
                     </div>
                 </div>
                 
-                <!-- Start Game Button -->
                 <div class="start-action">
                     <button id="start-game" class="btn start-btn" disabled>
                         <i class="fas fa-play"></i> Start Game
                     </button>
                 </div>
                 
-                <!-- Demo Buttons -->
                 <div class="demo-section">
-                    <h4><i class="fas fa-bolt"></i> Try Demo Quizzes</h4>
+                    <h4><i class="fas fa-bolt"></i> Demo Quizzes</h4>
                     <div class="demo-buttons">
                         <button class="demo-btn" data-code="106011">
-                            <i class="fas fa-calculator"></i> P6 Fractions
+                            <i class="fas fa-calculator"></i> Fractions 1
                         </button>
-                        <button class="demo-btn" data-code="106015">
-                            <i class="fas fa-flask"></i> P6 Fractions 2
+                        <button class="demo-btn" data-code="106012">
+                            <i class="fas fa-calculator"></i> Fractions 2
                         </button>
                     </div>
                 </div>
@@ -139,7 +122,6 @@
         
         <!-- Game Screen -->
         <div id="game-screen" class="screen">
-            <!-- Header -->
             <div class="game-header">
                 <div class="quiz-info-header">
                     <h2 id="game-quiz-title">Quiz Title</h2>
@@ -166,52 +148,44 @@
                 </div>
             </div>
             
-            <!-- Main Content -->
             <div class="main-content">
-                <!-- Left Column: Question -->
                 <div class="question-section">
                     <div class="question-card">
                         <div class="question-points">
                             <i class="fas fa-star"></i> Points: <span id="base-points">10</span>
                         </div>
                         <div id="question-text" class="question-text">
-                            Loading question...
+                            Question will appear here...
                         </div>
                         
-                        <!-- Options -->
                         <div id="options-container" class="options-container">
                             <!-- Options will be added here -->
                         </div>
                     </div>
                 </div>
                 
-                <!-- Right Column: Risk Boxes -->
                 <div class="risk-section">
                     <div class="risk-header">
                         <h3><i class="fas fa-dice"></i> Risk Boxes</h3>
                         <p>Select 1-3 boxes. High risk = bigger rewards/penalties!</p>
                     </div>
                     
-                    <!-- Risk Boxes Grid -->
                     <div class="risk-grid">
-                        <!-- Low Risk Boxes -->
                         <div class="risk-zone low-risk">
                             <div class="zone-label">Low Risk</div>
                             <div class="boxes-grid" id="low-risk-boxes">
-                                <!-- Low risk boxes will be added here -->
+                                <!-- Boxes will be added here -->
                             </div>
                         </div>
                         
-                        <!-- High Risk Boxes -->
                         <div class="risk-zone high-risk">
                             <div class="zone-label">High Risk</div>
                             <div class="boxes-grid" id="high-risk-boxes">
-                                <!-- High risk boxes will be added here -->
+                                <!-- Boxes will be added here -->
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Selection Info -->
                     <div class="selection-info">
                         <div class="selected-count">
                             <i class="fas fa-check-circle"></i>
@@ -224,7 +198,6 @@
                 </div>
             </div>
             
-            <!-- Game Controls -->
             <div class="game-controls">
                 <div class="left-controls">
                     <button id="submit-answer" class="btn primary-btn" disabled>
@@ -242,19 +215,15 @@
                 </div>
             </div>
             
-            <!-- Feedback Area -->
             <div id="feedback" class="feedback-area">
                 <div class="feedback-placeholder">
                     <i class="fas fa-lightbulb"></i> Select boxes and choose an answer
                 </div>
             </div>
             
-            <!-- Results Display -->
             <div id="results-display" class="results-area" style="display: none;">
                 <h3><i class="fas fa-chart-bar"></i> Results</h3>
-                <div id="box-results" class="box-results-grid">
-                    <!-- Results will be shown here -->
-                </div>
+                <div id="box-results" class="box-results-grid"></div>
                 <div class="total-points">
                     <i class="fas fa-trophy"></i>
                     Points earned: <span id="points-earned">0</span>
@@ -297,8 +266,6 @@
         </div>
     </div>
 
-    <!-- Loading Overlay (Added dynamically) -->
-    
     <script src="script.js"></script>
 </body>
 </html>

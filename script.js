@@ -1,62 +1,23 @@
-// Brain Battle Game - Complete Fixed Version
+// Brain Battle Game - Complete Working Version
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
-    const gameState = {
-        currentScreen: 'start',
-        currentQuestion: 0,
-        currentPlayer: 1,
-        selectedQuiz: null,
-        quizData: null,
-        scores: { 1: 0, 2: 0 },
-        selectedBoxes: [],
-        selectedOption: null,
-        boxPoints: {}
-    };
-
-    // Points configuration
-    const BOX_POINTS = {
-        lowRisk: [
-            { min: 5, max: 15 },
-            { min: 8, max: 18 },
-            { min: 6, max: 12 },
-            { min: 4, max: 10 },
-            { min: 7, max: 14 },
-            { min: 9, max: 20 }
-        ],
-        highRisk: [
-            { min: -10, max: 30 },
-            { min: -15, max: 40 },
-            { min: -20, max: 50 },
-            { min: -25, max: 60 },
-            { min: -30, max: 70 },
-            { min: -40, max: 100 }
-        ]
-    };
-
-    // Quiz directory structure
-    const QUIZ_PATHS = {
-        '1': { // Primary
-            '0': 'Questions/primary/math/',
-            '1': 'Questions/primary/science/'
-        },
-        '2': { // Lower Secondary
-            '0': 'Questions/lower-secondary/math/',
-            '1': 'Questions/lower-secondary/science/'
-        },
-        '3': { // Upper Secondary
-            '0': 'Questions/upper-secondary/math/',
-            '2': 'Questions/upper-secondary/combined-physics/',
-            '3': 'Questions/upper-secondary/pure-physics/',
-            '4': 'Questions/upper-secondary/combined-chem/',
-            '5': 'Questions/upper-secondary/pure-chem/'
-        }
-    };
+    let currentScreen = 'start';
+    let currentQuestion = 0;
+    let currentPlayer = 1;
+    let selectedQuiz = null;
+    let quizData = null;
+    let scores = { 1: 0, 2: 0 };
+    let selectedBoxes = [];
+    let selectedOption = null;
 
     // DOM Elements
     const elements = {
+        // Screens
         startScreen: document.getElementById('start-screen'),
         gameScreen: document.getElementById('game-screen'),
         gameOverScreen: document.getElementById('game-over'),
+        
+        // Code input
         codeDigits: document.querySelectorAll('.code-digit'),
         keypadButtons: document.querySelectorAll('.keypad-btn'),
         backspaceBtn: document.getElementById('backspace'),
@@ -64,30 +25,44 @@ document.addEventListener('DOMContentLoaded', function() {
         validateBtn: document.getElementById('validate-code'),
         startGameBtn: document.getElementById('start-game'),
         startError: document.getElementById('start-error'),
+        
+        // Quiz info
         quizInfo: document.getElementById('quiz-info'),
         quizTitleDisplay: document.getElementById('quiz-title-display'),
         quizSubjectDisplay: document.getElementById('quiz-subject-display'),
         quizCountDisplay: document.getElementById('quiz-count-display'),
+        
+        // Game screen
         gameQuizTitle: document.getElementById('game-quiz-title'),
         currentQ: document.getElementById('current-q'),
         totalQ: document.getElementById('total-q'),
         currentPlayerName: document.getElementById('current-player-name'),
         player1Score: document.getElementById('player1-score'),
         player2Score: document.getElementById('player2-score'),
+        
+        // Question elements
         questionText: document.getElementById('question-text'),
         optionsContainer: document.getElementById('options-container'),
         basePoints: document.getElementById('base-points'),
+        
+        // Box elements
         lowRiskBoxes: document.getElementById('low-risk-boxes'),
         highRiskBoxes: document.getElementById('high-risk-boxes'),
         selectedCount: document.getElementById('selected-count'),
         clearSelectionsBtn: document.getElementById('clear-selections'),
+        
+        // Game controls
         submitBtn: document.getElementById('submit-answer'),
         nextBtn: document.getElementById('next-question'),
         homeBtn: document.getElementById('home-btn'),
+        
+        // Feedback & Results
         feedback: document.getElementById('feedback'),
         resultsDisplay: document.getElementById('results-display'),
         boxResults: document.getElementById('box-results'),
         pointsEarned: document.getElementById('points-earned'),
+        
+        // Game over
         winnerTrophy: document.getElementById('winner-trophy'),
         winnerTitle: document.getElementById('winner-title'),
         winnerMessage: document.getElementById('winner-message'),
@@ -95,16 +70,18 @@ document.addEventListener('DOMContentLoaded', function() {
         finalScore2: document.getElementById('final-score2'),
         playAgainBtn: document.getElementById('play-again'),
         newGameBtn: document.getElementById('new-game'),
+        
+        // Demo buttons
         demoButtons: document.querySelectorAll('.demo-btn')
     };
 
     // Initialize
-    initGame();
+    init();
 
-    function initGame() {
+    function init() {
         setupEventListeners();
         initCodeInput();
-        console.log('Game initialized with MathJax support');
+        console.log('Game initialized');
     }
 
     function setupEventListeners() {
@@ -221,110 +198,162 @@ document.addEventListener('DOMContentLoaded', function() {
         validateCode();
     }
 
-    async function validateCode() {
+    function validateCode() {
         const code = getCurrentCode();
         if (code.length !== 6) return;
         
-        showLoading('Loading quiz...', `Code: ${code}`);
+        showLoading('Loading quiz...');
         
-        try {
-            const level = code[0];
-            const subject = code[1];
-            
-            const basePath = QUIZ_PATHS[level]?.[subject];
-            if (!basePath) {
-                throw new Error('Invalid quiz code format');
-            }
-            
-            const filePath = `${basePath}${code}.json`;
-            
-            // Fetch the JSON file
-            const response = await fetch(filePath);
-            
-            if (!response.ok) {
-                throw new Error(`Quiz file not found: ${filePath}`);
-            }
-            
-            const quizData = await response.json();
-            
-            // Validate required fields
-            if (!quizData.questions || !Array.isArray(quizData.questions)) {
-                throw new Error('Invalid quiz format: missing questions array');
-            }
-            
-            // Validate each question
-            quizData.questions.forEach((q, index) => {
-                if (q.correctAnswer === undefined) {
-                    throw new Error(`Question ${index + 1} missing correctAnswer field`);
-                }
-                if (!q.options || !Array.isArray(q.options)) {
-                    throw new Error(`Question ${index + 1} missing options array`);
-                }
-            });
-            
-            // Store quiz info
-            gameState.selectedQuiz = {
-                code: code,
-                path: filePath,
-                title: quizData.title || `Quiz ${code}`,
-                subject: quizData.subject || 'Mathematics',
-                questionCount: quizData.questions.length
-            };
-            
-            gameState.quizData = quizData;
-            
-            // Update UI
-            showQuizInfo(gameState.selectedQuiz);
+        // Check if code exists
+        const quiz = findQuizByCode(code);
+        
+        if (quiz) {
+            selectedQuiz = quiz;
+            showQuizInfo(quiz);
             elements.startError.textContent = '';
             elements.startGameBtn.disabled = false;
-            
-            hideLoading();
-            
-        } catch (error) {
-            console.error('Error loading quiz:', error);
-            showError(`Failed to load quiz: ${error.message}`);
+        } else {
+            showError('Invalid code. Please try a demo code.');
             hideQuizInfo();
             elements.startGameBtn.disabled = true;
-            hideLoading();
         }
+        
+        hideLoading();
+    }
+
+    function findQuizByCode(code) {
+        // Demo quizzes
+        const demoQuizzes = {
+            '106011': {
+                code: '106011',
+                title: 'P6 Fractions (Set 1)',
+                subject: 'Mathematics - Primary 6',
+                questions: 10
+            },
+            '106012': {
+                code: '106012',
+                title: 'P6 Fractions (Set 2)',
+                subject: 'Mathematics - Primary 6',
+                questions: 5
+            }
+        };
+        
+        return demoQuizzes[code] || null;
     }
 
     function showQuizInfo(quiz) {
         elements.quizTitleDisplay.textContent = quiz.title;
         elements.quizSubjectDisplay.textContent = quiz.subject;
-        elements.quizCountDisplay.textContent = quiz.questionCount;
+        elements.quizCountDisplay.textContent = quiz.questions;
         elements.quizInfo.style.display = 'block';
     }
 
     function hideQuizInfo() {
         elements.quizInfo.style.display = 'none';
-        gameState.selectedQuiz = null;
-        gameState.quizData = null;
+        selectedQuiz = null;
+        quizData = null;
     }
 
     function startGame() {
-        if (!gameState.selectedQuiz || !gameState.quizData) {
+        if (!selectedQuiz) {
             showError('Please select a valid quiz first.');
             return;
         }
         
-        resetGameState();
+        // Load quiz data
+        loadQuizData();
+        
+        // Switch to game screen
         switchScreen('game');
-        initializeGameDisplay();
-        loadQuestion(0);
-        initializeRiskBoxes();
+        
+        // Initialize game
+        initializeGame();
+        
+        // Load first question
+        loadQuestion(currentQuestion);
     }
 
-    function resetGameState() {
-        gameState.currentQuestion = 0;
-        gameState.currentPlayer = 1;
-        gameState.scores = { 1: 0, 2: 0 };
-        gameState.selectedBoxes = [];
-        gameState.selectedOption = null;
-        gameState.boxPoints = {};
+    function loadQuizData() {
+        // For demo, use hardcoded data
+        quizData = {
+            title: selectedQuiz.title,
+            questions: getQuestionsForCode(selectedQuiz.code)
+        };
+    }
+
+    function getQuestionsForCode(code) {
+        const questions = {
+            '106011': [
+                {
+                    question: "Calculate: \\(\\frac{3}{4} \\times \\frac{2}{5}\\)",
+                    options: ["\\(\\frac{3}{10}\\)", "\\(\\frac{6}{20}\\)", "\\(\\frac{5}{9}\\)", "\\(\\frac{8}{15}\\)"],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    question: "Simplify: \\(\\frac{5}{6} \\div \\frac{2}{3}\\)",
+                    options: ["\\(\\frac{5}{4}\\)", "\\(\\frac{10}{18}\\)", "\\(\\frac{15}{12}\\)", "\\(\\frac{4}{5}\\)"],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    question: "Which fraction is NOT equivalent to \\(\\frac{2}{3}\\)?",
+                    options: ["\\(\\frac{4}{9}\\)", "\\(\\frac{6}{9}\\)", "\\(\\frac{8}{12}\\)", "\\(\\frac{10}{15}\\)"],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    question: "John had \\(\\frac{3}{5}\\) of a cake. He ate \\(\\frac{1}{4}\\) of what he had. What fraction of the whole cake did he eat?",
+                    options: ["\\(\\frac{3}{20}\\)", "\\(\\frac{4}{9}\\)", "\\(\\frac{1}{5}\\)", "\\(\\frac{7}{20}\\)"],
+                    correctAnswer: 0,
+                    points: 15
+                },
+                {
+                    question: "A rope is 12 m long. Ali cuts off \\(\\frac{2}{3}\\) of it. What length of rope is left?",
+                    options: ["4 m", "6 m", "8 m", "10 m"],
+                    correctAnswer: 0,
+                    points: 15
+                }
+            ],
+            '106012': [
+                {
+                    question: "John had \\(\\frac{5}{8}\\) of a pizza. He ate \\(\\frac{1}{4}\\) of what he had. What fraction of the whole pizza did he eat?",
+                    options: ["\\(\\frac{5}{32}\\)", "\\(\\frac{1}{4}\\)", "\\(\\frac{5}{24}\\)", "\\(\\frac{3}{8}\\)"],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    question: "Express \\(\\frac{7}{12}\\) as a fraction with denominator 36",
+                    options: ["\\(\\frac{21}{36}\\)", "\\(\\frac{14}{36}\\)", "\\(\\frac{28}{36}\\)", "\\(\\frac{35}{36}\\)"],
+                    correctAnswer: 0,
+                    points: 8
+                },
+                {
+                    question: "A rope 24m long was cut into 3 pieces. The first piece was \\(\\frac{3}{8}\\) of the rope, the second was \\(\\frac{1}{3}\\) of the rope. What fraction of the rope was the third piece?",
+                    options: ["\\(\\frac{7}{24}\\)", "\\(\\frac{5}{12}\\)", "\\(\\frac{1}{2}\\)", "\\(\\frac{17}{24}\\)"],
+                    correctAnswer: 0,
+                    points: 15
+                },
+                {
+                    question: "Mr. Tan gave \\(\\frac{1}{4}\\) of his stamps to Ali and \\(\\frac{2}{5}\\) of the remainder to Bob. What fraction of his original stamps did he have left?",
+                    options: ["\\(\\frac{9}{20}\\)", "\\(\\frac{11}{20}\\)", "\\(\\frac{3}{10}\\)", "\\(\\frac{7}{20}\\)"],
+                    correctAnswer: 0,
+                    points: 20
+                },
+                {
+                    question: "In a class, \\(\\frac{3}{7}\\) of the students are boys. If there are 6 more girls than boys, how many students are in the class?",
+                    options: ["42", "49", "56", "63"],
+                    correctAnswer: 0,
+                    points: 20
+                }
+            ]
+        };
+        
+        return questions[code] || questions['106011'];
     }
 
     function switchScreen(screenName) {
+        currentScreen = screenName;
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
@@ -332,30 +361,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const screen = document.getElementById(`${screenName}-screen`);
         if (screen) {
             screen.classList.add('active');
-            gameState.currentScreen = screenName;
         }
     }
 
-    function initializeGameDisplay() {
-        elements.gameQuizTitle.textContent = gameState.quizData.title;
-        elements.totalQ.textContent = gameState.quizData.questions.length;
+    function initializeGame() {
+        elements.gameQuizTitle.textContent = quizData.title;
+        elements.totalQ.textContent = quizData.questions.length;
         updateScores();
         updateCurrentPlayer();
+        initializeRiskBoxes();
     }
 
     function updateScores() {
-        elements.player1Score.textContent = gameState.scores[1];
-        elements.player2Score.textContent = gameState.scores[2];
+        elements.player1Score.textContent = scores[1];
+        elements.player2Score.textContent = scores[2];
     }
 
     function updateCurrentPlayer() {
-        const playerName = `Player ${gameState.currentPlayer}`;
-        elements.currentPlayerName.textContent = playerName;
+        elements.currentPlayerName.textContent = `Player ${currentPlayer}`;
         
+        // Update player highlights
         document.querySelectorAll('.player-score').forEach((el, index) => {
-            if (index + 1 === gameState.currentPlayer) {
+            if (index + 1 === currentPlayer) {
                 el.style.transform = 'scale(1.1)';
-                el.style.transition = 'transform 0.3s';
             } else {
                 el.style.transform = 'scale(1)';
             }
@@ -363,12 +391,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadQuestion(index) {
-        if (!gameState.quizData || !gameState.quizData.questions[index]) {
-            console.error('Question not found at index:', index);
+        if (!quizData || !quizData.questions[index]) {
+            console.error('Question not found:', index);
             return;
         }
         
-        const question = gameState.quizData.questions[index];
+        const question = quizData.questions[index];
         
         // Update question counter
         elements.currentQ.textContent = index + 1;
@@ -376,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set base points
         elements.basePoints.textContent = question.points || 10;
         
-        // Set question text - CRITICAL: Use innerHTML for LaTeX
+        // Set question text
         elements.questionText.innerHTML = question.question;
         
         // Clear and add options
@@ -399,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Reset selection state
-        gameState.selectedOption = null;
+        selectedOption = null;
         elements.submitBtn.disabled = true;
         
         // Clear box selections
@@ -417,33 +445,16 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.submitBtn.style.display = 'flex';
         elements.nextBtn.style.display = 'none';
         
-        // Process MathJax after a short delay
-        setTimeout(renderMathJax, 100);
-    }
-
-    function renderMathJax() {
-        if (window.MathJax && MathJax.typesetPromise) {
-            try {
-                MathJax.typesetPromise()
-                    .then(() => {
-                        console.log('MathJax rendering successful');
-                    })
-                    .catch(err => {
-                        console.warn('MathJax typeset warning:', err);
-                        // Try again after another short delay
-                        setTimeout(() => {
-                            if (MathJax.typesetPromise) {
-                                MathJax.typesetPromise();
-                            }
-                        }, 200);
-                    });
-            } catch (error) {
-                console.error('MathJax error:', error);
-            }
+        // Process MathJax
+        if (window.MathJax) {
+            setTimeout(() => {
+                MathJax.typesetPromise();
+            }, 100);
         }
     }
 
     function initializeRiskBoxes() {
+        // Clear existing boxes
         elements.lowRiskBoxes.innerHTML = '';
         elements.highRiskBoxes.innerHTML = '';
         
@@ -474,31 +485,32 @@ document.addEventListener('DOMContentLoaded', function() {
         box.appendChild(boxNumber);
         box.appendChild(boxContent);
         
-        box.addEventListener('click', () => selectRiskBox(box, number, riskLevel));
+        box.addEventListener('click', () => selectRiskBox(box, number));
         
         if (riskLevel === 'low') {
             elements.lowRiskBoxes.appendChild(box);
         } else {
             elements.highRiskBoxes.appendChild(box);
         }
-        
-        return box;
     }
 
-    function selectRiskBox(box, number, riskLevel) {
+    function selectRiskBox(box, number) {
         if (box.classList.contains('selected')) {
+            // Deselect
             box.classList.remove('selected');
             box.querySelector('.box-question').textContent = '?';
-            gameState.selectedBoxes = gameState.selectedBoxes.filter(n => n !== number);
+            selectedBoxes = selectedBoxes.filter(n => n !== number);
         } else {
-            if (gameState.selectedBoxes.length >= 3) {
-                showFeedback('Maximum 3 boxes allowed!', 'warning');
+            // Check limit
+            if (selectedBoxes.length >= 3) {
+                showFeedback('Maximum 3 boxes!', 'warning');
                 return;
             }
             
+            // Select
             box.classList.add('selected');
             box.querySelector('.box-question').textContent = '✓';
-            gameState.selectedBoxes.push(number);
+            selectedBoxes.push(number);
         }
         
         updateSelectionInfo();
@@ -506,68 +518,74 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateSelectionInfo() {
-        elements.selectedCount.textContent = gameState.selectedBoxes.length;
+        elements.selectedCount.textContent = selectedBoxes.length;
     }
 
     function selectOption(optionElement) {
+        // Deselect all options
         document.querySelectorAll('.option').forEach(opt => {
             opt.classList.remove('selected');
         });
         
+        // Select clicked option
         optionElement.classList.add('selected');
-        gameState.selectedOption = parseInt(optionElement.dataset.index);
+        selectedOption = parseInt(optionElement.dataset.index);
         
         updateSubmitButton();
     }
 
     function updateSubmitButton() {
-        const canSubmit = gameState.selectedBoxes.length > 0 && gameState.selectedOption !== null;
-        elements.submitBtn.disabled = !canSubmit;
+        elements.submitBtn.disabled = !(selectedBoxes.length > 0 && selectedOption !== null);
     }
 
     function submitAnswer() {
-        if (gameState.selectedBoxes.length === 0 || gameState.selectedOption === null) {
+        if (selectedBoxes.length === 0 || selectedOption === null) {
             showFeedback('Please select boxes and an answer!', 'warning');
             return;
         }
         
-        const question = gameState.quizData.questions[gameState.currentQuestion];
-        const isCorrect = gameState.selectedOption === question.correctAnswer;
+        const question = quizData.questions[currentQuestion];
+        const isCorrect = selectedOption === question.correctAnswer;
         
-        const results = processBoxPoints(isCorrect);
+        // Calculate points
+        const points = calculatePoints(isCorrect, selectedBoxes, question.points || 10);
         
+        // Update score if correct
         if (isCorrect) {
-            showFeedback('Correct answer! Check your box results.', 'correct');
-        } else {
-            const correctAnswer = question.options[question.correctAnswer];
-            showFeedback(`Incorrect. The right answer was: ${correctAnswer}`, 'incorrect');
+            scores[currentPlayer] += points.total;
+            updateScores();
         }
         
-        showResults(results);
+        // Show results
+        showResults(points, isCorrect);
         
+        // Update game controls
         elements.submitBtn.style.display = 'none';
         elements.nextBtn.style.display = 'flex';
     }
 
-    function processBoxPoints(isCorrect) {
-        const question = gameState.quizData.questions[gameState.currentQuestion];
-        const basePointsValue = question.points || 10;
-        
-        let totalPoints = 0;
+    function calculatePoints(isCorrect, boxes, basePoints) {
         const results = [];
+        let total = 0;
         
-        gameState.selectedBoxes.forEach(boxNumber => {
-            const riskLevel = boxNumber >= 7 ? 'highRisk' : 'lowRisk';
-            const index = (boxNumber - 1) % 6;
-            const range = BOX_POINTS[riskLevel][index];
+        boxes.forEach(boxNumber => {
+            // Generate random points based on box number
+            let points;
+            if (boxNumber <= 6) {
+                // Low risk: 5-15 points
+                points = Math.floor(Math.random() * 11) + 5;
+            } else {
+                // High risk: -10 to 30 points
+                points = Math.floor(Math.random() * 41) - 10;
+            }
             
-            let points = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-            
+            // If answer is wrong, make points negative
             if (!isCorrect) {
                 points = -Math.abs(points);
             }
             
-            points = Math.round(points * (basePointsValue / 10));
+            // Apply base points multiplier
+            points = Math.round(points * (basePoints / 10));
             
             results.push({
                 boxNumber: boxNumber,
@@ -575,33 +593,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 isPositive: points >= 0
             });
             
-            totalPoints += points;
+            total += points;
             
+            // Update box display
             const box = document.querySelector(`.risk-box[data-box-number="${boxNumber}"]`);
             if (box) {
                 const boxContent = box.querySelector('.box-question');
                 boxContent.className = 'box-revealed';
                 boxContent.classList.add(points >= 0 ? 'positive' : 'negative');
-                boxContent.textContent = points >= 0 ? `+${points}` : points.toString();
+                boxContent.textContent = points >= 0 ? `+${points}` : points;
             }
         });
         
-        if (isCorrect) {
-            gameState.scores[gameState.currentPlayer] += totalPoints;
-            updateScores();
-        }
-        
-        return {
-            results: results,
-            total: totalPoints,
-            isCorrect: isCorrect
-        };
+        return { results, total };
     }
 
-    function showResults(data) {
-        elements.boxResults.innerHTML = '';
+    function showResults(points, isCorrect) {
+        // Show feedback
+        if (isCorrect) {
+            showFeedback('Correct! Check your box results.', 'correct');
+        } else {
+            showFeedback('Incorrect! Better luck next time.', 'incorrect');
+        }
         
-        data.results.forEach(result => {
+        // Show box results
+        elements.boxResults.innerHTML = '';
+        points.results.forEach(result => {
             const resultElement = document.createElement('div');
             resultElement.className = 'box-result';
             resultElement.innerHTML = `
@@ -613,23 +630,26 @@ document.addEventListener('DOMContentLoaded', function() {
             elements.boxResults.appendChild(resultElement);
         });
         
-        elements.pointsEarned.textContent = data.total >= 0 ? `+${data.total}` : data.total.toString();
+        elements.pointsEarned.textContent = points.total >= 0 ? `+${points.total}` : points.total;
         elements.resultsDisplay.style.display = 'block';
     }
 
     function nextQuestion() {
-        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+        // Switch player
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
         updateCurrentPlayer();
         
-        if (gameState.currentQuestion < gameState.quizData.questions.length - 1) {
-            gameState.currentQuestion++;
-            loadQuestion(gameState.currentQuestion);
+        // Check if more questions
+        if (currentQuestion < quizData.questions.length - 1) {
+            currentQuestion++;
+            loadQuestion(currentQuestion);
         } else {
             endGame();
         }
     }
 
     function clearSelections() {
+        // Clear box selections
         document.querySelectorAll('.risk-box').forEach(box => {
             box.classList.remove('selected');
             const content = box.querySelector('.box-question');
@@ -637,13 +657,16 @@ document.addEventListener('DOMContentLoaded', function() {
             content.textContent = '?';
         });
         
+        // Clear option selection
         document.querySelectorAll('.option').forEach(opt => {
             opt.classList.remove('selected');
         });
         
-        gameState.selectedBoxes = [];
-        gameState.selectedOption = null;
+        // Reset state
+        selectedBoxes = [];
+        selectedOption = null;
         
+        // Update UI
         updateSelectionInfo();
         updateSubmitButton();
     }
@@ -654,40 +677,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function endGame() {
+        // Determine winner
         let winner = 0;
-        let winnerText = "It's a Tie!";
-        let message = "Both players played well!";
+        let message = "It's a Tie!";
         
-        if (gameState.scores[1] > gameState.scores[2]) {
+        if (scores[1] > scores[2]) {
             winner = 1;
-            winnerText = "Player 1 Wins!";
-            message = "Congratulations Player 1!";
-        } else if (gameState.scores[2] > gameState.scores[1]) {
+            message = "Player 1 Wins!";
+        } else if (scores[2] > scores[1]) {
             winner = 2;
-            winnerText = "Player 2 Wins!";
-            message = "Congratulations Player 2!";
+            message = "Player 2 Wins!";
         }
         
-        elements.winnerTitle.textContent = winnerText;
-        elements.winnerMessage.textContent = message;
-        elements.finalScore1.textContent = gameState.scores[1];
-        elements.finalScore2.textContent = gameState.scores[2];
+        // Update game over screen
+        elements.winnerTitle.textContent = message;
+        elements.winnerMessage.textContent = `Final Scores: Player 1: ${scores[1]}, Player 2: ${scores[2]}`;
+        elements.finalScore1.textContent = scores[1];
+        elements.finalScore2.textContent = scores[2];
         
-        if (winner === 0) {
-            elements.winnerTrophy.textContent = "🤝";
-        } else {
-            elements.winnerTrophy.textContent = "🏆";
-        }
+        elements.winnerTrophy.textContent = winner === 0 ? "🤝" : "🏆";
         
         switchScreen('gameOver');
     }
 
     function playAgain() {
-        if (gameState.selectedQuiz && gameState.quizData) {
-            startGame();
-        } else {
-            goHome();
-        }
+        // Reset game
+        currentQuestion = 0;
+        currentPlayer = 1;
+        scores = { 1: 0, 2: 0 };
+        selectedBoxes = [];
+        selectedOption = null;
+        
+        // Start again
+        startGame();
     }
 
     function newGame() {
@@ -728,56 +750,30 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
-    // Loading functions
-    function showLoading(message, details = '') {
-        let loadingOverlay = document.getElementById('loading-overlay');
-        if (!loadingOverlay) {
-            loadingOverlay = document.createElement('div');
-            loadingOverlay.id = 'loading-overlay';
-            loadingOverlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(26, 26, 46, 0.95);
-                display: none;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-                flex-direction: column;
-            `;
-            
-            const loadingContent = document.createElement('div');
-            loadingContent.className = 'loading-content';
-            
-            const spinner = document.createElement('div');
-            spinner.className = 'loading-spinner';
-            
-            const text = document.createElement('div');
-            text.className = 'loading-text';
-            text.id = 'loading-text';
-            
-            const detailsEl = document.createElement('div');
-            detailsEl.className = 'loading-details';
-            detailsEl.id = 'loading-details';
-            
-            loadingContent.appendChild(spinner);
-            loadingContent.appendChild(text);
-            loadingContent.appendChild(detailsEl);
-            loadingOverlay.appendChild(loadingContent);
-            document.body.appendChild(loadingOverlay);
-        }
-        
-        document.getElementById('loading-text').textContent = message;
-        document.getElementById('loading-details').textContent = details;
-        loadingOverlay.classList.add('active');
+    function showLoading(message) {
+        // Create simple loading indicator
+        const loading = document.createElement('div');
+        loading.id = 'simple-loading';
+        loading.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-align: center;
+        `;
+        loading.innerHTML = `<div style="margin-bottom: 15px; color: #4361ee;"><i class="fas fa-spinner fa-spin fa-2x"></i></div><div>${message}</div>`;
+        document.body.appendChild(loading);
     }
 
     function hideLoading() {
-        const loadingOverlay = document.getElementById('loading-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.classList.remove('active');
+        const loading = document.getElementById('simple-loading');
+        if (loading) {
+            loading.remove();
         }
     }
 });
