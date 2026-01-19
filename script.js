@@ -1,4 +1,4 @@
-// Brain Battle Card Game - Simple Working Version
+// Brain Battle Card Game - Complete Working Version
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
     let currentScreen = 'start';
@@ -92,47 +92,99 @@ document.addEventListener('DOMContentLoaded', function() {
         demoButtons: document.querySelectorAll('.demo-btn')
     };
 
+    // Debug: Check if elements exist
+    console.log('Checking elements:');
+    console.log('Start button:', elements.startGameBtn);
+    console.log('Submit button:', elements.submitBtn);
+    console.log('Validate button:', elements.validateBtn);
+
     // Initialize Game
     init();
 
     function init() {
+        console.log('Initializing game...');
         setupEventListeners();
         initCodeInput();
-        console.log('Brain Battle Game Initialized');
+        console.log('Game initialized successfully');
     }
 
     function setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         // Code keypad
         elements.keypadButtons.forEach(btn => {
             if (!btn.id) {
-                btn.addEventListener('click', () => handleCodeInput(btn.dataset.key));
+                btn.addEventListener('click', function() {
+                    console.log('Keypad button clicked:', this.dataset.key);
+                    handleCodeInput(this.dataset.key);
+                });
             }
         });
         
-        elements.backspaceBtn.addEventListener('click', handleBackspace);
-        elements.clearBtn.addEventListener('click', handleClear);
-        elements.validateBtn.addEventListener('click', validateCode);
-        elements.startGameBtn.addEventListener('click', startGame);
+        elements.backspaceBtn.addEventListener('click', function() {
+            console.log('Backspace clicked');
+            handleBackspace();
+        });
+        
+        elements.clearBtn.addEventListener('click', function() {
+            console.log('Clear clicked');
+            handleClear();
+        });
+        
+        elements.validateBtn.addEventListener('click', function() {
+            console.log('Validate clicked');
+            validateCode();
+        });
+        
+        elements.startGameBtn.addEventListener('click', function() {
+            console.log('Start Game clicked');
+            startGame();
+        });
         
         // Demo buttons
         elements.demoButtons.forEach(btn => {
-            btn.addEventListener('click', () => enterDemoCode(btn.dataset.code));
+            btn.addEventListener('click', function() {
+                console.log('Demo button clicked:', this.dataset.code);
+                enterDemoCode(this.dataset.code);
+            });
         });
         
         // Game controls
-        elements.submitBtn.addEventListener('click', submitAnswer);
-        elements.nextBtn.addEventListener('click', nextQuestion);
-        elements.homeBtn.addEventListener('click', goHome);
+        elements.submitBtn.addEventListener('click', function() {
+            console.log('Submit Answer clicked');
+            submitAnswer();
+        });
+        
+        elements.nextBtn.addEventListener('click', function() {
+            console.log('Next Question clicked');
+            nextQuestion();
+        });
+        
+        elements.homeBtn.addEventListener('click', function() {
+            console.log('Home clicked');
+            goHome();
+        });
         
         // Game over buttons
-        elements.playAgainBtn.addEventListener('click', playAgain);
-        elements.newGameBtn.addEventListener('click', newGame);
+        elements.playAgainBtn.addEventListener('click', function() {
+            console.log('Play Again clicked');
+            playAgain();
+        });
+        
+        elements.newGameBtn.addEventListener('click', function() {
+            console.log('New Game clicked');
+            newGame();
+        });
+        
+        console.log('Event listeners setup complete');
     }
 
     function initCodeInput() {
+        console.log('Initializing code input...');
         elements.codeDigits[0].classList.add('active');
         elements.codeDigits.forEach(digit => {
             digit.addEventListener('click', function() {
+                console.log('Code digit clicked:', this.dataset.index);
                 elements.codeDigits.forEach(d => d.classList.remove('active'));
                 this.classList.add('active');
             });
@@ -140,10 +192,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleCodeInput(key) {
+        console.log('Handling code input:', key);
         const activeDigit = document.querySelector('.code-digit.active');
-        if (!activeDigit) return;
+        if (!activeDigit) {
+            console.log('No active digit found');
+            return;
+        }
         
         const index = parseInt(activeDigit.dataset.index);
+        console.log('Active digit index:', index);
         activeDigit.textContent = key;
         activeDigit.classList.remove('active');
         
@@ -155,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleBackspace() {
+        console.log('Handling backspace');
         const activeDigit = document.querySelector('.code-digit.active');
         let index;
         
@@ -179,6 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleClear() {
+        console.log('Clearing code input');
         elements.codeDigits.forEach(digit => {
             digit.textContent = '_';
             digit.classList.remove('active');
@@ -190,7 +249,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateValidateButton() {
         const code = getCurrentCode();
+        console.log('Current code:', code, 'Length:', code.length);
         elements.validateBtn.disabled = code.length !== 6;
+        console.log('Validate button disabled:', elements.validateBtn.disabled);
     }
 
     function getCurrentCode() {
@@ -204,6 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function enterDemoCode(code) {
+        console.log('Entering demo code:', code);
         handleClear();
         code.split('').forEach((char, index) => {
             if (index < 6) {
@@ -215,12 +277,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function validateCode() {
+        console.log('Validating code...');
         const code = getCurrentCode();
-        if (code.length !== 6) return;
+        console.log('Code to validate:', code);
+        
+        if (code.length !== 6) {
+            console.log('Invalid code length');
+            showError('Code must be 6 digits');
+            return;
+        }
         
         // For demo, we'll load hardcoded quiz data
-        // In production, this would fetch from server
         if (code === '106011') {
+            console.log('Loading quiz 106011');
             selectedQuiz = {
                 code: '106011',
                 title: 'P6 Chapter 1: Fractions (PSLE Focus)',
@@ -234,7 +303,9 @@ document.addEventListener('DOMContentLoaded', function() {
             showQuizInfo(selectedQuiz);
             elements.startError.textContent = '';
             elements.startGameBtn.disabled = false;
+            console.log('Quiz loaded successfully, start button enabled');
         } else {
+            console.log('Invalid code');
             showError('Invalid code. Please use 106011 for demo.');
             hideQuizInfo();
             elements.startGameBtn.disabled = true;
@@ -242,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadQuizData() {
+        console.log('Loading quiz data...');
         // Load the JSON data
         quizData = {
             code: "106011",
@@ -370,9 +442,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             ]
         };
+        console.log('Quiz data loaded, questions:', quizData.questions.length);
     }
 
     function showQuizInfo(quiz) {
+        console.log('Showing quiz info:', quiz);
         elements.quizTitleDisplay.textContent = quiz.title;
         elements.quizSubjectDisplay.textContent = quiz.subject;
         elements.quizCountDisplay.textContent = quiz.questions;
@@ -380,31 +454,40 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function hideQuizInfo() {
+        console.log('Hiding quiz info');
         elements.quizInfo.style.display = 'none';
         selectedQuiz = null;
         quizData = null;
     }
 
     function startGame() {
+        console.log('Starting game...');
+        
         if (!selectedQuiz || !quizData) {
+            console.log('No quiz selected');
             showError('Please select a valid quiz first.');
             return;
         }
         
+        console.log('Quiz selected, resetting game state');
         // Reset game state
         resetGameState();
         
         // Switch to game screen
+        console.log('Switching to game screen');
         switchScreen('game');
         
         // Initialize game
+        console.log('Initializing game');
         initializeGame();
         
         // Load first question
+        console.log('Loading first question');
         loadQuestion(currentQuestion);
     }
 
     function resetGameState() {
+        console.log('Resetting game state');
         currentQuestion = 0;
         currentPlayer = 1;
         scores = { 1: 0, 2: 0 };
@@ -417,31 +500,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function switchScreen(screenName) {
+        console.log('Switching to screen:', screenName);
         currentScreen = screenName;
+        
+        // Hide all screens
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
         
+        // Show the requested screen
         const screen = document.getElementById(`${screenName}-screen`);
         if (screen) {
             screen.classList.add('active');
+            console.log('Screen shown:', screenName);
+        } else {
+            console.error('Screen not found:', screenName);
         }
     }
 
     function initializeGame() {
+        console.log('Initializing game display');
         elements.gameQuizTitle.textContent = quizData.title;
         elements.totalQ.textContent = quizData.questions.length;
         updateScores();
         updateCurrentPlayer();
         createPointsCards();
+        console.log('Game initialized');
     }
 
     function updateScores() {
+        console.log('Updating scores:', scores);
         elements.player1Score.textContent = scores[1];
         elements.player2Score.textContent = scores[2];
     }
 
     function updateCurrentPlayer() {
+        console.log('Updating current player to:', currentPlayer);
         elements.currentPlayerName.textContent = `Player ${currentPlayer}`;
         
         // Update player highlights
@@ -450,18 +544,23 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (currentPlayer === 1) {
             elements.player1Display.classList.add('active');
+            console.log('Player 1 active');
         } else {
             elements.player2Display.classList.add('active');
+            console.log('Player 2 active');
         }
     }
 
     function loadQuestion(index) {
+        console.log('Loading question:', index);
+        
         if (!quizData || !quizData.questions[index]) {
-            console.error('Question not found:', index);
+            console.error('Question not found at index:', index);
             return;
         }
         
         const question = quizData.questions[index];
+        console.log('Question loaded:', question.id);
         
         // Update question counter
         elements.currentQ.textContent = index + 1;
@@ -471,9 +570,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Set question text
         elements.questionText.innerHTML = question.question;
+        console.log('Question text set');
         
         // Clear and add options
         elements.optionsContainer.innerHTML = '';
+        console.log('Options container cleared');
         
         const letters = ['A', 'B', 'C', 'D'];
         question.options.forEach((option, i) => {
@@ -486,10 +587,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="option-text">${option}</div>
                 `;
                 
-                optionElement.addEventListener('click', () => selectOption(optionElement));
+                optionElement.addEventListener('click', function() {
+                    console.log('Option clicked:', i);
+                    selectOption(optionElement);
+                });
+                
                 elements.optionsContainer.appendChild(optionElement);
             }
         });
+        console.log('Options added:', question.options.length);
         
         // Reset selection state
         selectedOption = null;
@@ -508,16 +614,28 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Enable submit button when option is selected
         elements.submitBtn.disabled = true;
+        console.log('Submit button disabled initially');
+        
+        // Make options clickable again
+        document.querySelectorAll('.option').forEach(opt => {
+            opt.style.pointerEvents = 'auto';
+        });
         
         // Process MathJax
         if (window.MathJax) {
+            console.log('Processing MathJax...');
             setTimeout(() => {
-                MathJax.typesetPromise();
+                MathJax.typesetPromise().then(() => {
+                    console.log('MathJax rendering complete');
+                }).catch(err => {
+                    console.warn('MathJax rendering error:', err);
+                });
             }, 100);
         }
     }
 
     function createPointsCards() {
+        console.log('Creating points cards');
         elements.cardsGrid.innerHTML = '';
         
         // Shuffle cards
@@ -525,6 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Take first 5 cards
         const selectedCards = shuffledCards.slice(0, 5);
+        console.log('Selected cards:', selectedCards);
         
         selectedCards.forEach((card, index) => {
             const cardElement = document.createElement('div');
@@ -541,12 +660,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="card-points ${pointsClass}">${card.points}</div>
             `;
             
-            cardElement.addEventListener('click', () => selectCard(cardElement, card));
+            cardElement.addEventListener('click', function() {
+                console.log('Card clicked:', card.id, card.title);
+                selectCard(cardElement, card);
+            });
+            
             elements.cardsGrid.appendChild(cardElement);
         });
+        console.log('Cards created');
     }
 
     function resetCards() {
+        console.log('Resetting cards');
         document.querySelectorAll('.card').forEach(card => {
             card.classList.remove('selected');
         });
@@ -555,8 +680,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function selectCard(cardElement, card) {
+        console.log('Selecting card:', card.id);
+        
         // Only allow selection after answer is submitted
         if (elements.submitBtn.style.display !== 'none') {
+            console.log('Cannot select card yet - need to submit answer first');
             return;
         }
         
@@ -568,6 +696,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Select clicked card
         cardElement.classList.add('selected');
         selectedCard = card;
+        console.log('Card selected:', selectedCard);
         
         // Show selected card info
         elements.selectedCardPoints.textContent = card.points;
@@ -575,9 +704,12 @@ document.addEventListener('DOMContentLoaded', function() {
                           card.type === 'negative' ? 'negative' : 'neutral';
         elements.selectedCardPoints.className = `card-points ${pointsClass}`;
         elements.selectedCardInfo.style.display = 'block';
+        console.log('Selected card info shown');
     }
 
     function selectOption(optionElement) {
+        console.log('Selecting option');
+        
         // Deselect all options
         document.querySelectorAll('.option').forEach(opt => {
             opt.classList.remove('selected');
@@ -586,23 +718,30 @@ document.addEventListener('DOMContentLoaded', function() {
         // Select clicked option
         optionElement.classList.add('selected');
         selectedOption = parseInt(optionElement.dataset.index);
+        console.log('Option selected:', selectedOption);
         
         // Enable submit button
         elements.submitBtn.disabled = false;
+        console.log('Submit button enabled');
     }
 
     function submitAnswer() {
+        console.log('Submitting answer...');
+        
         if (selectedOption === null) {
+            console.log('No option selected');
             showError('Please select an answer first.');
             return;
         }
         
         const question = quizData.questions[currentQuestion];
         const isCorrect = selectedOption === question.correctAnswer;
+        console.log('Answer is correct:', isCorrect);
         
         // Update game stats
         gameStats.questionsAnswered++;
         if (isCorrect) gameStats.correctAnswers++;
+        console.log('Game stats updated:', gameStats);
         
         // Calculate points
         let pointsEarned = 0;
@@ -610,35 +749,44 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isCorrect) {
             // Base points for correct answer
             pointsEarned = question.points || 10;
+            console.log('Base points:', pointsEarned);
             
             // If card is selected, apply card effect
             if (selectedCard) {
+                console.log('Applying card effect:', selectedCard.type);
                 if (selectedCard.type === 'multiplier') {
                     pointsEarned *= 2;
+                    console.log('Points doubled:', pointsEarned);
                 } else if (selectedCard.type === 'steal') {
                     // Steal points from opponent
                     const opponent = currentPlayer === 1 ? 2 : 1;
                     const stealAmount = 5;
                     scores[opponent] = Math.max(0, scores[opponent] - stealAmount);
                     pointsEarned += stealAmount;
+                    console.log('Stole points from opponent, new scores:', scores);
                 } else if (typeof selectedCard.points === 'number') {
                     pointsEarned += selectedCard.points;
+                    console.log('Added card points:', selectedCard.points);
                 }
             }
             
             // Add to current player's score
             scores[currentPlayer] += pointsEarned;
+            console.log('Updated scores:', scores);
             updateScores();
         } else {
+            console.log('Answer incorrect');
             // Penalty for wrong answer if negative card is selected
             if (selectedCard && selectedCard.type === 'negative') {
                 pointsEarned = selectedCard.points; // Negative number
                 scores[currentPlayer] += pointsEarned;
+                console.log('Applied penalty, new score:', scores[currentPlayer]);
                 updateScores();
             }
         }
         
         // Show results
+        console.log('Showing results');
         showResults(isCorrect, pointsEarned);
         
         // Disable options
@@ -649,9 +797,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show next button
         elements.submitBtn.style.display = 'none';
         elements.nextBtn.style.display = 'flex';
+        console.log('Submit hidden, Next shown');
     }
 
     function showResults(isCorrect, points) {
+        console.log('Showing results:', { isCorrect, points });
+        
         // Update result display
         elements.answerResult.textContent = isCorrect ? 'Correct' : 'Incorrect';
         elements.answerResult.className = `result-value ${isCorrect ? 'correct' : 'incorrect'}`;
@@ -664,6 +815,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show results
         elements.resultsDisplay.style.display = 'block';
+        console.log('Results shown');
         
         // If card was already selected, show it
         if (selectedCard) {
@@ -672,6 +824,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function nextQuestion() {
+        console.log('Moving to next question');
+        
         // Switch to next player
         currentPlayer = currentPlayer === 1 ? 2 : 1;
         updateCurrentPlayer();
@@ -679,17 +833,22 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if there are more questions
         if (currentQuestion < quizData.questions.length - 1) {
             currentQuestion++;
+            console.log('Loading question:', currentQuestion);
             loadQuestion(currentQuestion);
         } else {
+            console.log('No more questions, ending game');
             endGame();
         }
     }
 
     function goHome() {
+        console.log('Going home');
         switchScreen('start');
     }
 
     function endGame() {
+        console.log('Ending game, scores:', scores);
+        
         // Determine winner
         let winner = 0;
         let winnerText = "It's a Tie!";
@@ -704,6 +863,8 @@ document.addEventListener('DOMContentLoaded', function() {
             winnerText = "Player 2 Wins!";
             message = `Congratulations Player 2 with ${scores[2]} points!`;
         }
+        
+        console.log('Winner determined:', winnerText);
         
         // Update game over screen
         elements.winnerTitle.textContent = winnerText;
@@ -727,19 +888,23 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.winnerTrophy.textContent = winner === 0 ? "🤝" : "🏆";
         
         switchScreen('gameOver');
+        console.log('Game over screen shown');
     }
 
     function playAgain() {
+        console.log('Playing again');
         // Reset and start again
         startGame();
     }
 
     function newGame() {
+        console.log('Starting new game');
         goHome();
         handleClear();
     }
 
     function showError(message) {
+        console.log('Showing error:', message);
         elements.startError.textContent = message;
         setTimeout(() => {
             elements.startError.textContent = '';
