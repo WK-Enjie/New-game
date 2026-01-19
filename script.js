@@ -1,4 +1,4 @@
-// Brain Battle Card Game - Gambling Edition (Final Only)
+// Brain Battle Card Game - With Randomized Questions from JSON
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
     let currentScreen = 'start';
@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
         questionsAnswered: 0,
         correctAnswers: 0
     };
+    
+    // Store shuffled questions
+    let shuffledQuestions = [];
 
     // Gambling Options Configuration (ONLY AT END)
     const GAMBLING_OPTIONS = [
@@ -21,35 +24,28 @@ document.addEventListener('DOMContentLoaded', function() {
             title: "Double or Nothing", 
             description: "Risk it all! Double your points or lose them all",
             icon: "🎲",
-            type: "doubleOrNothing",
-            multiplier: 2,
-            lossChance: 0.5
+            type: "doubleOrNothing"
         },
         { 
             id: 2, 
             title: "Safe 50%", 
             description: "Play it safe with a guaranteed 50% increase",
             icon: "🛡️",
-            type: "safe",
-            multiplier: 1.5,
-            lossChance: 0
+            type: "safe"
         },
         { 
             id: 3, 
             title: "Lucky Dip", 
             description: "Random multiplier between 0.5x and 2x",
             icon: "🎁",
-            type: "random",
-            minMultiplier: 0.5,
-            maxMultiplier: 2
+            type: "random"
         },
         { 
             id: 4, 
             title: "Skip Gamble", 
             description: "Keep your current points, no risk taken",
             icon: "✋",
-            type: "skip",
-            multiplier: 1
+            type: "skip"
         }
     ];
 
@@ -130,98 +126,11 @@ document.addEventListener('DOMContentLoaded', function() {
         demoButtons: document.querySelectorAll('.demo-btn')
     };
 
-    // DEMO QUIZZES - For testing
-    const DEMO_QUIZZES = {
-        "123456": {
-            code: "123456",
-            title: "Science Trivia",
-            subject: "General Science",
-            level: "Mixed",
-            difficulty: "Easy",
-            author: "System",
-            created: "2024-01-19",
-            description: "General science knowledge test",
-            questions: [
-                {
-                    id: 1,
-                    question: "What planet is known as the Red Planet?",
-                    options: [
-                        "Mars",
-                        "Venus",
-                        "Jupiter",
-                        "Saturn"
-                    ],
-                    correctAnswer: 0,
-                    points: 10,
-                    explanation: "Mars is called the Red Planet due to iron oxide (rust) on its surface."
-                },
-                {
-                    id: 2,
-                    question: "What is the chemical symbol for gold?",
-                    options: [
-                        "Au",
-                        "Ag",
-                        "Fe",
-                        "Pb"
-                    ],
-                    correctAnswer: 0,
-                    points: 10,
-                    explanation: "Au comes from the Latin word for gold, 'aurum'."
-                },
-                {
-                    id: 3,
-                    question: "How many bones are in the adult human body?",
-                    options: [
-                        "206",
-                        "196",
-                        "216",
-                        "226"
-                    ],
-                    correctAnswer: 0,
-                    points: 15,
-                    explanation: "An adult human has 206 bones, while babies have about 300."
-                }
-            ]
-        },
-        "654321": {
-            code: "654321",
-            title: "Math Challenge",
-            subject: "Mathematics",
-            level: "Intermediate",
-            questions: [
-                {
-                    id: 1,
-                    question: "What is 15% of 200?",
-                    options: [
-                        "30",
-                        "15",
-                        "20",
-                        "25"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                },
-                {
-                    id: 2,
-                    question: "Solve for x: 2x + 5 = 15",
-                    options: [
-                        "5",
-                        "10",
-                        "7.5",
-                        "8"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                }
-            ]
-        }
-    };
-
     // Initialize Game
     init();
 
     function init() {
-        console.log('Brain Battle Game - Final Gambling Edition Initializing...');
+        console.log('Brain Battle Game - Randomized Questions');
         setupEventListeners();
         initCodeInput();
         console.log('Game initialized successfully');
@@ -366,66 +275,48 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoading(true);
         
         try {
-            // First check if it's a demo quiz
-            if (DEMO_QUIZZES[code]) {
-                console.log('Loading demo quiz:', code);
-                // Simulate loading delay
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                quizData = DEMO_QUIZZES[code];
-                selectedQuiz = {
-                    code: code,
-                    title: quizData.title,
-                    subject: quizData.subject,
-                    level: quizData.level || 'Not specified',
-                    questions: quizData.questions.length
-                };
-                
-                showQuizInfo(selectedQuiz);
-                elements.startError.textContent = '';
-                elements.startGameBtn.disabled = false;
-                showLoading(false);
-                
-            } else {
-                // Try to load from JSON file
-                const filePath = `Questions/${code}.json`;
-                console.log('Attempting to load from:', filePath);
-                
-                const response = await fetch(filePath);
-                
-                if (!response.ok) {
-                    throw new Error(`Quiz not found (Error ${response.status})`);
-                }
-                
-                const data = await response.json();
-                
-                // Validate the quiz data structure
-                if (!validateQuizData(data, code)) {
-                    throw new Error('Invalid quiz data format');
-                }
-                
-                // Store quiz data
-                quizData = data;
-                selectedQuiz = {
-                    code: code,
-                    title: data.title,
-                    subject: data.subject,
-                    level: data.level || 'Not specified',
-                    questions: data.questions.length
-                };
-                
-                // Update UI
-                showQuizInfo(selectedQuiz);
-                elements.startError.textContent = '';
-                elements.startGameBtn.disabled = false;
-                showLoading(false);
+            // Try to load from JSON file first
+            const filePath = `Questions/${code}.json`;
+            console.log('Attempting to load from:', filePath);
+            
+            const response = await fetch(filePath);
+            
+            if (!response.ok) {
+                throw new Error(`Quiz not found (Error ${response.status})`);
             }
             
-            console.log('Quiz loaded successfully:', selectedQuiz);
+            const data = await response.json();
+            
+            // Validate the quiz data structure
+            if (!validateQuizData(data, code)) {
+                throw new Error('Invalid quiz data format');
+            }
+            
+            // Store quiz data
+            quizData = data;
+            selectedQuiz = {
+                code: code,
+                title: quizData.title,
+                subject: quizData.subject,
+                level: quizData.level || 'Not specified',
+                questions: quizData.questions.length
+            };
+            
+            // Shuffle questions immediately when loaded
+            shuffleQuestions();
+            
+            // Update UI
+            showQuizInfo(selectedQuiz);
+            elements.startError.textContent = '';
+            elements.startGameBtn.disabled = false;
+            showLoading(false);
+            
+            console.log('Quiz loaded successfully with', quizData.questions.length, 'questions');
+            console.log('Questions shuffled for this session');
             
         } catch (error) {
             console.error('Error loading quiz:', error);
-            showError('Quiz not found. Try 123456 or 654321');
+            showError('Quiz not found. Please check the code and ensure JSON file exists.');
             showLoading(false);
         }
     }
@@ -469,6 +360,27 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
+    function shuffleQuestions() {
+        if (!quizData || !quizData.questions) return;
+        
+        // Create a copy of the questions array
+        const questionsCopy = [...quizData.questions];
+        
+        // Fisher-Yates shuffle algorithm
+        for (let i = questionsCopy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [questionsCopy[i], questionsCopy[j]] = [questionsCopy[j], questionsCopy[i]];
+        }
+        
+        // Store shuffled questions
+        shuffledQuestions = questionsCopy;
+        
+        console.log('Questions shuffled. New order:');
+        shuffledQuestions.forEach((q, i) => {
+            console.log(`${i + 1}. ${q.question.substring(0, 50)}...`);
+        });
+    }
+
     function showLoading(show) {
         if (show) {
             elements.loadingIndicator.style.display = 'block';
@@ -493,11 +405,12 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.quizInfo.style.display = 'none';
         selectedQuiz = null;
         quizData = null;
+        shuffledQuestions = [];
         elements.startGameBtn.disabled = true;
     }
 
     function startGame() {
-        if (!selectedQuiz || !quizData) {
+        if (!selectedQuiz || !quizData || shuffledQuestions.length === 0) {
             showError('Please select a valid quiz first.');
             return;
         }
@@ -511,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initialize game
         initializeGame();
         
-        // Load first question
+        // Load first question (from shuffled list)
         loadQuestion(currentQuestion);
     }
 
@@ -525,6 +438,11 @@ document.addEventListener('DOMContentLoaded', function() {
             questionsAnswered: 0,
             correctAnswers: 0
         };
+        
+        // Re-shuffle questions for new game
+        if (quizData && quizData.questions) {
+            shuffleQuestions();
+        }
     }
 
     function switchScreen(screenName) {
@@ -545,10 +463,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function initializeGame() {
         elements.gameQuizTitle.textContent = quizData.title;
-        elements.totalQ.textContent = quizData.questions.length;
+        elements.totalQ.textContent = shuffledQuestions.length;
         updateScores();
         updateCurrentPlayer();
-        console.log('Game initialized with', quizData.questions.length, 'questions');
+        console.log('Game initialized with', shuffledQuestions.length, 'shuffled questions');
     }
 
     function updateScores() {
@@ -571,12 +489,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadQuestion(index) {
-        if (!quizData || !quizData.questions[index]) {
+        if (shuffledQuestions.length === 0 || !shuffledQuestions[index]) {
             console.error('Question not found at index:', index);
             return;
         }
         
-        const question = quizData.questions[index];
+        const question = shuffledQuestions[index];
         
         // Update question counter
         elements.currentQ.textContent = index + 1;
@@ -657,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        const question = quizData.questions[currentQuestion];
+        const question = shuffledQuestions[currentQuestion];
         const isCorrect = selectedOption === question.correctAnswer;
         
         // Update game stats
@@ -711,7 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCurrentPlayer();
         
         // Check if there are more questions
-        if (currentQuestion < quizData.questions.length - 1) {
+        if (currentQuestion < shuffledQuestions.length - 1) {
             currentQuestion++;
             loadQuestion(currentQuestion);
         } else {
@@ -809,7 +727,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
                 
             case 'safe':
-                multiplier = option.multiplier;
+                multiplier = 1.5;
                 result = 'SAFE WIN';
                 description = 'Smart choice! Points increased by 50%';
                 icon = '🛡️';
@@ -818,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
             case 'random':
                 // Random multiplier between 0.5 and 2
-                multiplier = option.minMultiplier + Math.random() * (option.maxMultiplier - option.minMultiplier);
+                multiplier = 0.5 + Math.random() * 1.5;
                 multiplier = Math.round(multiplier * 100) / 100; // Round to 2 decimal places
                 
                 if (multiplier > 1) {
@@ -941,7 +859,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function playAgain() {
-        // Reset and start again
+        // Reset and start again (questions will be re-shuffled)
         startGame();
     }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Battle: Card Quiz Game</title>
+    <title>Brain Battle: Randomized Quiz Game</title>
     
     <!-- MathJax for fractions -->
     <script>
@@ -36,7 +36,7 @@
                 <div class="logo">
                     <div class="logo-icon">🧠</div>
                     <h1>Brain Battle</h1>
-                    <p class="tagline">Answer Questions • Final Gamble • Win Big!</p>
+                    <p class="tagline">Randomized Questions • Final Gamble • Win Big!</p>
                 </div>
                 
                 <div class="code-section">
@@ -106,6 +106,10 @@
                             <span class="detail-label">Questions:</span>
                             <span id="quiz-count-display" class="detail-value">-</span>
                         </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Feature:</span>
+                            <span class="detail-value">Questions will be randomized!</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -113,6 +117,24 @@
                     <button id="start-game" class="btn start-btn" disabled>
                         <i class="fas fa-play"></i> Start Game
                     </button>
+                </div>
+                
+                <div class="demo-section">
+                    <h4><i class="fas fa-bolt"></i> Test Codes</h4>
+                    <p style="color: #666; margin-bottom: 15px; font-size: 0.9rem;">
+                        <i class="fas fa-info-circle"></i> Create JSON files in "Questions/" folder named like "123456.json"
+                    </p>
+                    <div class="demo-buttons">
+                        <button class="demo-btn" data-code="123456">
+                            <i class="fas fa-file-code"></i> Test Code 1 (123456)
+                        </button>
+                        <button class="demo-btn" data-code="789012">
+                            <i class="fas fa-file-code"></i> Test Code 2 (789012)
+                        </button>
+                        <button class="demo-btn" data-code="334151">
+                            <i class="fas fa-bolt"></i> Physics (334151)
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -123,8 +145,11 @@
                 <div class="quiz-info-header">
                     <h2 id="game-quiz-title">Quiz Title</h2>
                     <div class="question-counter">
-                        <i class="fas fa-question-circle"></i>
+                        <i class="fas fa-random"></i>
                         Question <span id="current-q">1</span> of <span id="total-q">5</span>
+                        <span style="margin-left: 10px; font-size: 0.8rem; color: var(--primary-purple);">
+                            <i class="fas fa-random"></i> Randomized
+                        </span>
                     </div>
                 </div>
                 
@@ -163,13 +188,22 @@
                     </div>
                 </div>
                 
-                <!-- Points Info -->
+                <!-- Game Info -->
                 <div class="cards-section">
                     <div class="cards-header">
                         <h3><i class="fas fa-info-circle"></i> Game Rules</h3>
                         <p class="cards-instruction">Correct: +Points | Wrong: -Points</p>
                     </div>
-                    <div style="padding: 20px; text-align: center;">
+                    <div style="padding: 20px;">
+                        <div style="background: rgba(67, 97, 238, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                            <h4 style="color: var(--primary-purple); margin-bottom: 10px;">
+                                <i class="fas fa-random"></i> Randomized Questions
+                            </h4>
+                            <p style="color: #666; font-size: 0.9rem;">
+                                Questions are shuffled each time you start the quiz! 
+                                Every game session will have a different question order.
+                            </p>
+                        </div>
                         <p><strong>Final Gamble:</strong> After all questions, choose one gamble option that will affect both players' scores!</p>
                     </div>
                 </div>
@@ -291,7 +325,7 @@
                 
                 <div class="game-over-buttons">
                     <button id="play-again" class="btn primary-btn">
-                        <i class="fas fa-redo"></i> Play Again
+                        <i class="fas fa-redo"></i> Play Again (New Random Order)
                     </button>
                     <button id="new-game" class="btn secondary-btn">
                         <i class="fas fa-plus"></i> New Quiz
