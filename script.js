@@ -1,4 +1,4 @@
-// Brain Battle Card Game - Complete Working Version with JSON Loading
+// Brain Battle Card Game - Gambling Edition
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
     let currentScreen = 'start';
@@ -8,22 +8,49 @@ document.addEventListener('DOMContentLoaded', function() {
     let quizData = null;
     let scores = { 1: 0, 2: 0 };
     let selectedOption = null;
-    let selectedCard = null;
+    let selectedGamblingOption = null;
     let gameStats = {
         questionsAnswered: 0,
         correctAnswers: 0
     };
 
-    // Points Cards Configuration
-    const POINTS_CARDS = [
-        { id: 1, title: "Small Win", points: 5, icon: "⭐", type: "positive" },
-        { id: 2, title: "Good Score", points: 10, icon: "🎯", type: "positive" },
-        { id: 3, title: "Big Win", points: 15, icon: "🏆", type: "positive" },
-        { id: 4, title: "Risk Card", points: -10, icon: "⚠️", type: "negative" },
-        { id: 5, title: "Double Points", points: "2x", icon: "✌️", type: "multiplier" },
-        { id: 6, title: "Steal 5", points: -5, icon: "🎭", type: "steal" },
-        { id: 7, title: "Bonus Points", points: 8, icon: "🎁", type: "positive" },
-        { id: 8, title: "Lucky Draw", points: "Random", icon: "🎲", type: "random" }
+    // Gambling Options Configuration
+    const GAMBLING_OPTIONS = [
+        { 
+            id: 1, 
+            title: "Double or Nothing", 
+            description: "Risk it all! Double your points or lose them all",
+            icon: "🎲",
+            type: "doubleOrNothing",
+            multiplier: 2,
+            lossChance: 0.5
+        },
+        { 
+            id: 2, 
+            title: "Safe 50%", 
+            description: "Play it safe with a guaranteed 50% increase",
+            icon: "🛡️",
+            type: "safe",
+            multiplier: 1.5,
+            lossChance: 0
+        },
+        { 
+            id: 3, 
+            title: "Lucky Dip", 
+            description: "Random multiplier between 0.5x and 2x",
+            icon: "🎁",
+            type: "random",
+            minMultiplier: 0.5,
+            maxMultiplier: 2
+        },
+        { 
+            id: 4, 
+            title: "Skip Gamble", 
+            description: "Keep your current points, no risk taken",
+            icon: "✋",
+            type: "skip",
+            multiplier: 1
+        }
     ];
 
     // DOM Elements
@@ -31,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Screens
         startScreen: document.getElementById('start-screen'),
         gameScreen: document.getElementById('game-screen'),
+        gamblingScreen: document.getElementById('gambling-screen'),
         gameOverScreen: document.getElementById('game-over'),
         
         // Code input
@@ -65,11 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
         optionsContainer: document.getElementById('options-container'),
         basePoints: document.getElementById('base-points'),
         
-        // Cards elements
-        cardsGrid: document.getElementById('cards-grid'),
-        selectedCardInfo: document.getElementById('selected-card-info'),
-        selectedCardPoints: document.getElementById('selected-card-points'),
-        
         // Game controls
         submitBtn: document.getElementById('submit-answer'),
         nextBtn: document.getElementById('next-question'),
@@ -78,8 +101,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Results
         resultsDisplay: document.getElementById('results-display'),
         answerResult: document.getElementById('answer-result'),
-        cardPointsResult: document.getElementById('card-points-result'),
-        totalEarned: document.getElementById('total-earned'),
+        pointsEarned: document.getElementById('points-earned'),
+        
+        // Gambling screen
+        gamblingOptions: document.getElementById('gambling-options'),
+        gamblingResult: document.getElementById('gambling-result'),
+        resultIcon: document.getElementById('result-icon'),
+        resultTitle: document.getElementById('result-title'),
+        resultDescription: document.getElementById('result-description'),
+        resultPoints: document.getElementById('result-points'),
+        finalPoints1: document.getElementById('final-points1'),
+        finalPoints2: document.getElementById('final-points2'),
+        continueBtn: document.getElementById('continue-after-gamble'),
         
         // Game over
         winnerTrophy: document.getElementById('winner-trophy'),
@@ -148,97 +181,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     correctAnswer: 0,
                     points: 15,
                     explanation: "The negatively charged balloon repels electrons in the wall, making the wall's surface positively charged by induction. This causes attraction."
-                },
-                {
-                    id: 4,
-                    question: "Why are fuel trucks grounded with a metal chain during refueling?",
-                    options: [
-                        "To prevent static charge buildup",
-                        "To increase fuel flow rate",
-                        "To measure fuel quantity",
-                        "To stabilize the truck"
-                    ],
-                    correctAnswer: 0,
-                    points: 15,
-                    explanation: "The chain provides a path for static electricity to flow to ground, preventing sparks that could ignite fuel vapors."
-                },
-                {
-                    id: 5,
-                    question: "In an electrostatic precipitator, how are smoke particles removed?",
-                    options: [
-                        "They are charged and attracted to oppositely charged plates",
-                        "They are filtered through fine mesh",
-                        "They are dissolved in water spray",
-                        "They are burned at high temperature"
-                    ],
-                    correctAnswer: 0,
-                    points: 15,
-                    explanation: "Particles are given a negative charge and attracted to positively charged collection plates where they stick and are removed."
-                },
-                {
-                    id: 6,
-                    question: "What type of electric field pattern exists between two opposite charges?",
-                    options: [
-                        "Field lines go from positive to negative",
-                        "Field lines go from negative to positive",
-                        "Field lines are parallel",
-                        "Field lines are circular"
-                    ],
-                    correctAnswer: 0,
-                    points: 15,
-                    explanation: "Electric field lines always point from positive to negative charges. Between opposite charges, lines connect them directly."
-                },
-                {
-                    id: 7,
-                    question: "What happens during charging by induction without contact?",
-                    options: [
-                        "Charge separation occurs in the neutral object",
-                        "Electrons are transferred by direct contact",
-                        "Protons move between objects",
-                        "Both objects become positively charged"
-                    ],
-                    correctAnswer: 0,
-                    points: 15,
-                    explanation: "A charged object brought near a conductor causes charge separation - electrons move away or toward the charged object."
-                },
-                {
-                    id: 8,
-                    question: "Why do clothes sometimes stick together after being in a dryer?",
-                    options: [
-                        "Static charge buildup causes attraction",
-                        "Heat causes fibers to melt slightly",
-                        "Moisture creates adhesive bonds",
-                        "Detergent residue acts like glue"
-                    ],
-                    correctAnswer: 0,
-                    points: 10,
-                    explanation: "Friction in the dryer transfers electrons between clothes, creating opposite charges that attract each other."
-                },
-                {
-                    id: 9,
-                    question: "What safety precaution is taken in operating theaters to prevent static sparks?",
-                    options: [
-                        "Conductive flooring and footwear",
-                        "Special anti-static lighting",
-                        "Humidity control systems",
-                        "All of the above"
-                    ],
-                    correctAnswer: 3,
-                    points: 15,
-                    explanation: "Multiple measures are used: conductive floors, special footwear, humidity control, and non-static materials to prevent sparks near flammable anesthetics."
-                },
-                {
-                    id: 10,
-                    question: "How does a photocopier use static electricity?",
-                    options: [
-                        "Charged drum attracts toner to specific areas",
-                        "Static cleans the paper surface",
-                        "It neutralizes paper before printing",
-                        "It heats the toner for fixing"
-                    ],
-                    correctAnswer: 0,
-                    points: 15,
-                    explanation: "Light removes charge from a photoconductive drum in pattern of the original. Toner (negatively charged) sticks to remaining charged areas."
                 }
             ]
         },
@@ -281,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
     init();
 
     function init() {
-        console.log('Brain Battle Game Initializing...');
+        console.log('Brain Battle Game - Gambling Edition Initializing...');
         setupEventListeners();
         initCodeInput();
         console.log('Game initialized successfully');
@@ -315,6 +257,9 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.submitBtn.addEventListener('click', submitAnswer);
         elements.nextBtn.addEventListener('click', nextQuestion);
         elements.homeBtn.addEventListener('click', goHome);
+        
+        // Gambling buttons
+        elements.continueBtn.addEventListener('click', continueToGameOver);
         
         // Game over buttons
         elements.playAgainBtn.addEventListener('click', playAgain);
@@ -404,6 +349,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 elements.codeDigits[index].textContent = char;
             }
         });
+        // Activate the last digit instead of first
+        elements.codeDigits.forEach(d => d.classList.remove('active'));
+        elements.codeDigits[5].classList.add('active');
         updateValidateButton();
         validateCode();
     }
@@ -574,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPlayer = 1;
         scores = { 1: 0, 2: 0 };
         selectedOption = null;
-        selectedCard = null;
+        selectedGamblingOption = null;
         gameStats = {
             questionsAnswered: 0,
             correctAnswers: 0
@@ -602,7 +550,6 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.totalQ.textContent = quizData.questions.length;
         updateScores();
         updateCurrentPlayer();
-        createPointsCards();
         console.log('Game initialized with', quizData.questions.length, 'questions');
     }
 
@@ -666,14 +613,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reset selection state
         selectedOption = null;
-        selectedCard = null;
-        
-        // Reset cards
-        resetCards();
         
         // Hide results
         elements.resultsDisplay.style.display = 'none';
-        elements.selectedCardInfo.style.display = 'none';
         
         // Show submit button, hide next button
         elements.submitBtn.style.display = 'flex';
@@ -695,69 +637,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }, 100);
         }
-    }
-
-    function createPointsCards() {
-        elements.cardsGrid.innerHTML = '';
-        
-        // Shuffle cards
-        const shuffledCards = [...POINTS_CARDS].sort(() => Math.random() - 0.5);
-        
-        // Take first 5 cards
-        const selectedCards = shuffledCards.slice(0, 5);
-        
-        selectedCards.forEach((card, index) => {
-            const cardElement = document.createElement('div');
-            cardElement.className = 'card';
-            cardElement.dataset.cardId = card.id;
-            cardElement.dataset.index = index;
-            
-            const pointsClass = card.type === 'positive' ? 'positive' : 
-                              card.type === 'negative' ? 'negative' : 'neutral';
-            
-            cardElement.innerHTML = `
-                <div class="card-icon">${card.icon}</div>
-                <div class="card-title">${card.title}</div>
-                <div class="card-points ${pointsClass}">${card.points}</div>
-            `;
-            
-            cardElement.addEventListener('click', function() {
-                selectCard(cardElement, card);
-            });
-            
-            elements.cardsGrid.appendChild(cardElement);
-        });
-    }
-
-    function resetCards() {
-        document.querySelectorAll('.card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        elements.selectedCardInfo.style.display = 'none';
-        selectedCard = null;
-    }
-
-    function selectCard(cardElement, card) {
-        // Only allow selection after answer is submitted
-        if (elements.submitBtn.style.display !== 'none') {
-            return;
-        }
-        
-        // Deselect all cards
-        document.querySelectorAll('.card').forEach(c => {
-            c.classList.remove('selected');
-        });
-        
-        // Select clicked card
-        cardElement.classList.add('selected');
-        selectedCard = card;
-        
-        // Show selected card info
-        elements.selectedCardPoints.textContent = card.points;
-        const pointsClass = card.type === 'positive' ? 'positive' : 
-                          card.type === 'negative' ? 'negative' : 'neutral';
-        elements.selectedCardPoints.className = `card-points ${pointsClass}`;
-        elements.selectedCardInfo.style.display = 'block';
     }
 
     function selectOption(optionElement) {
@@ -791,38 +670,17 @@ document.addEventListener('DOMContentLoaded', function() {
         let pointsEarned = 0;
         
         if (isCorrect) {
-            // Base points for correct answer
+            // Gain points for correct answer
             pointsEarned = question.points || 10;
-            
-            // If card is selected, apply card effect
-            if (selectedCard) {
-                if (selectedCard.type === 'multiplier') {
-                    pointsEarned *= 2;
-                } else if (selectedCard.type === 'steal') {
-                    // Steal points from opponent
-                    const opponent = currentPlayer === 1 ? 2 : 1;
-                    const stealAmount = 5;
-                    scores[opponent] = Math.max(0, scores[opponent] - stealAmount);
-                    pointsEarned += stealAmount;
-                } else if (selectedCard.type === 'random') {
-                    // Random points between 1 and 20
-                    pointsEarned += Math.floor(Math.random() * 20) + 1;
-                } else if (typeof selectedCard.points === 'number') {
-                    pointsEarned += selectedCard.points;
-                }
-            }
-            
-            // Add to current player's score
             scores[currentPlayer] += pointsEarned;
-            updateScores();
         } else {
-            // Penalty for wrong answer if negative card is selected
-            if (selectedCard && selectedCard.type === 'negative') {
-                pointsEarned = selectedCard.points; // Negative number
-                scores[currentPlayer] += pointsEarned;
-                updateScores();
-            }
+            // Lose points for wrong answer
+            pointsEarned = -(question.points || 10);
+            scores[currentPlayer] += pointsEarned; // This will subtract points
         }
+        
+        // Update scores
+        updateScores();
         
         // Show results
         showResults(isCorrect, pointsEarned);
@@ -842,19 +700,11 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.answerResult.textContent = isCorrect ? 'Correct' : 'Incorrect';
         elements.answerResult.className = `result-value ${isCorrect ? 'correct' : 'incorrect'}`;
         
-        elements.cardPointsResult.textContent = points >= 0 ? `+${points}` : points;
-        elements.cardPointsResult.className = `result-value ${points >= 0 ? 'positive' : 'negative'}`;
-        
-        elements.totalEarned.textContent = points >= 0 ? `+${points}` : points;
-        elements.totalEarned.className = `result-value total`;
+        elements.pointsEarned.textContent = points >= 0 ? `+${points}` : points;
+        elements.pointsEarned.className = `result-value ${points >= 0 ? 'positive' : 'negative'}`;
         
         // Show results
         elements.resultsDisplay.style.display = 'block';
-        
-        // If card was already selected, show it
-        if (selectedCard) {
-            elements.selectedCardInfo.style.display = 'block';
-        }
     }
 
     function nextQuestion() {
@@ -867,8 +717,173 @@ document.addEventListener('DOMContentLoaded', function() {
             currentQuestion++;
             loadQuestion(currentQuestion);
         } else {
-            endGame();
+            showGamblingScreen();
         }
+    }
+
+    function showGamblingScreen() {
+        // Create gambling screen
+        createGamblingScreen();
+        
+        // Switch to gambling screen
+        switchScreen('gambling');
+        
+        // Reset gambling result
+        elements.gamblingResult.style.display = 'none';
+        elements.continueBtn.disabled = true;
+    }
+
+    function createGamblingScreen() {
+        elements.gamblingOptions.innerHTML = '';
+        
+        // Shuffle gambling options
+        const shuffledOptions = [...GAMBLING_OPTIONS].sort(() => Math.random() - 0.5);
+        
+        shuffledOptions.forEach((option, index) => {
+            const gamblingCard = document.createElement('div');
+            gamblingCard.className = 'gambling-card';
+            gamblingCard.dataset.optionId = option.id;
+            
+            // Determine effect class
+            let effectClass = 'neutral';
+            if (option.type === 'safe') effectClass = 'positive';
+            if (option.type === 'doubleOrNothing') effectClass = 'negative';
+            
+            let effectText = '';
+            if (option.type === 'doubleOrNothing') effectText = '2x or 0x';
+            else if (option.type === 'safe') effectText = '1.5x';
+            else if (option.type === 'random') effectText = '0.5x-2x';
+            else effectText = '1x';
+            
+            gamblingCard.innerHTML = `
+                <div class="gambling-icon">${option.icon}</div>
+                <div class="gambling-title">${option.title}</div>
+                <div class="gambling-description">${option.description}</div>
+                <div class="gambling-effect ${effectClass}">${effectText}</div>
+            `;
+            
+            gamblingCard.addEventListener('click', function() {
+                selectGamblingOption(gamblingCard, option);
+            });
+            
+            elements.gamblingOptions.appendChild(gamblingCard);
+        });
+    }
+
+    function selectGamblingOption(cardElement, option) {
+        // Deselect all gambling cards
+        document.querySelectorAll('.gambling-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Select clicked card
+        cardElement.classList.add('selected');
+        selectedGamblingOption = option;
+        
+        // Process gambling result
+        processGamblingResult(option);
+    }
+
+    function processGamblingResult(option) {
+        let multiplier = 1;
+        let result = '';
+        let description = '';
+        let icon = '';
+        let pointsClass = 'neutral';
+        
+        switch(option.type) {
+            case 'doubleOrNothing':
+                // 50% chance to double, 50% chance to lose everything
+                const isWin = Math.random() > 0.5;
+                if (isWin) {
+                    multiplier = 2;
+                    result = 'DOUBLED!';
+                    description = 'You got lucky! All points doubled!';
+                    icon = '🎉';
+                    pointsClass = 'positive';
+                } else {
+                    multiplier = 0;
+                    result = 'LOST ALL!';
+                    description = 'Bad luck! All points lost!';
+                    icon = '💥';
+                    pointsClass = 'negative';
+                }
+                break;
+                
+            case 'safe':
+                multiplier = option.multiplier;
+                result = 'SAFE WIN';
+                description = 'Smart choice! Points increased by 50%';
+                icon = '🛡️';
+                pointsClass = 'positive';
+                break;
+                
+            case 'random':
+                // Random multiplier between 0.5 and 2
+                multiplier = option.minMultiplier + Math.random() * (option.maxMultiplier - option.minMultiplier);
+                multiplier = Math.round(multiplier * 100) / 100; // Round to 2 decimal places
+                
+                if (multiplier > 1) {
+                    result = 'LUCKY!';
+                    description = `You got a ${multiplier}x multiplier!`;
+                    icon = '🍀';
+                    pointsClass = 'positive';
+                } else if (multiplier < 1) {
+                    result = 'UNLUCKY!';
+                    description = `Only ${multiplier}x multiplier...`;
+                    icon = '😞';
+                    pointsClass = 'negative';
+                } else {
+                    result = 'NEUTRAL';
+                    description = 'No change to your points';
+                    icon = '😐';
+                    pointsClass = 'neutral';
+                }
+                break;
+                
+            case 'skip':
+                multiplier = 1;
+                result = 'NO CHANGE';
+                description = 'You kept your current points';
+                icon = '✋';
+                pointsClass = 'neutral';
+                break;
+        }
+        
+        // Calculate new scores
+        const oldScores = { ...scores };
+        scores[1] = Math.round(scores[1] * multiplier);
+        scores[2] = Math.round(scores[2] * multiplier);
+        
+        // Update result display
+        elements.resultIcon.textContent = icon;
+        elements.resultTitle.textContent = result;
+        elements.resultDescription.textContent = description;
+        
+        // Calculate point changes
+        const player1Change = scores[1] - oldScores[1];
+        const player2Change = scores[2] - oldScores[2];
+        
+        // Show point changes
+        elements.finalPoints1.textContent = player1Change >= 0 ? `+${player1Change}` : player1Change;
+        elements.finalPoints1.className = `final-points-value ${player1Change >= 0 ? 'positive' : 'negative'}`;
+        
+        elements.finalPoints2.textContent = player2Change >= 0 ? `+${player2Change}` : player2Change;
+        elements.finalPoints2.className = `final-points-value ${player2Change >= 0 ? 'positive' : 'negative'}`;
+        
+        // Show final points
+        elements.resultPoints.textContent = `Player 1: ${scores[1]} | Player 2: ${scores[2]}`;
+        elements.resultPoints.className = `result-points ${pointsClass}`;
+        
+        // Show gambling result
+        elements.gamblingResult.style.display = 'block';
+        
+        // Enable continue button
+        elements.continueBtn.disabled = false;
+    }
+
+    function continueToGameOver() {
+        endGame();
     }
 
     function goHome() {
