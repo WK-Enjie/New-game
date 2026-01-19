@@ -1,4 +1,4 @@
-// Brain Battle Card Game - Simplified Version
+// Brain Battle Card Game - Individual Gambles & Randomized Questions
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
     let currentScreen = 'start';
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let quizData = null;
     let scores = { 1: 0, 2: 0 };
     let selectedOption = null;
-    let selectedGamblingOption = null;
+    let playerGambles = { 1: null, 2: null };
     let gameStats = {
         questionsAnswered: 0,
         correctAnswers: 0
@@ -49,13 +49,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
-    // BUILT-IN QUIZZES (No JSON files needed!)
+    // BUILT-IN QUIZZES
     const BUILT_IN_QUIZZES = {
         "334151": {
             code: "334151",
-            title: "Static Electricity (Physics)",
-            subject: "Pure Physics",
-            level: "Secondary 4",
+            title: "Physics Challenge",
+            subject: "Physics",
+            level: "Intermediate",
             questions: [
                 {
                     id: 1,
@@ -71,62 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 {
                     id: 2,
-                    question: "When a plastic rod is rubbed with wool, the plastic becomes negatively charged. What has been transferred?",
-                    options: [
-                        "Electrons from wool to plastic",
-                        "Protons from plastic to wool",
-                        "Electrons from plastic to wool",
-                        "Protons from wool to plastic"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                },
-                {
-                    id: 3,
-                    question: "What happens when a negatively charged balloon is brought near a neutral wall?",
-                    options: [
-                        "The wall becomes positively charged by induction",
-                        "The wall becomes negatively charged by conduction",
-                        "Nothing happens because the wall is neutral",
-                        "The balloon loses its charge immediately"
-                    ],
-                    correctAnswer: 0,
-                    points: 15
-                },
-                {
-                    id: 4,
-                    question: "Why are fuel trucks grounded with a metal chain during refueling?",
-                    options: [
-                        "To prevent static charge buildup",
-                        "To increase fuel flow rate",
-                        "To measure fuel quantity",
-                        "To stabilize the truck"
-                    ],
-                    correctAnswer: 0,
-                    points: 15
-                },
-                {
-                    id: 5,
-                    question: "In an electrostatic precipitator, how are smoke particles removed?",
-                    options: [
-                        "They are charged and attracted to oppositely charged plates",
-                        "They are filtered through fine mesh",
-                        "They are dissolved in water spray",
-                        "They are burned at high temperature"
-                    ],
-                    correctAnswer: 0,
-                    points: 15
-                }
-            ]
-        },
-        "123456": {
-            code: "123456",
-            title: "General Science Trivia",
-            subject: "Science",
-            level: "Mixed",
-            questions: [
-                {
-                    id: 1,
                     question: "What planet is known as the Red Planet?",
                     options: [
                         "Mars",
@@ -138,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     points: 10
                 },
                 {
-                    id: 2,
+                    id: 3,
                     question: "What is the chemical symbol for gold?",
                     options: [
                         "Au",
@@ -150,39 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     points: 10
                 },
                 {
-                    id: 3,
-                    question: "How many bones are in the adult human body?",
-                    options: [
-                        "206",
-                        "196",
-                        "216",
-                        "226"
-                    ],
-                    correctAnswer: 0,
-                    points: 15
-                },
-                {
                     id: 4,
-                    question: "What gas do plants absorb from the atmosphere?",
-                    options: [
-                        "Carbon dioxide",
-                        "Oxygen",
-                        "Nitrogen",
-                        "Hydrogen"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                }
-            ]
-        },
-        "789012": {
-            code: "789012",
-            title: "Mathematics Basics",
-            subject: "Mathematics",
-            level: "Primary 6",
-            questions: [
-                {
-                    id: 1,
                     question: "What is 15% of 200?",
                     options: [
                         "30",
@@ -194,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     points: 10
                 },
                 {
-                    id: 2,
+                    id: 5,
                     question: "Solve for x: 2x + 5 = 15",
                     options: [
                         "5",
@@ -204,15 +116,47 @@ document.addEventListener('DOMContentLoaded', function() {
                     ],
                     correctAnswer: 0,
                     points: 10
+                }
+            ]
+        },
+        "111111": {
+            code: "111111",
+            title: "General Knowledge",
+            subject: "Mixed",
+            level: "Beginner",
+            questions: [
+                {
+                    id: 1,
+                    question: "What is the capital of France?",
+                    options: [
+                        "Paris",
+                        "London",
+                        "Berlin",
+                        "Madrid"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 2,
+                    question: "How many continents are there?",
+                    options: [
+                        "7",
+                        "6",
+                        "5",
+                        "8"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
                 },
                 {
                     id: 3,
-                    question: "What is the area of a square with side length 5cm?",
+                    question: "What is the largest ocean?",
                     options: [
-                        "25 cm²",
-                        "20 cm²",
-                        "10 cm²",
-                        "15 cm²"
+                        "Pacific",
+                        "Atlantic",
+                        "Indian",
+                        "Arctic"
                     ],
                     correctAnswer: 0,
                     points: 10
@@ -272,6 +216,8 @@ document.addEventListener('DOMContentLoaded', function() {
         pointsEarned: document.getElementById('points-earned'),
         
         // Gambling screen
+        gamblingTitle: document.getElementById('gambling-title'),
+        gamblingPlayerInfo: document.getElementById('gambling-player-info'),
         gamblingOptions: document.getElementById('gambling-options'),
         gamblingResult: document.getElementById('gambling-result'),
         resultIcon: document.getElementById('result-icon'),
@@ -281,6 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
         finalPoints1: document.getElementById('final-points1'),
         finalPoints2: document.getElementById('final-points2'),
         continueBtn: document.getElementById('continue-after-gamble'),
+        nextGamblerBtn: document.getElementById('next-gambler'),
         
         // Game over
         winnerTrophy: document.getElementById('winner-trophy'),
@@ -292,17 +239,14 @@ document.addEventListener('DOMContentLoaded', function() {
         correctAnswers: document.getElementById('correct-answers'),
         accuracyRate: document.getElementById('accuracy-rate'),
         playAgainBtn: document.getElementById('play-again'),
-        newGameBtn: document.getElementById('new-game'),
-        
-        // Demo buttons
-        demoButtons: document.querySelectorAll('.demo-btn')
+        newGameBtn: document.getElementById('new-game')
     };
 
     // Initialize Game
     init();
 
     function init() {
-        console.log('Brain Battle Game - Simplified Version');
+        console.log('Brain Battle Game - Individual Gambles');
         setupEventListeners();
         initCodeInput();
         console.log('Game initialized successfully');
@@ -325,13 +269,6 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.validateBtn.addEventListener('click', validateCode);
         elements.startGameBtn.addEventListener('click', startGame);
         
-        // Demo buttons
-        elements.demoButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                enterDemoCode(this.dataset.code);
-            });
-        });
-        
         // Game controls
         elements.submitBtn.addEventListener('click', submitAnswer);
         elements.nextBtn.addEventListener('click', nextQuestion);
@@ -339,6 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Gambling buttons
         elements.continueBtn.addEventListener('click', continueToGameOver);
+        elements.nextGamblerBtn.addEventListener('click', nextGambler);
         
         // Game over buttons
         elements.playAgainBtn.addEventListener('click', playAgain);
@@ -421,20 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return code;
     }
 
-    function enterDemoCode(code) {
-        handleClear();
-        code.split('').forEach((char, index) => {
-            if (index < 6) {
-                elements.codeDigits[index].textContent = char;
-            }
-        });
-        // Activate the last digit
-        elements.codeDigits.forEach(d => d.classList.remove('active'));
-        elements.codeDigits[5].classList.add('active');
-        updateValidateButton();
-        validateCode();
-    }
-
     function validateCode() {
         const code = getCurrentCode();
         
@@ -471,13 +395,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 showLoading(false);
                 
                 console.log('Quiz loaded successfully with', quizData.questions.length, 'questions');
-                console.log('Questions shuffled for this session');
                 
             } else {
-                showError('Quiz not found. Try: 334151, 123456, or 789012');
+                showError('Invalid quiz code');
                 showLoading(false);
             }
-        }, 500); // 0.5 second loading delay
+        }, 500);
     }
 
     function shuffleQuestions() {
@@ -495,10 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Store shuffled questions
         shuffledQuestions = questionsCopy;
         
-        console.log('Questions shuffled. New order:');
-        shuffledQuestions.forEach((q, i) => {
-            console.log(`${i + 1}. ${q.question.substring(0, 50)}...`);
-        });
+        console.log('Questions shuffled');
     }
 
     function showLoading(show) {
@@ -509,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             elements.loadingIndicator.style.display = 'none';
             elements.validateBtn.disabled = false;
-            elements.validateBtn.innerHTML = '<i class="fas fa-search"></i> Load Quiz';
+            elements.validateBtn.innerHTML = '<i class="fas fa-search"></i> Validate Code';
         }
     }
 
@@ -553,7 +473,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPlayer = 1;
         scores = { 1: 0, 2: 0 };
         selectedOption = null;
-        selectedGamblingOption = null;
+        playerGambles = { 1: null, 2: null };
         gameStats = {
             questionsAnswered: 0,
             correctAnswers: 0
@@ -758,16 +678,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    let currentGambler = 1;
+
     function showGamblingScreen() {
-        // Create gambling screen
+        // Reset gambling state
+        currentGambler = 1;
+        playerGambles = { 1: null, 2: null };
+        
+        // Create gambling screen for Player 1
         createGamblingScreen();
+        
+        // Update UI for Player 1
+        elements.gamblingTitle.textContent = 'Final Gamble!';
+        elements.gamblingPlayerInfo.textContent = 'Player 1: Choose Your Gamble';
+        elements.nextGamblerBtn.style.display = 'none';
+        elements.continueBtn.style.display = 'none';
         
         // Switch to gambling screen
         switchScreen('gambling');
         
-        // Reset gambling result and disable continue button
+        // Reset gambling result
         elements.gamblingResult.style.display = 'none';
-        elements.continueBtn.disabled = true;
     }
 
     function createGamblingScreen() {
@@ -813,13 +744,40 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Select clicked card
         cardElement.classList.add('selected');
-        selectedGamblingOption = option;
+        playerGambles[currentGambler] = option;
         
-        // Process gambling result
-        processGamblingResult(option);
+        // Show next gambler button
+        elements.nextGamblerBtn.style.display = 'flex';
+        elements.nextGamblerBtn.disabled = false;
     }
 
-    function processGamblingResult(option) {
+    function nextGambler() {
+        // Process current gambler's choice
+        processIndividualGamble(currentGambler, playerGambles[currentGambler]);
+        
+        // Move to next gambler
+        if (currentGambler === 1) {
+            currentGambler = 2;
+            
+            // Update UI for Player 2
+            elements.gamblingTitle.textContent = 'Player 2\'s Turn';
+            elements.gamblingPlayerInfo.textContent = 'Player 2: Choose Your Gamble';
+            elements.gamblingResult.style.display = 'none';
+            
+            // Reset card selection
+            document.querySelectorAll('.gambling-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            elements.nextGamblerBtn.style.display = 'none';
+            
+        } else {
+            // Both players have chosen - show results
+            showFinalGambleResults();
+        }
+    }
+
+    function processIndividualGamble(player, option) {
         let multiplier = 1;
         let result = '';
         let description = '';
@@ -834,13 +792,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (isWin) {
                     multiplier = 2;
                     result = 'DOUBLED!';
-                    description = 'You got lucky! All points doubled!';
+                    description = 'Player ' + player + ' got lucky! Points doubled!';
                     icon = '🎉';
                     pointsClass = 'positive';
                 } else {
                     multiplier = 0;
                     result = 'LOST ALL!';
-                    description = 'Bad luck! All points lost!';
+                    description = 'Player ' + player + ' was unlucky! Points lost!';
                     icon = '💥';
                     pointsClass = 'negative';
                 }
@@ -849,7 +807,7 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'safe':
                 multiplier = 1.5;
                 result = 'SAFE WIN';
-                description = 'Smart choice! Points increased by 50%';
+                description = 'Player ' + player + ' played safe! Points increased by 50%';
                 icon = '🛡️';
                 pointsClass = 'positive';
                 break;
@@ -861,17 +819,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (multiplier > 1) {
                     result = 'LUCKY!';
-                    description = `You got a ${multiplier}x multiplier!`;
+                    description = `Player ${player} got a ${multiplier}x multiplier!`;
                     icon = '🍀';
                     pointsClass = 'positive';
                 } else if (multiplier < 1) {
                     result = 'UNLUCKY!';
-                    description = `Only ${multiplier}x multiplier...`;
+                    description = `Player ${player} only got ${multiplier}x multiplier...`;
                     icon = '😞';
                     pointsClass = 'negative';
                 } else {
                     result = 'NEUTRAL';
-                    description = 'No change to your points';
+                    description = 'Player ' + player + ' - no change to points';
                     icon = '😐';
                     pointsClass = 'neutral';
                 }
@@ -880,48 +838,63 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'skip':
                 multiplier = 1;
                 result = 'NO CHANGE';
-                description = 'You kept your current points';
+                description = 'Player ' + player + ' skipped the gamble';
                 icon = '✋';
                 pointsClass = 'neutral';
                 break;
         }
         
-        // Store original scores for comparison
-        const oldScores = { ...scores };
+        // Store original score
+        const oldScore = scores[player];
         
-        // Apply multiplier to both players
-        scores[1] = Math.round(scores[1] * multiplier);
-        scores[2] = Math.round(scores[2] * multiplier);
+        // Apply multiplier to player's score
+        scores[player] = Math.round(scores[player] * multiplier);
         
-        // Ensure scores don't go negative
-        scores[1] = Math.max(0, scores[1]);
-        scores[2] = Math.max(0, scores[2]);
+        // Ensure score doesn't go negative
+        scores[player] = Math.max(0, scores[player]);
+        
+        // Calculate point change
+        const playerChange = scores[player] - oldScore;
         
         // Update result display
         elements.resultIcon.textContent = icon;
-        elements.resultTitle.textContent = result;
+        elements.resultTitle.textContent = `Player ${player}: ${result}`;
         elements.resultDescription.textContent = description;
         
-        // Calculate point changes
-        const player1Change = scores[1] - oldScores[1];
-        const player2Change = scores[2] - oldScores[2];
+        // Show point change
+        if (player === 1) {
+            elements.finalPoints1.textContent = playerChange >= 0 ? `+${playerChange}` : playerChange;
+            elements.finalPoints1.className = `final-points-value ${playerChange >= 0 ? 'positive' : 'negative'}`;
+        } else {
+            elements.finalPoints2.textContent = playerChange >= 0 ? `+${playerChange}` : playerChange;
+            elements.finalPoints2.className = `final-points-value ${playerChange >= 0 ? 'positive' : 'negative'}`;
+        }
         
-        // Show point changes
-        elements.finalPoints1.textContent = player1Change >= 0 ? `+${player1Change}` : player1Change;
-        elements.finalPoints1.className = `final-points-value ${player1Change >= 0 ? 'positive' : 'negative'}`;
-        
-        elements.finalPoints2.textContent = player2Change >= 0 ? `+${player2Change}` : player2Change;
-        elements.finalPoints2.className = `final-points-value ${player2Change >= 0 ? 'positive' : 'negative'}`;
-        
-        // Show final points
-        elements.resultPoints.textContent = `Player 1: ${scores[1]} | Player 2: ${scores[2]}`;
+        // Show player's new score
+        elements.resultPoints.textContent = `New Score: ${scores[player]}`;
         elements.resultPoints.className = `result-points ${pointsClass}`;
         
         // Show gambling result
         elements.gamblingResult.style.display = 'block';
+    }
+
+    function showFinalGambleResults() {
+        // Update UI for final results
+        elements.gamblingTitle.textContent = 'Gamble Results';
+        elements.gamblingPlayerInfo.textContent = 'Both players have chosen!';
+        elements.gamblingOptions.style.display = 'none';
+        elements.nextGamblerBtn.style.display = 'none';
         
-        // Enable continue button
+        // Show continue button
+        elements.continueBtn.style.display = 'flex';
         elements.continueBtn.disabled = false;
+        
+        // Show final scores
+        elements.resultTitle.textContent = 'Final Scores';
+        elements.resultDescription.textContent = 'After individual gambles:';
+        elements.resultPoints.textContent = `Player 1: ${scores[1]} | Player 2: ${scores[2]}`;
+        elements.resultPoints.className = 'result-points neutral';
+        elements.resultIcon.textContent = '🏆';
     }
 
     function continueToGameOver() {

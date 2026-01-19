@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Battle: Pin-Activated Quiz Game</title>
+    <title>Brain Battle: Individual Gambles</title>
     
     <!-- MathJax for fractions -->
     <script>
@@ -36,11 +36,11 @@
                 <div class="logo">
                     <div class="logo-icon">🧠</div>
                     <h1>Brain Battle</h1>
-                    <p class="tagline">Pin-Activated • Randomized • Gamble to Win!</p>
+                    <p class="tagline">Individual Gambles • Randomized Questions</p>
                 </div>
                 
                 <div class="code-section">
-                    <h3><i class="fas fa-key"></i> Enter 6-Digit Quiz Code</h3>
+                    <h3><i class="fas fa-key"></i> Enter Quiz Code</h3>
                     
                     <div class="code-display" id="code-display">
                         <div class="code-digit" data-index="0">_</div>
@@ -106,6 +106,10 @@
                             <span class="detail-label">Questions:</span>
                             <span id="quiz-count-display" class="detail-value">-</span>
                         </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Feature:</span>
+                            <span class="detail-value">Each player chooses own gamble!</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -113,24 +117,6 @@
                     <button id="start-game" class="btn start-btn" disabled>
                         <i class="fas fa-play"></i> Start Game
                     </button>
-                </div>
-                
-                <div class="demo-section">
-                    <h4><i class="fas fa-bolt"></i> Working Test Codes</h4>
-                    <div class="demo-buttons">
-                        <button class="demo-btn" data-code="334151">
-                            <i class="fas fa-bolt"></i> Physics Quiz (334151)
-                        </button>
-                        <button class="demo-btn" data-code="123456">
-                            <i class="fas fa-flask"></i> Science Trivia (123456)
-                        </button>
-                        <button class="demo-btn" data-code="789012">
-                            <i class="fas fa-calculator"></i> Math Basics (789012)
-                        </button>
-                    </div>
-                    <p style="color: #666; margin-top: 15px; font-size: 0.9rem;">
-                        <i class="fas fa-info-circle"></i> Each game randomizes question order!
-                    </p>
                 </div>
             </div>
         </div>
@@ -181,25 +167,30 @@
                     </div>
                 </div>
                 
-                <!-- Game Rules -->
+                <!-- Game Info -->
                 <div class="cards-section">
                     <div class="cards-header">
-                        <h3><i class="fas fa-gamepad"></i> Game Rules</h3>
+                        <h3><i class="fas fa-info-circle"></i> Game Features</h3>
                         <p class="cards-instruction">Correct: +Points | Wrong: -Points</p>
                     </div>
                     <div style="padding: 20px;">
                         <div style="background: rgba(67, 97, 238, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                             <h4 style="color: var(--primary-purple); margin-bottom: 10px;">
-                                <i class="fas fa-random"></i> Randomized Mode
+                                <i class="fas fa-random"></i> Randomized Questions
                             </h4>
                             <p style="color: #666; font-size: 0.9rem;">
-                                Questions are shuffled randomly each time you play!
-                                Try "Play Again" to get a different question order.
+                                Questions shuffle every time! "Play Again" for new random order.
                             </p>
                         </div>
-                        <p style="color: var(--primary-blue); font-weight: bold;">
-                            <i class="fas fa-dice"></i> Final Gamble: Choose 1 option at the end to multiply both players' scores!
-                        </p>
+                        <div style="background: rgba(46, 196, 182, 0.1); padding: 15px; border-radius: 10px;">
+                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">
+                                <i class="fas fa-user-friends"></i> Individual Gambles
+                            </h4>
+                            <p style="color: #666; font-size: 0.9rem;">
+                                Each player chooses their OWN gamble at the end!
+                                Different risks, different rewards.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -233,15 +224,13 @@
             </div>
         </div>
         
-        <!-- Gambling Screen (ONLY AT END) -->
+        <!-- Gambling Screen (Each Player Chooses INDIVIDUALLY) -->
         <div id="gambling-screen" class="screen gambling-screen">
             <div class="gambling-content">
                 <div class="gambling-header">
-                    <h2><i class="fas fa-dice"></i> Final Gamble!</h2>
-                    <p class="gambling-instruction">
-                        All questions answered! Now choose ONE gamble option.<br>
-                        <strong>The chosen gamble will affect BOTH players' scores!</strong><br>
-                        Choose wisely - you won't know the outcome until you choose!
+                    <h2 id="gambling-title">Final Gamble!</h2>
+                    <p id="gambling-player-info" class="gambling-instruction">
+                        Player 1: Choose Your Gamble
                     </p>
                 </div>
                 
@@ -251,9 +240,9 @@
                 
                 <div class="gambling-result" id="gambling-result" style="display: none;">
                     <div id="result-icon" class="result-icon">🎉</div>
-                    <h3 id="result-title" class="result-title">DOUBLED!</h3>
+                    <h3 id="result-title" class="result-title">Player 1: DOUBLED!</h3>
                     <p id="result-description" class="result-description">
-                        You got lucky! All points doubled!
+                        Player 1 got lucky! Points doubled!
                     </p>
                     
                     <div class="final-points-display">
@@ -268,12 +257,15 @@
                     </div>
                     
                     <div id="result-points" class="result-points positive">
-                        Player 1: 200 | Player 2: 200
+                        New Score: 200
                     </div>
                 </div>
                 
                 <div class="gambling-controls">
-                    <button id="continue-after-gamble" class="btn primary-btn" disabled>
+                    <button id="next-gambler" class="btn secondary-btn" style="display: none;">
+                        <i class="fas fa-user"></i> Player 2's Turn
+                    </button>
+                    <button id="continue-after-gamble" class="btn primary-btn" style="display: none;" disabled>
                         <i class="fas fa-trophy"></i> See Final Results
                     </button>
                 </div>
