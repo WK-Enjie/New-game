@@ -1,4 +1,4 @@
-// Brain Battle Card Game - Individual Gambles & Randomized Questions
+// Brain Battle Card Game - Searches Subfolders for JSON Files
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
     let currentScreen = 'start';
@@ -48,122 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
             type: "skip"
         }
     ];
-
-    // BUILT-IN QUIZZES
-    const BUILT_IN_QUIZZES = {
-        "334151": {
-            code: "334151",
-            title: "Physics Challenge",
-            subject: "Physics",
-            level: "Intermediate",
-            questions: [
-                {
-                    id: 1,
-                    question: "What is the SI unit for measuring electric charge?",
-                    options: [
-                        "Coulomb",
-                        "Newton",
-                        "Joule",
-                        "Watt"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                },
-                {
-                    id: 2,
-                    question: "What planet is known as the Red Planet?",
-                    options: [
-                        "Mars",
-                        "Venus",
-                        "Jupiter",
-                        "Saturn"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                },
-                {
-                    id: 3,
-                    question: "What is the chemical symbol for gold?",
-                    options: [
-                        "Au",
-                        "Ag",
-                        "Fe",
-                        "Pb"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                },
-                {
-                    id: 4,
-                    question: "What is 15% of 200?",
-                    options: [
-                        "30",
-                        "15",
-                        "20",
-                        "25"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                },
-                {
-                    id: 5,
-                    question: "Solve for x: 2x + 5 = 15",
-                    options: [
-                        "5",
-                        "10",
-                        "7.5",
-                        "8"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                }
-            ]
-        },
-        "111111": {
-            code: "111111",
-            title: "General Knowledge",
-            subject: "Mixed",
-            level: "Beginner",
-            questions: [
-                {
-                    id: 1,
-                    question: "What is the capital of France?",
-                    options: [
-                        "Paris",
-                        "London",
-                        "Berlin",
-                        "Madrid"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                },
-                {
-                    id: 2,
-                    question: "How many continents are there?",
-                    options: [
-                        "7",
-                        "6",
-                        "5",
-                        "8"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                },
-                {
-                    id: 3,
-                    question: "What is the largest ocean?",
-                    options: [
-                        "Pacific",
-                        "Atlantic",
-                        "Indian",
-                        "Arctic"
-                    ],
-                    correctAnswer: 0,
-                    points: 10
-                }
-            ]
-        }
-    };
 
     // DOM Elements
     const elements = {
@@ -246,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
     init();
 
     function init() {
-        console.log('Brain Battle Game - Individual Gambles');
+        console.log('Brain Battle Game - Searches Subfolders');
         setupEventListeners();
         initCodeInput();
         console.log('Game initialized successfully');
@@ -359,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return code;
     }
 
-    function validateCode() {
+    async function validateCode() {
         const code = getCurrentCode();
         
         if (code.length !== 6) {
@@ -370,37 +254,223 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show loading indicator
         showLoading(true);
         
-        // Simulate loading delay
-        setTimeout(() => {
-            // Check if it's a valid quiz code
-            if (BUILT_IN_QUIZZES[code]) {
-                console.log('Loading built-in quiz:', code);
-                
-                quizData = BUILT_IN_QUIZZES[code];
-                selectedQuiz = {
-                    code: code,
-                    title: quizData.title,
-                    subject: quizData.subject,
-                    level: quizData.level || 'Not specified',
-                    questions: quizData.questions.length
-                };
-                
-                // Shuffle questions immediately when loaded
-                shuffleQuestions();
-                
-                // Update UI
-                showQuizInfo(selectedQuiz);
-                elements.startError.textContent = '';
-                elements.startGameBtn.disabled = false;
-                showLoading(false);
-                
-                console.log('Quiz loaded successfully with', quizData.questions.length, 'questions');
-                
-            } else {
-                showError('Invalid quiz code');
-                showLoading(false);
+        try {
+            // Search for JSON file in multiple locations including subfolders
+            const foundPath = await findQuizFile(code);
+            
+            if (!foundPath) {
+                throw new Error(`Quiz ${code}.json not found in Questions/ folder or subfolders`);
             }
-        }, 500);
+            
+            console.log('Found quiz at:', foundPath);
+            const response = await fetch(foundPath);
+            
+            if (!response.ok) {
+                throw new Error(`Failed to load: ${response.status} ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            // Validate the JSON structure
+            if (!validateQuizJSON(data, code)) {
+                throw new Error('Invalid JSON structure');
+            }
+            
+            // Store quiz data
+            quizData = data;
+            selectedQuiz = {
+                code: code,
+                title: quizData.title || 'Untitled Quiz',
+                subject: quizData.subject || 'General',
+                level: quizData.level || 'Not specified',
+                questions: quizData.questions.length,
+                path: foundPath
+            };
+            
+            // Shuffle questions immediately when loaded
+            shuffleQuestions();
+            
+            // Update UI
+            showQuizInfo(selectedQuiz);
+            elements.startError.textContent = '';
+            elements.startGameBtn.disabled = false;
+            showLoading(false);
+            
+            console.log(`Quiz loaded successfully from ${foundPath} with ${quizData.questions.length} questions`);
+            
+        } catch (error) {
+            console.error('Error loading quiz:', error);
+            showError(`Cannot load quiz: ${error.message}`);
+            showLoading(false);
+        }
+    }
+
+    // Function to search for quiz file in subfolders
+    async function findQuizFile(code) {
+        console.log(`Searching for quiz: ${code}.json`);
+        
+        // Define search paths including subfolders
+        const searchPaths = [
+            // Root level
+            `Questions/${code}.json`,
+            `./Questions/${code}.json`,
+            `${code}.json`,
+            `./${code}.json`,
+            
+            // Common subfolder patterns
+            `Questions/Physics/${code}.json`,
+            `Questions/Math/${code}.json`,
+            `Questions/Science/${code}.json`,
+            `Questions/English/${code}.json`,
+            `Questions/Chemistry/${code}.json`,
+            `Questions/Biology/${code}.json`,
+            `Questions/Geography/${code}.json`,
+            `Questions/History/${code}.json`,
+            
+            // Year-based subfolders
+            `Questions/2024/${code}.json`,
+            `Questions/2023/${code}.json`,
+            `Questions/2022/${code}.json`,
+            
+            // Level-based subfolders
+            `Questions/Primary/${code}.json`,
+            `Questions/Secondary/${code}.json`,
+            `Questions/College/${code}.json`,
+            
+            // Subject-based subfolders with years
+            `Questions/Physics/2024/${code}.json`,
+            `Questions/Math/2024/${code}.json`,
+            `Questions/Science/2024/${code}.json`,
+            
+            // Two-level deep
+            `Questions/Physics/Secondary/${code}.json`,
+            `Questions/Math/Primary/${code}.json`,
+            `Questions/Science/Secondary/${code}.json`,
+            
+            // Try with lowercase/uppercase variations
+            `questions/${code}.json`,
+            `QUESTIONS/${code}.json`,
+            `questions/${code.toLowerCase()}.json`,
+            `questions/${code.toUpperCase()}.json`
+        ];
+        
+        // Also try to find all JSON files recursively (more advanced)
+        try {
+            // Method 1: Try to get directory listing (works on some servers)
+            const recursiveResult = await searchRecursively(code);
+            if (recursiveResult) {
+                return recursiveResult;
+            }
+        } catch (recursiveError) {
+            console.log('Recursive search failed, trying predefined paths');
+        }
+        
+        // Method 2: Try all predefined paths
+        for (const path of searchPaths) {
+            try {
+                console.log(`Trying path: ${path}`);
+                const response = await fetch(path, { method: 'HEAD' });
+                if (response.ok) {
+                    return path;
+                }
+            } catch (error) {
+                // Continue to next path
+                continue;
+            }
+        }
+        
+        // Method 3: Try with .txt extension too (some servers block .json)
+        const txtPaths = [
+            `Questions/${code}.txt`,
+            `./Questions/${code}.txt`,
+            `Questions/${code}.json.txt`
+        ];
+        
+        for (const path of txtPaths) {
+            try {
+                console.log(`Trying txt path: ${path}`);
+                const response = await fetch(path, { method: 'HEAD' });
+                if (response.ok) {
+                    return path;
+                }
+            } catch (error) {
+                continue;
+            }
+        }
+        
+        return null;
+    }
+
+    // Advanced recursive search (works if server allows directory listing)
+    async function searchRecursively(code) {
+        try {
+            // Try to get list of all available quizzes
+            const indexResponse = await fetch('Questions/quiz-index.json');
+            if (indexResponse.ok) {
+                const index = await indexResponse.json();
+                if (index[code]) {
+                    return index[code];
+                }
+            }
+        } catch (error) {
+            console.log('No quiz index found');
+        }
+        
+        // Try to scan directory (requires server support)
+        try {
+            const scanResponse = await fetch('Questions/scan.php?code=' + code);
+            if (scanResponse.ok) {
+                const result = await scanResponse.json();
+                if (result.found) {
+                    return result.path;
+                }
+            }
+        } catch (error) {
+            console.log('Directory scan not available');
+        }
+        
+        return null;
+    }
+
+    function validateQuizJSON(data, expectedCode) {
+        // Basic validation
+        if (!data || typeof data !== 'object') {
+            console.error('Quiz data is not an object');
+            return false;
+        }
+        
+        // Check if code matches (optional but good practice)
+        if (data.code && data.code !== expectedCode) {
+            console.warn(`Code mismatch: JSON has ${data.code}, expected ${expectedCode}`);
+            // Still accept it - filename is the primary identifier
+        }
+        
+        // Check for required questions array
+        if (!Array.isArray(data.questions) || data.questions.length === 0) {
+            console.error('Invalid or empty questions array');
+            return false;
+        }
+        
+        // Validate each question
+        for (let i = 0; i < data.questions.length; i++) {
+            const q = data.questions[i];
+            if (!q.question || !Array.isArray(q.options) || q.options.length < 2) {
+                console.error(`Invalid question at index ${i}`);
+                return false;
+            }
+            
+            // Convert correctAnswer to number if it's a string
+            if (typeof q.correctAnswer === 'string') {
+                q.correctAnswer = parseInt(q.correctAnswer);
+            }
+            
+            if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer >= q.options.length) {
+                console.error(`Invalid correctAnswer at index ${i}: ${q.correctAnswer}`);
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     function shuffleQuestions() {
@@ -418,18 +488,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Store shuffled questions
         shuffledQuestions = questionsCopy;
         
-        console.log('Questions shuffled');
+        console.log(`${shuffledQuestions.length} questions shuffled`);
     }
 
     function showLoading(show) {
         if (show) {
             elements.loadingIndicator.style.display = 'block';
             elements.validateBtn.disabled = true;
-            elements.validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            elements.validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
         } else {
             elements.loadingIndicator.style.display = 'none';
             elements.validateBtn.disabled = false;
-            elements.validateBtn.innerHTML = '<i class="fas fa-search"></i> Validate Code';
+            elements.validateBtn.innerHTML = '<i class="fas fa-search"></i> Load Quiz';
         }
     }
 
@@ -438,6 +508,12 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.quizSubjectDisplay.textContent = quiz.subject;
         elements.quizLevelDisplay.textContent = quiz.level;
         elements.quizCountDisplay.textContent = quiz.questions;
+        
+        // Show path if available (for debugging)
+        if (quiz.path) {
+            console.log(`Quiz loaded from: ${quiz.path}`);
+        }
+        
         elements.quizInfo.style.display = 'block';
     }
 
@@ -502,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function initializeGame() {
-        elements.gameQuizTitle.textContent = quizData.title;
+        elements.gameQuizTitle.textContent = quizData.title || 'Quiz';
         elements.totalQ.textContent = shuffledQuestions.length;
         updateScores();
         updateCurrentPlayer();
@@ -548,23 +624,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear and add options
         elements.optionsContainer.innerHTML = '';
         
-        const letters = ['A', 'B', 'C', 'D'];
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F'].slice(0, question.options.length);
         question.options.forEach((option, i) => {
-            if (i < 4) {
-                const optionElement = document.createElement('div');
-                optionElement.className = 'option';
-                optionElement.dataset.index = i;
-                optionElement.innerHTML = `
-                    <div class="option-letter">${letters[i]}</div>
-                    <div class="option-text">${option}</div>
-                `;
-                
-                optionElement.addEventListener('click', function() {
-                    selectOption(optionElement);
-                });
-                
-                elements.optionsContainer.appendChild(optionElement);
-            }
+            const optionElement = document.createElement('div');
+            optionElement.className = 'option';
+            optionElement.dataset.index = i;
+            optionElement.innerHTML = `
+                <div class="option-letter">${letters[i] || String.fromCharCode(65 + i)}</div>
+                <div class="option-text">${option}</div>
+            `;
+            
+            optionElement.addEventListener('click', function() {
+                selectOption(optionElement);
+            });
+            
+            elements.optionsContainer.appendChild(optionElement);
         });
         
         // Reset selection state
