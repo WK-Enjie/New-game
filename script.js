@@ -97,6 +97,186 @@ document.addEventListener('DOMContentLoaded', function() {
         demoButtons: document.querySelectorAll('.demo-btn')
     };
 
+    // DEMO QUIZZES - For testing without server
+    const DEMO_QUIZZES = {
+        "334151": {
+            code: "334151",
+            title: "Static Electricity (Conceptual)",
+            subject: "Pure Physics",
+            level: "Secondary 4",
+            topic: "15. Static Electricity",
+            difficulty: "Intermediate",
+            author: "Physics Department",
+            created: "2024-01-19",
+            description: "Conceptual questions on static electricity covering charges, fields, charging methods, and applications - no calculations required.",
+            questions: [
+                {
+                    id: 1,
+                    question: "What is the SI unit for measuring electric charge?",
+                    options: [
+                        "Coulomb",
+                        "Newton",
+                        "Joule",
+                        "Watt"
+                    ],
+                    correctAnswer: 0,
+                    points: 10,
+                    explanation: "The coulomb (C) is the SI unit of electric charge, named after French physicist Charles-Augustin de Coulomb."
+                },
+                {
+                    id: 2,
+                    question: "When a plastic rod is rubbed with wool, the plastic becomes negatively charged. What has been transferred?",
+                    options: [
+                        "Electrons from wool to plastic",
+                        "Protons from plastic to wool",
+                        "Electrons from plastic to wool",
+                        "Protons from wool to plastic"
+                    ],
+                    correctAnswer: 0,
+                    points: 10,
+                    explanation: "Electrons are transferred from the wool to the plastic rod. The plastic gains electrons and becomes negatively charged."
+                },
+                {
+                    id: 3,
+                    question: "What happens when a negatively charged balloon is brought near a neutral wall?",
+                    options: [
+                        "The wall becomes positively charged by induction",
+                        "The wall becomes negatively charged by conduction",
+                        "Nothing happens because the wall is neutral",
+                        "The balloon loses its charge immediately"
+                    ],
+                    correctAnswer: 0,
+                    points: 15,
+                    explanation: "The negatively charged balloon repels electrons in the wall, making the wall's surface positively charged by induction. This causes attraction."
+                },
+                {
+                    id: 4,
+                    question: "Why are fuel trucks grounded with a metal chain during refueling?",
+                    options: [
+                        "To prevent static charge buildup",
+                        "To increase fuel flow rate",
+                        "To measure fuel quantity",
+                        "To stabilize the truck"
+                    ],
+                    correctAnswer: 0,
+                    points: 15,
+                    explanation: "The chain provides a path for static electricity to flow to ground, preventing sparks that could ignite fuel vapors."
+                },
+                {
+                    id: 5,
+                    question: "In an electrostatic precipitator, how are smoke particles removed?",
+                    options: [
+                        "They are charged and attracted to oppositely charged plates",
+                        "They are filtered through fine mesh",
+                        "They are dissolved in water spray",
+                        "They are burned at high temperature"
+                    ],
+                    correctAnswer: 0,
+                    points: 15,
+                    explanation: "Particles are given a negative charge and attracted to positively charged collection plates where they stick and are removed."
+                },
+                {
+                    id: 6,
+                    question: "What type of electric field pattern exists between two opposite charges?",
+                    options: [
+                        "Field lines go from positive to negative",
+                        "Field lines go from negative to positive",
+                        "Field lines are parallel",
+                        "Field lines are circular"
+                    ],
+                    correctAnswer: 0,
+                    points: 15,
+                    explanation: "Electric field lines always point from positive to negative charges. Between opposite charges, lines connect them directly."
+                },
+                {
+                    id: 7,
+                    question: "What happens during charging by induction without contact?",
+                    options: [
+                        "Charge separation occurs in the neutral object",
+                        "Electrons are transferred by direct contact",
+                        "Protons move between objects",
+                        "Both objects become positively charged"
+                    ],
+                    correctAnswer: 0,
+                    points: 15,
+                    explanation: "A charged object brought near a conductor causes charge separation - electrons move away or toward the charged object."
+                },
+                {
+                    id: 8,
+                    question: "Why do clothes sometimes stick together after being in a dryer?",
+                    options: [
+                        "Static charge buildup causes attraction",
+                        "Heat causes fibers to melt slightly",
+                        "Moisture creates adhesive bonds",
+                        "Detergent residue acts like glue"
+                    ],
+                    correctAnswer: 0,
+                    points: 10,
+                    explanation: "Friction in the dryer transfers electrons between clothes, creating opposite charges that attract each other."
+                },
+                {
+                    id: 9,
+                    question: "What safety precaution is taken in operating theaters to prevent static sparks?",
+                    options: [
+                        "Conductive flooring and footwear",
+                        "Special anti-static lighting",
+                        "Humidity control systems",
+                        "All of the above"
+                    ],
+                    correctAnswer: 3,
+                    points: 15,
+                    explanation: "Multiple measures are used: conductive floors, special footwear, humidity control, and non-static materials to prevent sparks near flammable anesthetics."
+                },
+                {
+                    id: 10,
+                    question: "How does a photocopier use static electricity?",
+                    options: [
+                        "Charged drum attracts toner to specific areas",
+                        "Static cleans the paper surface",
+                        "It neutralizes paper before printing",
+                        "It heats the toner for fixing"
+                    ],
+                    correctAnswer: 0,
+                    points: 15,
+                    explanation: "Light removes charge from a photoconductive drum in pattern of the original. Toner (negatively charged) sticks to remaining charged areas."
+                }
+            ]
+        },
+        "101021": {
+            code: "101021",
+            title: "Primary Mathematics: Fractions",
+            subject: "Mathematics",
+            level: "Primary 6",
+            difficulty: "Intermediate",
+            questions: [
+                {
+                    id: 1,
+                    question: "Calculate: \\(\\frac{3}{4} \\times \\frac{2}{5}\\)",
+                    options: [
+                        "\\(\\frac{3}{10}\\)",
+                        "\\(\\frac{6}{20}\\)",
+                        "\\(\\frac{5}{9}\\)",
+                        "\\(\\frac{8}{15}\\)"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 2,
+                    question: "Simplify: \\(\\frac{5}{6} \\div \\frac{2}{3}\\)",
+                    options: [
+                        "\\(\\frac{5}{4}\\)",
+                        "\\(\\frac{10}{18}\\)",
+                        "\\(\\frac{15}{12}\\)",
+                        "\\(\\frac{4}{5}\\)"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                }
+            ]
+        }
+    };
+
     // Initialize Game
     init();
 
@@ -240,61 +420,67 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoading(true);
         
         try {
-            // Try to load the quiz from the correct path
-            const filePath = getQuizFilePath(code);
-            await loadQuizFromFile(filePath, code);
-            
-        } catch (error) {
-            console.error('Error loading quiz:', error);
-            showError(error.message || 'Failed to load quiz. Please check the code.');
-            showLoading(false);
-        }
-    }
-
-    function getQuizFilePath(code) {
-        // Simplified file path - just look in the Questions folder
-        // You can modify this based on your actual folder structure
-        return `Questions/${code}.json`;
-    }
-
-    async function loadQuizFromFile(filePath, code) {
-        try {
-            // Fetch the JSON file
-            const response = await fetch(filePath);
-            
-            if (!response.ok) {
-                throw new Error(`Quiz not found (Error ${response.status})`);
+            // First check if it's a demo quiz
+            if (DEMO_QUIZZES[code]) {
+                console.log('Loading demo quiz:', code);
+                // Simulate loading delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                quizData = DEMO_QUIZZES[code];
+                selectedQuiz = {
+                    code: code,
+                    title: quizData.title,
+                    subject: quizData.subject,
+                    level: quizData.level || 'Not specified',
+                    questions: quizData.questions.length
+                };
+                
+                showQuizInfo(selectedQuiz);
+                elements.startError.textContent = '';
+                elements.startGameBtn.disabled = false;
+                showLoading(false);
+                
+            } else {
+                // Try to load from JSON file
+                const filePath = `Questions/${code}.json`;
+                console.log('Attempting to load from:', filePath);
+                
+                const response = await fetch(filePath);
+                
+                if (!response.ok) {
+                    throw new Error(`Quiz not found (Error ${response.status})`);
+                }
+                
+                const data = await response.json();
+                
+                // Validate the quiz data structure
+                if (!validateQuizData(data, code)) {
+                    throw new Error('Invalid quiz data format');
+                }
+                
+                // Store quiz data
+                quizData = data;
+                selectedQuiz = {
+                    code: code,
+                    title: data.title,
+                    subject: data.subject,
+                    level: data.level || 'Not specified',
+                    questions: data.questions.length
+                };
+                
+                // Update UI
+                showQuizInfo(selectedQuiz);
+                elements.startError.textContent = '';
+                elements.startGameBtn.disabled = false;
+                showLoading(false);
             }
-            
-            const data = await response.json();
-            
-            // Validate the quiz data structure
-            if (!validateQuizData(data, code)) {
-                throw new Error('Invalid quiz data format');
-            }
-            
-            // Store quiz data
-            quizData = data;
-            selectedQuiz = {
-                code: code,
-                title: data.title,
-                subject: data.subject,
-                level: data.level || 'Not specified',
-                questions: data.questions.length
-            };
-            
-            // Update UI
-            showQuizInfo(selectedQuiz);
-            elements.startError.textContent = '';
-            elements.startGameBtn.disabled = false;
-            showLoading(false);
             
             console.log('Quiz loaded successfully:', selectedQuiz);
             
         } catch (error) {
-            console.error('Error loading quiz file:', error);
+            console.error('Error loading quiz:', error);
+            showError('Quiz not found. Use 334151 for Static Electricity demo.');
             showLoading(false);
-            throw error;
         }
     }
 
