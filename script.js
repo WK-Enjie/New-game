@@ -14,17 +14,109 @@ document.addEventListener('DOMContentLoaded', function() {
         correctAnswers: 0
     };
 
-    // Points Cards Configuration
+    // Points Cards Configuration - UPDATED WITH EFFECTS
     const POINTS_CARDS = [
-        { id: 1, title: "Small Win", points: 5, icon: "⭐", type: "positive" },
-        { id: 2, title: "Good Score", points: 10, icon: "🎯", type: "positive" },
-        { id: 3, title: "Big Win", points: 15, icon: "🏆", type: "positive" },
-        { id: 4, title: "Risk Card", points: -10, icon: "⚠️", type: "negative" },
-        { id: 5, title: "Double Points", points: "2x", icon: "✌️", type: "multiplier" },
-        { id: 6, title: "Steal 5", points: -5, icon: "🎭", type: "steal" },
-        { id: 7, title: "Bonus Points", points: 8, icon: "🎁", type: "positive" },
-        { id: 8, title: "Lucky Draw", points: "Random", icon: "🎲", type: "random" }
+        { 
+            id: 1, 
+            title: "Small Win", 
+            points: 5, 
+            icon: "⭐", 
+            type: "positive",
+            effect: "Adds 5 points to your score"
+        },
+        { 
+            id: 2, 
+            title: "Good Score", 
+            points: 10, 
+            icon: "🎯", 
+            type: "positive",
+            effect: "Adds 10 points to your score"
+        },
+        { 
+            id: 3, 
+            title: "Big Win", 
+            points: 15, 
+            icon: "🏆", 
+            type: "positive",
+            effect: "Adds 15 points to your score"
+        },
+        { 
+            id: 4, 
+            title: "Risk Card", 
+            points: -10, 
+            icon: "⚠️", 
+            type: "negative",
+            effect: "Subtracts 10 points from your score"
+        },
+        { 
+            id: 5, 
+            title: "Double Points", 
+            points: "2x", 
+            icon: "✌️", 
+            type: "multiplier",
+            effect: "Doubles your base points"
+        },
+        { 
+            id: 6, 
+            title: "Steal 5", 
+            points: -5, 
+            icon: "🎭", 
+            type: "steal",
+            effect: "Takes 5 points from opponent, adds to you"
+        },
+        { 
+            id: 7, 
+            title: "Bonus Points", 
+            points: 8, 
+            icon: "🎁", 
+            type: "positive",
+            effect: "Adds 8 bonus points"
+        },
+        { 
+            id: 8, 
+            title: "Lucky Draw", 
+            points: "Random", 
+            icon: "🎲", 
+            type: "random",
+            effect: "Adds random points (1-20)"
+        },
+        { 
+            id: 9, 
+            title: "Half Points", 
+            points: "÷2", 
+            icon: "½", 
+            type: "divide",
+            effect: "Cuts opponent's score in half (round down)"
+        },
+        { 
+            id: 10, 
+            title: "Swap Scores", 
+            points: "🔄", 
+            icon: "🔄", 
+            type: "swap",
+            effect: "Swaps scores with opponent"
+        },
+        { 
+            id: 11, 
+            title: "Protection", 
+            points: "🛡️", 
+            icon: "🛡️", 
+            type: "protect",
+            effect: "Protects from negative cards next turn"
+        },
+        { 
+            id: 12, 
+            title: "Extra Turn", 
+            points: "↻", 
+            icon: "↻", 
+            type: "extraTurn",
+            effect: "Gets an extra turn"
+        }
     ];
+
+    // Game modifiers
+    let protectedPlayers = { 1: false, 2: false };
+    let extraTurns = { 1: 0, 2: 0 };
 
     // DOM Elements
     const elements = {
@@ -269,6 +361,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         "\\(\\frac{10}{18}\\)",
                         "\\(\\frac{15}{12}\\)",
                         "\\(\\frac{4}{5}\\)"
+                    ],
+                    correctAnswer: 0,
+                    points: 10
+                },
+                {
+                    id: 3,
+                    question: "Which fraction is NOT equivalent to \\(\\frac{2}{3}\\)?",
+                    options: [
+                        "\\(\\frac{4}{9}\\)",
+                        "\\(\\frac{6}{9}\\)",
+                        "\\(\\frac{8}{12}\\)",
+                        "\\(\\frac{10}{15}\\)"
                     ],
                     correctAnswer: 0,
                     points: 10
@@ -548,6 +652,9 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedQuiz = null;
         quizData = null;
         elements.startGameBtn.disabled = true;
+        // Reset game modifiers
+        protectedPlayers = { 1: false, 2: false };
+        extraTurns = { 1: 0, 2: 0 };
     }
 
     function startGame() {
@@ -579,6 +686,9 @@ document.addEventListener('DOMContentLoaded', function() {
             questionsAnswered: 0,
             correctAnswers: 0
         };
+        // Reset game modifiers
+        protectedPlayers = { 1: false, 2: false };
+        extraTurns = { 1: 0, 2: 0 };
     }
 
     function switchScreen(screenName) {
@@ -703,14 +813,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Shuffle cards
         const shuffledCards = [...POINTS_CARDS].sort(() => Math.random() - 0.5);
         
-        // Take first 5 cards
-        const selectedCards = shuffledCards.slice(0, 5);
+        // Take first 6 cards for variety
+        const selectedCards = shuffledCards.slice(0, 6);
         
         selectedCards.forEach((card, index) => {
             const cardElement = document.createElement('div');
             cardElement.className = 'card';
             cardElement.dataset.cardId = card.id;
             cardElement.dataset.index = index;
+            cardElement.title = card.effect; // Tooltip with effect
             
             const pointsClass = card.type === 'positive' ? 'positive' : 
                               card.type === 'negative' ? 'negative' : 'neutral';
@@ -789,43 +900,58 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Calculate points
         let pointsEarned = 0;
+        let cardEffectApplied = false;
+        let cardEffectMessage = "";
         
         if (isCorrect) {
             // Base points for correct answer
             pointsEarned = question.points || 10;
+            cardEffectMessage = `Base points: +${pointsEarned}`;
             
             // If card is selected, apply card effect
             if (selectedCard) {
-                if (selectedCard.type === 'multiplier') {
-                    pointsEarned *= 2;
-                } else if (selectedCard.type === 'steal') {
-                    // Steal points from opponent
-                    const opponent = currentPlayer === 1 ? 2 : 1;
-                    const stealAmount = 5;
-                    scores[opponent] = Math.max(0, scores[opponent] - stealAmount);
-                    pointsEarned += stealAmount;
-                } else if (selectedCard.type === 'random') {
-                    // Random points between 1 and 20
-                    pointsEarned += Math.floor(Math.random() * 20) + 1;
-                } else if (typeof selectedCard.points === 'number') {
-                    pointsEarned += selectedCard.points;
-                }
+                pointsEarned = applyCardEffect(pointsEarned, selectedCard);
+                cardEffectApplied = true;
+                cardEffectMessage = `Card effect applied: ${selectedCard.effect}`;
             }
             
             // Add to current player's score
             scores[currentPlayer] += pointsEarned;
             updateScores();
+            
         } else {
+            cardEffectMessage = "Wrong answer - no base points";
+            
             // Penalty for wrong answer if negative card is selected
             if (selectedCard && selectedCard.type === 'negative') {
-                pointsEarned = selectedCard.points; // Negative number
-                scores[currentPlayer] += pointsEarned;
-                updateScores();
+                // Check if player is protected
+                if (!protectedPlayers[currentPlayer]) {
+                    pointsEarned = selectedCard.points; // Negative number
+                    scores[currentPlayer] += pointsEarned;
+                    updateScores();
+                    cardEffectApplied = true;
+                    cardEffectMessage = `Penalty applied: ${selectedCard.effect}`;
+                } else {
+                    cardEffectMessage = "Protected! No penalty applied.";
+                    protectedPlayers[currentPlayer] = false; // Protection used
+                }
+            }
+            
+            // Some cards still work even with wrong answer
+            if (selectedCard && selectedCard.type === 'steal') {
+                applyStealEffect();
+                cardEffectApplied = true;
+                cardEffectMessage = `Steal effect applied: ${selectedCard.effect}`;
             }
         }
         
+        // Apply special effects that don't depend on correctness
+        if (selectedCard && !cardEffectApplied) {
+            applySpecialCardEffect(selectedCard);
+        }
+        
         // Show results
-        showResults(isCorrect, pointsEarned);
+        showResults(isCorrect, pointsEarned, cardEffectMessage);
         
         // Disable options
         document.querySelectorAll('.option').forEach(opt => {
@@ -837,7 +963,97 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.nextBtn.style.display = 'flex';
     }
 
-    function showResults(isCorrect, points) {
+    function applyCardEffect(basePoints, card) {
+        let finalPoints = basePoints;
+        
+        switch(card.type) {
+            case 'positive':
+                finalPoints += card.points;
+                break;
+                
+            case 'negative':
+                // Only apply if not protected
+                if (!protectedPlayers[currentPlayer]) {
+                    finalPoints += card.points; // Negative number
+                } else {
+                    protectedPlayers[currentPlayer] = false; // Protection used
+                }
+                break;
+                
+            case 'multiplier':
+                finalPoints *= 2;
+                break;
+                
+            case 'steal':
+                const opponent = currentPlayer === 1 ? 2 : 1;
+                const stealAmount = 5;
+                scores[opponent] = Math.max(0, scores[opponent] - stealAmount);
+                finalPoints += stealAmount;
+                break;
+                
+            case 'random':
+                const randomPoints = Math.floor(Math.random() * 20) + 1;
+                finalPoints += randomPoints;
+                break;
+                
+            case 'divide':
+                const opp = currentPlayer === 1 ? 2 : 1;
+                scores[opp] = Math.floor(scores[opp] / 2);
+                break;
+                
+            case 'swap':
+                const temp = scores[1];
+                scores[1] = scores[2];
+                scores[2] = temp;
+                updateScores();
+                break;
+                
+            case 'protect':
+                protectedPlayers[currentPlayer] = true;
+                break;
+                
+            case 'extraTurn':
+                extraTurns[currentPlayer]++;
+                break;
+        }
+        
+        return finalPoints;
+    }
+
+    function applyStealEffect() {
+        const opponent = currentPlayer === 1 ? 2 : 1;
+        const stealAmount = 5;
+        scores[opponent] = Math.max(0, scores[opponent] - stealAmount);
+        scores[currentPlayer] += stealAmount;
+        updateScores();
+    }
+
+    function applySpecialCardEffect(card) {
+        switch(card.type) {
+            case 'divide':
+                const opponent = currentPlayer === 1 ? 2 : 1;
+                scores[opponent] = Math.floor(scores[opponent] / 2);
+                updateScores();
+                break;
+                
+            case 'swap':
+                const temp = scores[1];
+                scores[1] = scores[2];
+                scores[2] = temp;
+                updateScores();
+                break;
+                
+            case 'protect':
+                protectedPlayers[currentPlayer] = true;
+                break;
+                
+            case 'extraTurn':
+                extraTurns[currentPlayer]++;
+                break;
+        }
+    }
+
+    function showResults(isCorrect, points, effectMessage = "") {
         // Update result display
         elements.answerResult.textContent = isCorrect ? 'Correct' : 'Incorrect';
         elements.answerResult.className = `result-value ${isCorrect ? 'correct' : 'incorrect'}`;
@@ -847,6 +1063,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         elements.totalEarned.textContent = points >= 0 ? `+${points}` : points;
         elements.totalEarned.className = `result-value total`;
+        
+        // Show card effect message if available
+        if (effectMessage && selectedCard) {
+            const effectElement = document.createElement('div');
+            effectElement.className = 'result-item';
+            effectElement.innerHTML = `
+                <span class="result-label">Card Effect:</span>
+                <span class="result-value neutral">${effectMessage}</span>
+            `;
+            elements.resultsDisplay.querySelector('.result-details').appendChild(effectElement);
+        }
         
         // Show results
         elements.resultsDisplay.style.display = 'block';
@@ -858,16 +1085,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function nextQuestion() {
-        // Switch to next player
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
-        updateCurrentPlayer();
-        
-        // Check if there are more questions
-        if (currentQuestion < quizData.questions.length - 1) {
+        // Check for extra turns
+        if (extraTurns[currentPlayer] > 0) {
+            extraTurns[currentPlayer]--;
+            // Same player gets another turn
             currentQuestion++;
+            if (currentQuestion >= quizData.questions.length) {
+                endGame();
+                return;
+            }
             loadQuestion(currentQuestion);
         } else {
-            endGame();
+            // Switch to next player
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            updateCurrentPlayer();
+            
+            // Check if there are more questions
+            if (currentQuestion < quizData.questions.length - 1) {
+                currentQuestion++;
+                loadQuestion(currentQuestion);
+            } else {
+                endGame();
+            }
         }
     }
 
