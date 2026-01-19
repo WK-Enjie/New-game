@@ -36,7 +36,7 @@
                 <div class="logo">
                     <div class="logo-icon">🧠</div>
                     <h1>Brain Battle</h1>
-                    <p class="tagline">Answer Questions • Gamble Points • Win Big!</p>
+                    <p class="tagline">Answer Questions • Final Gamble • Win Big!</p>
                 </div>
                 
                 <div class="code-section">
@@ -114,18 +114,6 @@
                         <i class="fas fa-play"></i> Start Game
                     </button>
                 </div>
-                
-                <div class="demo-section">
-                    <h4><i class="fas fa-bolt"></i> Sample Quiz Codes</h4>
-                    <div class="demo-buttons">
-                        <button class="demo-btn" data-code="101021">
-                            <i class="fas fa-calculator"></i> Primary Math (101021)
-                        </button>
-                        <button class="demo-btn" data-code="334151">
-                            <i class="fas fa-bolt"></i> Physics: Static Electricity (334151)
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
         
@@ -175,7 +163,16 @@
                     </div>
                 </div>
                 
-                <!-- Points Cards (Removed - Now shows after answering) -->
+                <!-- Points Info -->
+                <div class="cards-section">
+                    <div class="cards-header">
+                        <h3><i class="fas fa-info-circle"></i> Game Rules</h3>
+                        <p class="cards-instruction">Correct: +Points | Wrong: -Points</p>
+                    </div>
+                    <div style="padding: 20px; text-align: center;">
+                        <p><strong>Final Gamble:</strong> After all questions, choose one gamble option that will affect both players' scores!</p>
+                    </div>
+                </div>
             </div>
             
             <!-- Game Controls -->
@@ -207,15 +204,15 @@
             </div>
         </div>
         
-        <!-- Gambling Screen -->
+        <!-- Gambling Screen (ONLY AT END) -->
         <div id="gambling-screen" class="screen gambling-screen">
             <div class="gambling-content">
                 <div class="gambling-header">
                     <h2><i class="fas fa-dice"></i> Final Gamble!</h2>
                     <p class="gambling-instruction">
-                        All questions answered! Now choose your final gamble option.<br>
-                        Each player's points will be multiplied based on your choice.<br>
-                        <strong>Choose wisely - you don't know what will happen!</strong>
+                        All questions answered! Now choose ONE gamble option.<br>
+                        <strong>The chosen gamble will affect BOTH players' scores!</strong><br>
+                        Choose wisely - you won't know the outcome until you choose!
                     </p>
                 </div>
                 

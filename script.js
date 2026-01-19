@@ -1,4 +1,4 @@
-// Brain Battle Card Game - Gambling Edition
+// Brain Battle Card Game - Gambling Edition (Final Only)
 document.addEventListener('DOMContentLoaded', function() {
     // Game State
     let currentScreen = 'start';
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         correctAnswers: 0
     };
 
-    // Gambling Options Configuration
+    // Gambling Options Configuration (ONLY AT END)
     const GAMBLING_OPTIONS = [
         { 
             id: 1, 
@@ -130,87 +130,85 @@ document.addEventListener('DOMContentLoaded', function() {
         demoButtons: document.querySelectorAll('.demo-btn')
     };
 
-    // DEMO QUIZZES - For testing without server
+    // DEMO QUIZZES - For testing
     const DEMO_QUIZZES = {
-        "334151": {
-            code: "334151",
-            title: "Static Electricity (Conceptual)",
-            subject: "Pure Physics",
-            level: "Secondary 4",
-            topic: "15. Static Electricity",
-            difficulty: "Intermediate",
-            author: "Physics Department",
+        "123456": {
+            code: "123456",
+            title: "Science Trivia",
+            subject: "General Science",
+            level: "Mixed",
+            difficulty: "Easy",
+            author: "System",
             created: "2024-01-19",
-            description: "Conceptual questions on static electricity covering charges, fields, charging methods, and applications - no calculations required.",
+            description: "General science knowledge test",
             questions: [
                 {
                     id: 1,
-                    question: "What is the SI unit for measuring electric charge?",
+                    question: "What planet is known as the Red Planet?",
                     options: [
-                        "Coulomb",
-                        "Newton",
-                        "Joule",
-                        "Watt"
+                        "Mars",
+                        "Venus",
+                        "Jupiter",
+                        "Saturn"
                     ],
                     correctAnswer: 0,
                     points: 10,
-                    explanation: "The coulomb (C) is the SI unit of electric charge, named after French physicist Charles-Augustin de Coulomb."
+                    explanation: "Mars is called the Red Planet due to iron oxide (rust) on its surface."
                 },
                 {
                     id: 2,
-                    question: "When a plastic rod is rubbed with wool, the plastic becomes negatively charged. What has been transferred?",
+                    question: "What is the chemical symbol for gold?",
                     options: [
-                        "Electrons from wool to plastic",
-                        "Protons from plastic to wool",
-                        "Electrons from plastic to wool",
-                        "Protons from wool to plastic"
+                        "Au",
+                        "Ag",
+                        "Fe",
+                        "Pb"
                     ],
                     correctAnswer: 0,
                     points: 10,
-                    explanation: "Electrons are transferred from the wool to the plastic rod. The plastic gains electrons and becomes negatively charged."
+                    explanation: "Au comes from the Latin word for gold, 'aurum'."
                 },
                 {
                     id: 3,
-                    question: "What happens when a negatively charged balloon is brought near a neutral wall?",
+                    question: "How many bones are in the adult human body?",
                     options: [
-                        "The wall becomes positively charged by induction",
-                        "The wall becomes negatively charged by conduction",
-                        "Nothing happens because the wall is neutral",
-                        "The balloon loses its charge immediately"
+                        "206",
+                        "196",
+                        "216",
+                        "226"
                     ],
                     correctAnswer: 0,
                     points: 15,
-                    explanation: "The negatively charged balloon repels electrons in the wall, making the wall's surface positively charged by induction. This causes attraction."
+                    explanation: "An adult human has 206 bones, while babies have about 300."
                 }
             ]
         },
-        "101021": {
-            code: "101021",
-            title: "Primary Mathematics: Fractions",
+        "654321": {
+            code: "654321",
+            title: "Math Challenge",
             subject: "Mathematics",
-            level: "Primary 6",
-            difficulty: "Intermediate",
+            level: "Intermediate",
             questions: [
                 {
                     id: 1,
-                    question: "Calculate: \\(\\frac{3}{4} \\times \\frac{2}{5}\\)",
+                    question: "What is 15% of 200?",
                     options: [
-                        "\\(\\frac{3}{10}\\)",
-                        "\\(\\frac{6}{20}\\)",
-                        "\\(\\frac{5}{9}\\)",
-                        "\\(\\frac{8}{15}\\)"
+                        "30",
+                        "15",
+                        "20",
+                        "25"
                     ],
                     correctAnswer: 0,
                     points: 10
                 },
                 {
                     id: 2,
-                    question: "Simplify: \\(\\frac{5}{6} \\div \\frac{2}{3}\\)",
+                    question: "Solve for x: 2x + 5 = 15",
                     options: [
-                        "\\(\\frac{5}{4}\\)",
-                        "\\(\\frac{10}{18}\\)",
-                        "\\(\\frac{15}{12}\\)",
-                        "\\(\\frac{4}{5}\\)"
+                        "5",
+                        "10",
+                        "7.5",
+                        "8"
                     ],
                     correctAnswer: 0,
                     points: 10
@@ -223,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
     init();
 
     function init() {
-        console.log('Brain Battle Game - Gambling Edition Initializing...');
+        console.log('Brain Battle Game - Final Gambling Edition Initializing...');
         setupEventListeners();
         initCodeInput();
         console.log('Game initialized successfully');
@@ -349,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 elements.codeDigits[index].textContent = char;
             }
         });
-        // Activate the last digit instead of first
+        // Activate the last digit
         elements.codeDigits.forEach(d => d.classList.remove('active'));
         elements.codeDigits[5].classList.add('active');
         updateValidateButton();
@@ -427,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (error) {
             console.error('Error loading quiz:', error);
-            showError('Quiz not found. Use 334151 for Static Electricity demo.');
+            showError('Quiz not found. Try 123456 or 654321');
             showLoading(false);
         }
     }
@@ -666,7 +664,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gameStats.questionsAnswered++;
         if (isCorrect) gameStats.correctAnswers++;
         
-        // Calculate points
+        // Calculate points - CORRECT: gain points, WRONG: lose points
         let pointsEarned = 0;
         
         if (isCorrect) {
@@ -717,6 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentQuestion++;
             loadQuestion(currentQuestion);
         } else {
+            // All questions answered - go to gambling screen
             showGamblingScreen();
         }
     }
@@ -728,7 +727,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Switch to gambling screen
         switchScreen('gambling');
         
-        // Reset gambling result
+        // Reset gambling result and disable continue button
         elements.gamblingResult.style.display = 'none';
         elements.continueBtn.disabled = true;
     }
@@ -736,10 +735,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function createGamblingScreen() {
         elements.gamblingOptions.innerHTML = '';
         
-        // Shuffle gambling options
-        const shuffledOptions = [...GAMBLING_OPTIONS].sort(() => Math.random() - 0.5);
-        
-        shuffledOptions.forEach((option, index) => {
+        // Create gambling cards
+        GAMBLING_OPTIONS.forEach((option) => {
             const gamblingCard = document.createElement('div');
             gamblingCard.className = 'gambling-card';
             gamblingCard.dataset.optionId = option.id;
@@ -791,6 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let icon = '';
         let pointsClass = 'neutral';
         
+        // Apply different gambling effects
         switch(option.type) {
             case 'doubleOrNothing':
                 // 50% chance to double, 50% chance to lose everything
@@ -850,10 +848,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
         }
         
-        // Calculate new scores
+        // Store original scores for comparison
         const oldScores = { ...scores };
+        
+        // Apply multiplier to both players
         scores[1] = Math.round(scores[1] * multiplier);
         scores[2] = Math.round(scores[2] * multiplier);
+        
+        // Ensure scores don't go negative
+        scores[1] = Math.max(0, scores[1]);
+        scores[2] = Math.max(0, scores[2]);
         
         // Update result display
         elements.resultIcon.textContent = icon;
