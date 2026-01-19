@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brain Battle: Card Quiz Game</title>
     
-    <!-- MathJax for fractions -->
+    <!-- MathJax for equations -->
     <script>
     window.MathJax = {
       tex: {
@@ -36,7 +36,7 @@
                 <div class="logo">
                     <div class="logo-icon">🧠</div>
                     <h1>Brain Battle</h1>
-                    <p class="tagline">Answer Questions • Gamble Points • Win Big!</p>
+                    <p class="tagline">Answer Questions • Pick Cards • Win Points</p>
                 </div>
                 
                 <div class="code-section">
@@ -118,11 +118,11 @@
                 <div class="demo-section">
                     <h4><i class="fas fa-bolt"></i> Sample Quiz Codes</h4>
                     <div class="demo-buttons">
-                        <button class="demo-btn" data-code="101021">
-                            <i class="fas fa-calculator"></i> Primary Math (101021)
-                        </button>
                         <button class="demo-btn" data-code="334151">
-                            <i class="fas fa-bolt"></i> Physics: Static Electricity (334151)
+                            <i class="fas fa-bolt"></i> Static Electricity (334151)
+                        </button>
+                        <button class="demo-btn" data-code="101021">
+                            <i class="fas fa-calculator"></i> Fractions (101021)
                         </button>
                     </div>
                 </div>
@@ -158,7 +158,7 @@
                 <div class="question-card">
                     <div class="question-header">
                         <div class="question-points">
-                            <i class="fas fa-star"></i> Points: <span id="base-points">10</span>
+                            <i class="fas fa-star"></i> Base: <span id="base-points">10</span> points
                         </div>
                         <div class="current-turn">
                             <i class="fas fa-user"></i> Turn: <span id="current-player-name">Player 1</span>
@@ -175,7 +175,24 @@
                     </div>
                 </div>
                 
-                <!-- Points Cards (Removed - Now shows after answering) -->
+                <!-- Points Cards -->
+                <div class="cards-section">
+                    <div class="cards-header">
+                        <h3><i class="fas fa-cards"></i> Points Cards</h3>
+                        <p class="cards-instruction">Select 1 card after answering</p>
+                    </div>
+                    
+                    <div class="cards-grid" id="cards-grid">
+                        <!-- Cards will be added here -->
+                    </div>
+                    
+                    <div class="selected-card-info" id="selected-card-info" style="display: none;">
+                        <div class="selected-card">
+                            <span class="selected-label">Selected Card:</span>
+                            <span class="card-points" id="selected-card-points">+10</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Game Controls -->
@@ -200,56 +217,13 @@
                         <span id="answer-result" class="result-value correct">Correct</span>
                     </div>
                     <div class="result-item">
-                        <span class="result-label">Points Earned:</span>
-                        <span id="points-earned" class="result-value positive">+10</span>
+                        <span class="result-label">Card Points:</span>
+                        <span id="card-points-result" class="result-value positive">+15</span>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Gambling Screen -->
-        <div id="gambling-screen" class="screen gambling-screen">
-            <div class="gambling-content">
-                <div class="gambling-header">
-                    <h2><i class="fas fa-dice"></i> Final Gamble!</h2>
-                    <p class="gambling-instruction">
-                        All questions answered! Now choose your final gamble option.<br>
-                        Each player's points will be multiplied based on your choice.<br>
-                        <strong>Choose wisely - you don't know what will happen!</strong>
-                    </p>
-                </div>
-                
-                <div class="gambling-options" id="gambling-options">
-                    <!-- Gambling options will be added here -->
-                </div>
-                
-                <div class="gambling-result" id="gambling-result" style="display: none;">
-                    <div id="result-icon" class="result-icon">🎉</div>
-                    <h3 id="result-title" class="result-title">DOUBLED!</h3>
-                    <p id="result-description" class="result-description">
-                        You got lucky! All points doubled!
-                    </p>
-                    
-                    <div class="final-points-display">
-                        <div class="final-points-player">
-                            <div class="final-points-name">Player 1 Change</div>
-                            <div id="final-points1" class="final-points-value positive">+100</div>
-                        </div>
-                        <div class="final-points-player">
-                            <div class="final-points-name">Player 2 Change</div>
-                            <div id="final-points2" class="final-points-value positive">+100</div>
-                        </div>
+                    <div class="result-item">
+                        <span class="result-label">Total Earned:</span>
+                        <span id="total-earned" class="result-value total">+25</span>
                     </div>
-                    
-                    <div id="result-points" class="result-points positive">
-                        Player 1: 200 | Player 2: 200
-                    </div>
-                </div>
-                
-                <div class="gambling-controls">
-                    <button id="continue-after-gamble" class="btn primary-btn" disabled>
-                        <i class="fas fa-trophy"></i> See Final Results
-                    </button>
                 </div>
             </div>
         </div>
