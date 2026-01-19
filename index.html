@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Brain Battle: Hidden Points Game</title>
+    <title>Brain Battle: Strategy & Chance Game</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3949ab">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -20,50 +19,28 @@
                 <div class="logo">
                     <div class="logo-icon">🎯</div>
                     <h1>Brain Battle</h1>
-                    <p class="tagline">Select Boxes • Hidden Points • 2 Player Battle</p>
+                    <p class="tagline">Strategy • Chance • Control • 2 Player Battle</p>
                 </div>
                 
-                <!-- Info Banner -->
-                <div class="age-banner">
-                    <span class="age-badge">
-                        <i class="fas fa-graduation-cap"></i>
-                        Level: P1-S4
-                    </span>
-                    <span class="players-badge">
-                        <i class="fas fa-users"></i>
-                        2 Players
-                    </span>
-                    <span class="scan-badge" id="scan-count">
-                        <i class="fas fa-sync-alt"></i>
-                        Scanning...
-                    </span>
-                </div>
-                
-                <!-- Game Rules -->
-                <div class="game-rules">
-                    <h3><i class="fas fa-info-circle"></i> How It Works</h3>
-                    <div class="rules-grid">
-                        <div class="rule">
-                            <div class="rule-icon">📁</div>
-                            <h4>Auto-Scan Folders</h4>
-                            <p>Automatically loads quiz files from organized folders</p>
-                        </div>
-                        <div class="rule">
-                            <div class="rule-icon">📦</div>
-                            <h4>Hidden Points Grid</h4>
-                            <p>Select 1-3 boxes with hidden point values</p>
-                        </div>
-                        <div class="rule">
-                            <div class="rule-icon">⚔️</div>
-                            <h4>Answer & Reveal</h4>
-                            <p>Correct answer = Get points from selected boxes</p>
-                        </div>
+                <!-- Game Features -->
+                <div class="game-features">
+                    <div class="feature">
+                        <div class="feature-icon">🎲</div>
+                        <div class="feature-text">Chance: Hidden Points</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">⚔️</div>
+                        <div class="feature-text">Control: Special Powers</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🧠</div>
+                        <div class="feature-text">Strategy: Risk vs Reward</div>
                     </div>
                 </div>
                 
                 <!-- Code Input Section -->
                 <div class="code-section">
-                    <h3><i class="fas fa-key"></i> Enter 6-Digit Quiz Code</h3>
+                    <h3><i class="fas fa-key"></i> Enter Quiz Code</h3>
                     
                     <div class="code-input-group">
                         <!-- Code Display -->
@@ -106,65 +83,19 @@
                         
                         <!-- Action Buttons -->
                         <div class="code-actions">
-                            <button id="validate-code" class="btn primary-btn" disabled aria-label="Validate code">
+                            <button id="validate-code" class="btn primary-btn" disabled>
                                 <span class="btn-emoji">✅</span>
                                 Validate Code
                             </button>
-                            <button id="rescan-quizzes" class="btn secondary-btn" aria-label="Rescan quizzes">
+                            <button id="rescan-quizzes" class="btn secondary-btn">
                                 <span class="btn-emoji">🔄</span>
-                                Rescan Folders
+                                Rescan Quizzes
                             </button>
                         </div>
                     </div>
                     
-                    <!-- Code Format Guide -->
-                    <div class="code-info">
-                        <h4><i class="fas fa-book"></i> Code Format Guide</h4>
-                        <div class="format-grid">
-                            <div class="format-item">
-                                <div class="format-digit">1</div>
-                                <div class="format-desc"><strong>Level:</strong> 1=Pri, 2=LowSec, 3=UpSec</div>
-                            </div>
-                            <div class="format-item">
-                                <div class="format-digit">2</div>
-                                <div class="format-desc"><strong>Subject:</strong> 0=Math, 1=Science, etc.</div>
-                            </div>
-                            <div class="format-item">
-                                <div class="format-digit">3</div>
-                                <div class="format-desc"><strong>Grade:</strong> 1-6=Primary, 7-10=Secondary</div>
-                            </div>
-                            <div class="format-item">
-                                <div class="format-digit">4</div>
-                                <div class="format-desc"><strong>Chapter Tens</strong> Digit</div>
-                            </div>
-                            <div class="format-item">
-                                <div class="format-digit">5</div>
-                                <div class="format-desc"><strong>Chapter Ones</strong> Digit</div>
-                            </div>
-                            <div class="format-item">
-                                <div class="format-digit">6</div>
-                                <div class="format-desc"><strong>Worksheet</strong> Number</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Folder Structure Guide -->
-                        <div class="folder-guide">
-                            <h5><i class="fas fa-folder"></i> Folder Structure:</h5>
-                            <pre><code>Questions/
-├── primary/
-│   ├── math/
-│   └── science/
-├── lower-secondary/
-│   ├── math/
-│   └── science/
-└── upper-secondary/
-    ├── math/
-    ├── pure-chem/
-    ├── pure-physics/
-    ├── combined-physics/
-    └── combined-chem/</code></pre>
-                        </div>
-                    </div>
+                    <!-- Error Message -->
+                    <div id="start-error" class="error-message"></div>
                 </div>
                 
                 <!-- Selected Quiz Info -->
@@ -176,11 +107,7 @@
                             <span id="quiz-title-display" class="detail-value">-</span>
                         </div>
                         <div class="detail-row">
-                            <span class="detail-label">Folder:</span>
-                            <span id="quiz-folder-display" class="detail-value">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Grade/Subject:</span>
+                            <span class="detail-label">Subject:</span>
                             <span id="quiz-grade-display" class="detail-value">-</span>
                         </div>
                         <div class="detail-row">
@@ -192,34 +119,19 @@
                 
                 <!-- Start Game Button -->
                 <div class="start-action">
-                    <button id="start-game" class="btn start-btn" disabled aria-label="Start game">
+                    <button id="start-game" class="btn start-btn" disabled>
                         <span class="btn-emoji">🚀</span>
-                        Start Game
+                        Start Battle!
                     </button>
-                    <div id="start-error" class="error-message" role="alert"></div>
                 </div>
                 
-                <!-- Available Quizzes -->
-                <div id="available-quizzes" class="available-quizzes" style="display: none;">
-                    <h4><i class="fas fa-book-open"></i> Available Quizzes <span id="quiz-count">(0)</span></h4>
-                    
-                    <!-- Filter Controls -->
-                    <div class="quiz-filter">
-                        <div class="search-container">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="quiz-search" placeholder="Search by code, subject, or grade..." aria-label="Search quizzes">
-                        </div>
-                        <select id="quiz-filter" aria-label="Filter by category">
-                            <option value="all">All Categories</option>
-                            <option value="primary">Primary</option>
-                            <option value="lower-secondary">Lower Secondary</option>
-                            <option value="upper-secondary">Upper Secondary</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Quiz List -->
-                    <div id="quiz-list" class="quiz-list" role="list">
-                        <!-- Quizzes will be loaded here -->
+                <!-- Quick Demo Codes -->
+                <div class="demo-codes">
+                    <h4><i class="fas fa-bolt"></i> Quick Start Codes</h4>
+                    <div class="demo-buttons">
+                        <button class="demo-btn" data-code="304021">Math: Algebra</button>
+                        <button class="demo-btn" data-code="304022">Math: Advanced</button>
+                        <button class="demo-btn" data-code="101021">Primary: Basics</button>
                     </div>
                 </div>
             </div>
@@ -236,36 +148,121 @@
                         Q: <span id="current-q">1</span>/<span id="total-q">5</span>
                     </span>
                 </div>
-                <div class="selection-display">
-                    <div class="selection-item">
-                        <span class="selection-icon">📦</span>
-                        <span id="selection-count">0/3</span>
+                <div class="chance-control-display">
+                    <div class="chance-meter">
+                        <span class="meter-icon">🎲</span>
+                        <span class="meter-label">Chance</span>
+                        <div class="meter-bar">
+                            <div class="meter-fill" id="chance-meter"></div>
+                        </div>
+                    </div>
+                    <div class="control-meter">
+                        <span class="meter-icon">⚔️</span>
+                        <span class="meter-label">Control</span>
+                        <div class="meter-bar">
+                            <div class="meter-fill" id="control-meter"></div>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Players Display -->
+            <!-- Players Display with Powers -->
             <div class="players-display">
-                <div class="player active" id="player1" role="region" aria-label="Player 1">
+                <!-- Player 1 with Powers -->
+                <div class="player active" id="player1">
                     <div class="player-header">
-                        <span class="player-emoji">👦</span>
+                        <span class="player-emoji">👑</span>
                         <span class="player-name">Player 1</span>
-                        <span class="turn-indicator" aria-hidden="true">✨</span>
+                        <span class="turn-indicator">✨</span>
                     </div>
-                    <div class="player-score" aria-label="Player 1 score">0</div>
+                    <div class="player-score">0</div>
                     <div class="score-label">Score</div>
+                    
+                    <!-- Special Powers -->
+                    <div class="player-powers">
+                        <div class="power" data-power="reveal" title="Reveal Box">
+                            <span class="power-icon">🔍</span>
+                            <span class="power-count" id="p1-reveal">2</span>
+                        </div>
+                        <div class="power" data-power="double" title="Double Points">
+                            <span class="power-icon">✌️</span>
+                            <span class="power-count" id="p1-double">1</span>
+                        </div>
+                        <div class="power" data-power="block" title="Block Opponent">
+                            <span class="power-icon">🛡️</span>
+                            <span class="power-count" id="p1-block">1</span>
+                        </div>
+                        <div class="power" data-power="swap" title="Swap Boxes">
+                            <span class="power-icon">🔄</span>
+                            <span class="power-count" id="p1-swap">1</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="vs" aria-label="Versus">VS</div>
+                <div class="vs">VS</div>
                 
-                <div class="player" id="player2" role="region" aria-label="Player 2">
+                <!-- Player 2 with Powers -->
+                <div class="player" id="player2">
                     <div class="player-header">
-                        <span class="player-emoji">👧</span>
+                        <span class="player-emoji">👑</span>
                         <span class="player-name">Player 2</span>
-                        <span class="turn-indicator" aria-hidden="true">✨</span>
+                        <span class="turn-indicator">✨</span>
                     </div>
-                    <div class="player-score" aria-label="Player 2 score">0</div>
+                    <div class="player-score">0</div>
                     <div class="score-label">Score</div>
+                    
+                    <!-- Special Powers -->
+                    <div class="player-powers">
+                        <div class="power" data-power="reveal" title="Reveal Box">
+                            <span class="power-icon">🔍</span>
+                            <span class="power-count" id="p2-reveal">2</span>
+                        </div>
+                        <div class="power" data-power="double" title="Double Points">
+                            <span class="power-icon">✌️</span>
+                            <span class="power-count" id="p2-double">1</span>
+                        </div>
+                        <div class="power" data-power="block" title="Block Opponent">
+                            <span class="power-icon">🛡️</span>
+                            <span class="power-count" id="p2-block">1</span>
+                        </div>
+                        <div class="power" data-power="swap" title="Swap Boxes">
+                            <span class="power-icon">🔄</span>
+                            <span class="power-count" id="p2-swap">1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Special Power Controls -->
+            <div class="power-controls">
+                <div class="power-controls-header">
+                    <h3><span class="power-controls-icon">⚡</span> Special Powers</h3>
+                    <div class="power-help">Use powers strategically!</div>
+                </div>
+                <div class="power-buttons">
+                    <button class="power-btn" data-power="reveal">
+                        <span class="power-btn-icon">🔍</span>
+                        <span class="power-btn-text">Reveal Box</span>
+                        <span class="power-btn-desc">See 1 box's points</span>
+                    </button>
+                    <button class="power-btn" data-power="double">
+                        <span class="power-btn-icon">✌️</span>
+                        <span class="power-btn-text">Double Points</span>
+                        <span class="power-btn-desc">2x points from next box</span>
+                    </button>
+                    <button class="power-btn" data-power="block">
+                        <span class="power-btn-icon">🛡️</span>
+                        <span class="power-btn-text">Block</span>
+                        <span class="power-btn-desc">Opponent loses 1 turn</span>
+                    </button>
+                    <button class="power-btn" data-power="swap">
+                        <span class="power-btn-icon">🔄</span>
+                        <span class="power-btn-text">Swap</span>
+                        <span class="power-btn-desc">Exchange boxes with opponent</span>
+                    </button>
+                </div>
+                <div class="active-power-display" id="active-power-display">
+                    No active power
                 </div>
             </div>
             
@@ -280,49 +277,65 @@
                         </span>
                         <span class="points-badge" id="question-points">
                             <i class="fas fa-star"></i>
-                            Base: 10 pts
+                            Base: <span id="base-points">10</span> pts
                         </span>
                     </div>
-                    <div id="question-text" class="question-text" role="heading" aria-level="2">
+                    <div id="question-text" class="question-text">
                         Question will appear here...
                     </div>
                     
                     <!-- Answer Options -->
-                    <div id="options-container" class="options-grid" role="listbox">
+                    <div id="options-container" class="options-grid">
                         <!-- Options will be added here -->
                     </div>
                 </div>
                 
-                <!-- Hidden Points Grid -->
+                <!-- Hidden Points Grid with Risk Levels -->
                 <div class="points-section">
                     <div class="points-header">
                         <h3><span class="points-icon">📦</span> Hidden Points Grid</h3>
-                        <div class="points-help">Select 1-3 boxes before answering!</div>
-                        <div class="selection-info" id="selection-info" role="status">
+                        <div class="points-help">
+                            <span class="risk-low">Low Risk</span> • 
+                            <span class="risk-medium">Medium Risk</span> • 
+                            <span class="risk-high">High Risk</span>
+                        </div>
+                        <div class="selection-info" id="selection-info">
                             <i class="fas fa-mouse-pointer"></i>
-                            Boxes selected: <span id="selected-count">0</span>/3
+                            Boxes selected: <span id="selected-count">0</span>/3 • 
+                            <span id="risk-indicator">Risk: Low</span>
                         </div>
                     </div>
                     
-                    <!-- Points Grid -->
-                    <div class="points-grid" id="points-grid" role="grid">
-                        <!-- Boxes will be added here -->
+                    <!-- Points Grid with Zones -->
+                    <div class="points-grid-container">
+                        <div class="grid-zone low-risk-zone">
+                            <div class="zone-label">Low Risk</div>
+                            <div class="points-grid" id="points-grid-low">
+                                <!-- Low risk boxes (1-6) -->
+                            </div>
+                        </div>
+                        <div class="grid-zone high-risk-zone">
+                            <div class="zone-label">High Risk</div>
+                            <div class="points-grid" id="points-grid-high">
+                                <!-- High risk boxes (7-12) -->
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Points Controls -->
                     <div class="points-controls">
-                        <button id="clear-selections" class="btn secondary-btn" aria-label="Clear selections">
+                        <button id="clear-selections" class="btn secondary-btn">
                             <span class="btn-emoji">🗑️</span>
                             Clear Selections
                         </button>
                         <div class="points-summary">
                             <div class="points-total" id="points-total">
                                 <i class="fas fa-coins"></i>
-                                Potential Points: 0
+                                Potential Points: <span id="potential-points">0</span>
                             </div>
-                            <div class="points-risk" id="points-risk">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                Risk Level: Low
+                            <div class="multiplier-display" id="multiplier-display">
+                                <i class="fas fa-bolt"></i>
+                                Multiplier: <span id="multiplier-value">1x</span>
                             </div>
                         </div>
                     </div>
@@ -331,22 +344,30 @@
             
             <!-- Game Controls -->
             <div class="game-controls">
-                <button id="submit-answer" class="btn primary-btn" disabled aria-label="Submit answer">
-                    <span class="btn-emoji">📤</span>
-                    Submit Answer
-                </button>
-                <button id="next-question" class="btn secondary-btn" style="display: none;" aria-label="Next question">
-                    <span class="btn-emoji">➡️</span>
-                    Next Question
-                </button>
-                <button id="home-btn" class="btn home-btn" aria-label="Back to home">
-                    <span class="btn-emoji">🏠</span>
-                    Back to Code
-                </button>
+                <div class="control-group">
+                    <button id="submit-answer" class="btn primary-btn" disabled>
+                        <span class="btn-emoji">📤</span>
+                        Submit Answer
+                    </button>
+                    <button id="next-question" class="btn secondary-btn" style="display: none;">
+                        <span class="btn-emoji">➡️</span>
+                        Next Question
+                    </button>
+                    <button id="skip-question" class="btn warning-btn" style="display: none;">
+                        <span class="btn-emoji">⏭️</span>
+                        Skip (Risk Points)
+                    </button>
+                </div>
+                <div class="home-controls">
+                    <button id="home-btn" class="btn home-btn">
+                        <span class="btn-emoji">🏠</span>
+                        Back to Home
+                    </button>
+                </div>
             </div>
             
             <!-- Feedback Area -->
-            <div id="feedback" class="feedback-area" role="region" aria-live="polite">
+            <div id="feedback" class="feedback-area">
                 <div class="feedback-placeholder">
                     <span class="feedback-icon">💡</span>
                     Select boxes (1-3) then choose an answer!
@@ -354,7 +375,7 @@
             </div>
             
             <!-- Results Display -->
-            <div id="results-display" class="results-area" style="display: none;" role="region" aria-label="Box results">
+            <div id="results-display" class="results-area" style="display: none;">
                 <div class="results-header">
                     <h3><span class="results-icon">🎯</span> Box Results</h3>
                 </div>
@@ -364,6 +385,17 @@
                 <div class="total-earned" id="total-earned">
                     <i class="fas fa-trophy"></i>
                     Total Earned: <span>0</span> points
+                    <div class="power-effects" id="power-effects"></div>
+                </div>
+            </div>
+            
+            <!-- Chance Events Popup -->
+            <div id="chance-popup" class="chance-popup" style="display: none;">
+                <div class="chance-popup-content">
+                    <div class="chance-icon" id="chance-event-icon">🎲</div>
+                    <h3 id="chance-event-title">Chance Event!</h3>
+                    <p id="chance-event-desc">Something unexpected happens!</p>
+                    <button id="close-chance" class="btn primary-btn">Continue</button>
                 </div>
             </div>
         </div>
@@ -373,28 +405,35 @@
             <div class="game-over-content">
                 <!-- Victory Banner -->
                 <div class="victory-banner">
-                    <div id="winner-trophy" class="trophy" aria-hidden="true">🏆</div>
-                    <div id="winner-message" class="winner-message" role="heading" aria-level="1">Game Over!</div>
+                    <div id="winner-trophy" class="trophy">🏆</div>
+                    <div id="winner-message" class="winner-message">Game Over!</div>
+                    <div id="winner-style" class="winner-style"></div>
                 </div>
                 
                 <!-- Final Scores -->
                 <div class="final-scores">
                     <div class="final-player">
                         <div class="final-player-header">
-                            <span class="final-emoji">👦</span>
+                            <span class="final-emoji">👑</span>
                             <span class="final-name">Player 1</span>
                         </div>
                         <div id="final-score1" class="final-score">0</div>
+                        <div class="final-powers-used">
+                            Powers Used: <span id="final-powers1">0</span>
+                        </div>
                     </div>
                     
                     <div class="vs-final">VS</div>
                     
                     <div class="final-player">
                         <div class="final-player-header">
-                            <span class="final-emoji">👧</span>
+                            <span class="final-emoji">👑</span>
                             <span class="final-name">Player 2</span>
                         </div>
                         <div id="final-score2" class="final-score">0</div>
+                        <div class="final-powers-used">
+                            Powers Used: <span id="final-powers2">0</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -404,17 +443,38 @@
                     <div id="game-stats" class="stats-grid">
                         <!-- Stats will be added here -->
                     </div>
+                    <div class="strategy-stats">
+                        <h4><i class="fas fa-chess"></i> Strategy Analysis</h4>
+                        <div class="strategy-grid">
+                            <div class="strategy-item">
+                                <div class="strategy-label">Chance Taken</div>
+                                <div class="strategy-value" id="chance-taken">0%</div>
+                            </div>
+                            <div class="strategy-item">
+                                <div class="strategy-label">Control Used</div>
+                                <div class="strategy-value" id="control-used">0%</div>
+                            </div>
+                            <div class="strategy-item">
+                                <div class="strategy-label">Risk Reward Ratio</div>
+                                <div class="strategy-value" id="risk-reward">0</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Game Over Buttons -->
                 <div class="game-over-buttons">
-                    <button id="play-again" class="btn primary-btn" aria-label="Play again">
+                    <button id="play-again" class="btn primary-btn">
                         <span class="btn-emoji">🔄</span>
                         Play Again
                     </button>
-                    <button id="new-quiz" class="btn fun-btn" aria-label="New quiz">
+                    <button id="new-quiz" class="btn fun-btn">
                         <span class="btn-emoji">🔢</span>
                         New Code
+                    </button>
+                    <button id="show-strategy" class="btn strategy-btn">
+                        <span class="btn-emoji">🧠</span>
+                        Strategy Tips
                     </button>
                 </div>
             </div>
@@ -423,25 +483,51 @@
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="loading-overlay">
             <div class="loading-content">
-                <div class="loading-spinner" aria-hidden="true"></div>
-                <div id="loading-text" class="loading-text">Scanning folder structure...</div>
+                <div class="loading-spinner"></div>
+                <div id="loading-text" class="loading-text">Loading...</div>
                 <div id="loading-details" class="loading-details"></div>
             </div>
         </div>
+        
+        <!-- Strategy Tips Modal -->
+        <div id="strategy-modal" class="strategy-modal" style="display: none;">
+            <div class="strategy-modal-content">
+                <h2><i class="fas fa-chess-knight"></i> Strategy Guide</h2>
+                <div class="strategy-tips">
+                    <div class="tip">
+                        <div class="tip-icon">🎲</div>
+                        <div class="tip-content">
+                            <h4>Chance Elements</h4>
+                            <p>• Low risk boxes (1-6) have smaller point ranges</p>
+                            <p>• High risk boxes (7-12) can give huge points or penalties</p>
+                            <p>• Chance events occur randomly (bonus points, extra turns)</p>
+                        </div>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">⚔️</div>
+                        <div class="tip-content">
+                            <h4>Control Elements</h4>
+                            <p>• Use Reveal to see a box's points before selecting</p>
+                            <p>• Double Points gives 2x points from next box</p>
+                            <p>• Block prevents opponent from using powers next turn</p>
+                            <p>• Swap exchanges your worst box with opponent's best</p>
+                        </div>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">🧠</div>
+                        <div class="tip-content">
+                            <h4>Winning Strategy</h4>
+                            <p>• Balance risk: mix low and high risk boxes</p>
+                            <p>• Save powers for critical moments</p>
+                            <p>• Use Block when opponent is ahead</p>
+                            <p>• Skip questions you're unsure about (with penalty)</p>
+                        </div>
+                    </div>
+                </div>
+                <button id="close-strategy" class="btn primary-btn">Got it!</button>
+            </div>
+        </div>
     </div>
-
-    <!-- Touch Device Detection Script -->
-    <script>
-        // Add touch device detection
-        document.addEventListener('DOMContentLoaded', function() {
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            if (isTouchDevice) {
-                document.body.classList.add('touch-device');
-            } else {
-                document.body.classList.add('no-touch-device');
-            }
-        });
-    </script>
 
     <script src="script.js"></script>
 </body>
