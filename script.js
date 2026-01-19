@@ -47,80 +47,6 @@ const CATEGORIES = {
     }
 };
 
-// Pre-loaded quiz data for demonstration
-const QUIZ_LIBRARY = {
-    '334161': {
-        title: "Chapter 16: Static Electricity",
-        subject: "Pure Physics",
-        grade: "Secondary 4",
-        questions: [
-            {
-                question: "What is the SI unit of electric charge?",
-                options: ["Ampere", "Volt", "Coulomb", "Ohm"],
-                correct: 2,
-                points: 10,
-                explanation: "Electric charge is measured in coulombs (C)."
-            },
-            {
-                question: "What happens when two negatively charged objects are brought close together?",
-                options: ["They attract", "They repel", "They become neutral", "They exchange protons"],
-                correct: 1,
-                points: 10,
-                explanation: "Like charges repel each other."
-            },
-            {
-                question: "Which of these best describes an electric field?",
-                options: ["A region where magnetic forces act", "A region where an electric charge experiences a force", "The path of electric current", "A conductor's surface charge"],
-                correct: 1,
-                points: 10,
-                explanation: "An electric field is a region where a charge experiences force."
-            }
-        ]
-    },
-    '334162': {
-        title: "Chapter 16: Static Electricity Applications",
-        subject: "Pure Physics",
-        grade: "Secondary 4",
-        questions: [
-            {
-                question: "Why do fuel tanker trucks have metal chains touching the ground?",
-                options: ["To improve aerodynamics", "To ground the vehicle and prevent static sparks", "To make noise for safety", "To measure speed"],
-                correct: 1,
-                points: 10,
-                explanation: "Grounding prevents static buildup that could cause sparks."
-            },
-            {
-                question: "How does a photocopier use electrostatic principles?",
-                options: ["By heating toner particles", "By charging drum with light pattern, attracting opposite toner", "Using magnetic attraction", "By mechanical pressure"],
-                correct: 1,
-                points: 15,
-                explanation: "Light creates charge pattern on drum."
-            }
-        ]
-    },
-    '217051': {
-        title: "Chapter 5: Basic Science",
-        subject: "Science (General)",
-        grade: "Secondary 1",
-        questions: [
-            {
-                question: "What are the two types of electric charge?",
-                options: ["Hot and cold", "Positive and negative", "Strong and weak", "Large and small"],
-                correct: 1,
-                points: 5,
-                explanation: "There are two types of charge: positive and negative."
-            },
-            {
-                question: "What happens when you rub a balloon on your hair?",
-                options: ["Balloon becomes magnetic", "Balloon gains electric charge", "Hair loses all its color", "Nothing happens"],
-                correct: 1,
-                points: 5,
-                explanation: "Rubbing transfers electrons."
-            }
-        ]
-    }
-};
-
 // Chance Cards
 const chanceCards = [
     { type: "bonus", message: "🎉 Bonus Points! +20 points!", effect: "score", value: 20 },
@@ -244,64 +170,206 @@ async function scanAvailableQuizzes() {
     showLoading(true, "Scanning folder structure...");
     
     try {
-        // Simulate scanning the folder structure
-        await simulateFolderScan();
-        
-        // For demonstration, load from QUIZ_LIBRARY
-        // In production, this would scan actual folders
+        // Clear existing quizzes
         currentGame.allQuizzes = {};
         
-        for (const [code, quizData] of Object.entries(QUIZ_LIBRARY)) {
-            const metadata = decodeCode(code);
-            if (metadata) {
-                currentGame.allQuizzes[code] = {
-                    ...quizData,
-                    code: code,
-                    metadata: metadata,
-                    folderPath: getFolderPath(metadata)
-                };
+        // Known quiz files based on your image
+        const knownFiles = [
+            'Questions/upper-secondary/math/304021.json',
+            'Questions/upper-secondary/math/304022.json',
+            'Questions/upper-secondary/math/304023.json'
+        ];
+        
+        let totalFound = 0;
+        
+        // Try to load known files
+        for (const filePath of knownFiles) {
+            try {
+                // Extract code from filename
+                const filename = filePath.split('/').pop();
+                const code = filename.replace('.json', '');
+                
+                // Load the JSON file
+                const response = await fetch(filePath);
+                
+                if (response.ok) {
+                    const quizData = await response.json();
+                    
+                    // Decode the code
+                    const metadata = decodeCode(code);
+                    if (metadata) {
+                        currentGame.allQuizzes[code] = {
+                            ...quizData,
+                            code: code,
+                            metadata: metadata,
+                            folderPath: getFolderPath(metadata)
+                        };
+                        totalFound++;
+                        
+                        showLoading(true, `Loading quiz files...`, 
+                            `Loaded: ${code}<br>${quizData.title}<br>Found: ${totalFound} quizzes`);
+                    }
+                }
+            } catch (error) {
+                console.warn(`Could not load ${filePath}:`, error);
             }
+        }
+        
+        // If no files were found, try to list files from directories
+        if (totalFound === 0) {
+            showLoading(true, "Scanning directories...");
+            
+            // Try to scan directories (this requires server-side support or CORS)
+            const directories = [
+                'Questions/primary/math/',
+                'Questions/primary/science/',
+                'Questions/lower-secondary/math/',
+                'Questions/lower-secondary/science/',
+                'Questions/upper-secondary/math/',
+                'Questions/upper-secondary/pure-physics/',
+                'Questions/upper-secondary/pure-chem/',
+                'Questions/upper-secondary/combined-physics/',
+                'Questions/upper-secondary/combined-chem/'
+            ];
+            
+            for (const dir of directories) {
+                try {
+                    // Try to get directory listing
+                    // Note: This only works if your server provides directory listing
+                    const response = await fetch(dir);
+                    if (response.ok) {
+                        const text = await response.text();
+                        // Parse HTML for links (simplified)
+                        const jsonFiles = text.match(/\d{6}\.json/g) || [];
+                        
+                        for (const filename of jsonFiles) {
+                            const code = filename.replace('.json', '');
+                            const fileUrl = dir + filename;
+                            
+                            try {
+                                const quizResponse = await fetch(fileUrl);
+                                if (quizResponse.ok) {
+                                    const quizData = await quizResponse.json();
+                                    const metadata = decodeCode(code);
+                                    
+                                    if (metadata) {
+                                        currentGame.allQuizzes[code] = {
+                                            ...quizData,
+                                            code: code,
+                                            metadata: metadata,
+                                            folderPath: getFolderPath(metadata)
+                                        };
+                                        totalFound++;
+                                    }
+                                }
+                            } catch (error) {
+                                console.warn(`Could not load ${fileUrl}:`, error);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    // Directory listing not available
+                    console.warn(`Could not scan ${dir}:`, error);
+                }
+            }
+        }
+        
+        // If still no files found, provide helpful message
+        if (totalFound === 0) {
+            showLoading(false);
+            showFeedback("No JSON quiz files found. Please ensure your files are in the correct folder structure.", "warning");
+            showAvailableQuizzes();
+            return;
         }
         
         showLoading(false);
         updateScanCount();
         showAvailableQuizzes();
-        showFeedback(`✅ Found ${Object.keys(currentGame.allQuizzes).length} quizzes in folder structure`, 'success');
+        showFeedback(`✅ Found ${totalFound} quiz files`, 'success');
         
     } catch (error) {
         console.error('Error scanning quizzes:', error);
-        showError("Error scanning folder structure. Using demo quizzes.");
+        showError("Error scanning folder structure. Please check browser console.");
         showLoading(false);
+        
+        // Fallback: Try to load at least the known files
+        try {
+            await loadKnownFilesFallback();
+        } catch (fallbackError) {
+            console.error('Fallback also failed:', fallbackError);
+        }
     }
 }
 
-function simulateFolderScan() {
-    return new Promise((resolve) => {
-        const folders = [
-            'Questions/primary/math/',
-            'Questions/primary/science/',
-            'Questions/lower-secondary/math/',
-            'Questions/lower-secondary/science/',
-            'Questions/upper-secondary/math/',
-            'Questions/upper-secondary/pure-physics/',
-            'Questions/upper-secondary/pure-chem/',
-            'Questions/upper-secondary/combined-physics/',
-            'Questions/upper-secondary/combined-chem/'
-        ];
-        
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 20;
-            const details = folders.slice(0, Math.floor(progress/20)).join('<br>');
-            showLoading(true, `Scanning... (${progress}%)`, details);
-            
-            if (progress >= 100) {
-                clearInterval(interval);
-                showLoading(true, "Loading quiz files...");
-                setTimeout(resolve, 800);
-            }
-        }, 300);
-    });
+async function loadKnownFilesFallback() {
+    // Hardcoded fallback for demo purposes
+    const fallbackQuizzes = {
+        '304021': {
+            title: "Chapter 4: Algebra Basics",
+            subject: "Mathematics",
+            grade: "Secondary 4",
+            questions: [
+                {
+                    question: "Solve for x: 2x + 5 = 13",
+                    options: ["x = 4", "x = 3", "x = 5", "x = 6"],
+                    correct: 0,
+                    points: 10,
+                    explanation: "2x + 5 = 13 → 2x = 8 → x = 4"
+                },
+                {
+                    question: "Simplify: 3(x + 4) - 2x",
+                    options: ["x + 12", "x + 4", "3x + 10", "5x + 12"],
+                    correct: 0,
+                    points: 10,
+                    explanation: "3(x + 4) - 2x = 3x + 12 - 2x = x + 12"
+                }
+            ]
+        },
+        '304022': {
+            title: "Chapter 4: Advanced Algebra",
+            subject: "Mathematics",
+            grade: "Secondary 4",
+            questions: [
+                {
+                    question: "Factorize: x² - 9",
+                    options: ["(x - 3)(x + 3)", "(x - 9)(x + 1)", "(x - 3)²", "(x + 3)²"],
+                    correct: 0,
+                    points: 10,
+                    explanation: "x² - 9 is a difference of squares: (x - 3)(x + 3)"
+                }
+            ]
+        },
+        '304023': {
+            title: "Chapter 4: Quadratic Equations",
+            subject: "Mathematics",
+            grade: "Secondary 4",
+            questions: [
+                {
+                    question: "Solve: x² - 5x + 6 = 0",
+                    options: ["x = 2, 3", "x = 1, 6", "x = -2, -3", "x = -1, -6"],
+                    correct: 0,
+                    points: 15,
+                    explanation: "Factor: (x - 2)(x - 3) = 0 → x = 2 or x = 3"
+                }
+            ]
+        }
+    };
+    
+    for (const [code, quizData] of Object.entries(fallbackQuizzes)) {
+        const metadata = decodeCode(code);
+        if (metadata) {
+            currentGame.allQuizzes[code] = {
+                ...quizData,
+                code: code,
+                metadata: metadata,
+                folderPath: getFolderPath(metadata)
+            };
+        }
+    }
+    
+    updateScanCount();
+    showAvailableQuizzes();
+    showFeedback("Using fallback quiz data. Check console for loading errors.", "warning");
 }
 
 function decodeCode(code) {
@@ -357,7 +425,7 @@ function getFolderPath(metadata) {
 
 function updateScanCount() {
     const count = Object.keys(currentGame.allQuizzes).length;
-    document.getElementById('scan-count').textContent = `${count} Quizzes`;
+    document.getElementById('scan-count').textContent = `${count} Quizzes Found`;
     document.getElementById('quiz-count').textContent = `(${count})`;
 }
 
@@ -366,7 +434,15 @@ function showAvailableQuizzes() {
     const availableDiv = document.getElementById('available-quizzes');
     
     if (Object.keys(currentGame.allQuizzes).length === 0) {
-        quizListDiv.innerHTML = '<div class="no-quizzes">No quizzes found. Please add JSON files to the Questions folder structure.</div>';
+        quizListDiv.innerHTML = `
+            <div class="no-quizzes">
+                <div style="margin-bottom: 15px;">📂 No quiz files found.</div>
+                <div style="font-size: 0.9rem; color: #888;">
+                    Please ensure JSON files are in the Questions/ folder structure.<br>
+                    Example: Questions/upper-secondary/math/304021.json
+                </div>
+            </div>
+        `;
         availableDiv.style.display = 'block';
         return;
     }
@@ -397,8 +473,8 @@ function filterQuizList() {
         filteredQuizzes = filteredQuizzes.filter(quiz => {
             return quiz.code.includes(searchTerm) ||
                    quiz.title.toLowerCase().includes(searchTerm) ||
-                   quiz.metadata.subject.toLowerCase().includes(searchTerm) ||
-                   quiz.metadata.grade.toLowerCase().includes(searchTerm);
+                   (quiz.metadata?.subject?.toLowerCase() || '').includes(searchTerm) ||
+                   (quiz.metadata?.grade?.toLowerCase() || '').includes(searchTerm);
         });
     }
     
@@ -466,7 +542,7 @@ function validateCode() {
     document.getElementById('start-game').disabled = false;
     document.getElementById('start-error').textContent = '';
     
-    showFeedback(`✅ Quiz "${currentGame.quizData.title}" loaded from ${currentGame.quizData.folderPath}`, 'success');
+    showFeedback(`✅ Quiz "${currentGame.quizData.title}" loaded successfully`, 'success');
 }
 
 function updateQuizInfoDisplay() {
@@ -924,66 +1000,3 @@ function showLoading(show, text = "Loading...", details = "") {
         loadingOverlay.classList.remove('active');
     }
 }
-
-// Add CSS for feedback toasts
-const style = document.createElement('style');
-style.textContent = `
-    .feedback-toast {
-        position: fixed;
-        top: 25px;
-        right: 25px;
-        padding: 18px 28px;
-        border-radius: 12px;
-        color: white;
-        font-weight: 600;
-        z-index: 2000;
-        animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
-        box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        max-width: 450px;
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(255,255,255,0.1);
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-    
-    .feedback-success { 
-        background: linear-gradient(135deg, rgba(76, 175, 80, 0.95), rgba(56, 142, 60, 0.95));
-        border-left: 6px solid #2e7d32;
-    }
-    
-    .feedback-error { 
-        background: linear-gradient(135deg, rgba(244, 67, 54, 0.95), rgba(211, 47, 47, 0.95));
-        border-left: 6px solid #c62828;
-    }
-    
-    .feedback-warning { 
-        background: linear-gradient(135deg, rgba(255, 152, 0, 0.95), rgba(245, 124, 0, 0.95));
-        border-left: 6px solid #ef6c00;
-    }
-    
-    .feedback-info { 
-        background: linear-gradient(135deg, rgba(33, 150, 243, 0.95), rgba(25, 118, 210, 0.95));
-        border-left: 6px solid #1565c0;
-    }
-    
-    .no-quizzes {
-        text-align: center;
-        padding: 40px 30px;
-        color: #666;
-        font-style: italic;
-        font-size: 1.1rem;
-        grid-column: 1 / -1;
-    }
-`;
-document.head.appendChild(style);
