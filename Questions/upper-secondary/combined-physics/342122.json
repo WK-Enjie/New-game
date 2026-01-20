@@ -1,0 +1,133 @@
+{
+    "code": "342122",
+    "title": "Sec 4 Combined Chemistry - Chapter 12: Reactivity Series (Worksheet 2)",
+    "subject": "Combined Chemistry",
+    "level": "Upper Secondary",
+    "topic": "Chapter 12: Metals and Reactivity Series",
+    "difficulty": "Intermediate",
+    "author": "Chemistry Department",
+    "created": "2024-01-25",
+    "description": "Second worksheet on reactivity series, displacement reactions, and corrosion of iron.",
+    "questions": [
+        {
+            "id": 1,
+            "question": "Which metal reacts most vigorously with dilute sulfuric acid?",
+            "options": ["Magnesium", "Zinc", "Iron", "Copper"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Magnesium is highest in the reactivity series among these options, so it reacts most vigorously."
+        },
+        {
+            "id": 2,
+            "question": "Which metal will NOT displace hydrogen from dilute hydrochloric acid?",
+            "options": ["Zinc", "Iron", "Copper", "Magnesium"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Copper is below hydrogen in the reactivity series, so it cannot displace hydrogen from acids."
+        },
+        {
+            "id": 3,
+            "question": "What happens when iron is placed in copper sulfate solution?",
+            "options": ["Iron becomes coated with copper", "Copper becomes coated with iron", "No visible change", "The solution turns green"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Iron is more reactive than copper, so it displaces copper from the solution, forming a copper coating."
+        },
+        {
+            "id": 4,
+            "question": "Which metal reacts with cold water to form a hydroxide and hydrogen gas?",
+            "options": ["Sodium", "Iron", "Copper", "Silver"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Sodium reacts vigorously with cold water to form sodium hydroxide and hydrogen gas."
+        },
+        {
+            "id": 5,
+            "question": "What is the correct order of reactivity (most reactive first)?",
+            "options": ["K > Na > Ca > Mg", "Mg > Ca > Na > K", "Ca > Mg > K > Na", "Na > K > Mg > Ca"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Potassium (K) is most reactive, followed by sodium (Na), then calcium (Ca), then magnesium (Mg)."
+        },
+        {
+            "id": 6,
+            "question": "Which statement about obtaining metals from their ores is true?",
+            "options": ["Gold is usually found as a pure metal", "All metals require electricity to extract", "More reactive metals are cheaper to obtain", "Iron is always found as a pure element"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Gold is very unreactive and can be found as a pure metal in nature, while more reactive metals are always found combined in ores."
+        },
+        {
+            "id": 7,
+            "question": "What is formed when magnesium reacts with steam?",
+            "options": ["Magnesium oxide and hydrogen", "Magnesium hydroxide", "Magnesium hydride", "Magnesium and oxygen"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Magnesium reacts with steam to form magnesium oxide and hydrogen gas."
+        },
+        {
+            "id": 8,
+            "question": "Which metal will displace silver from silver nitrate solution?",
+            "options": ["Copper", "Gold", "Silver", "Platinum"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Copper is more reactive than silver and will displace it from silver nitrate solution."
+        },
+        {
+            "id": 9,
+            "question": "Why does painting prevent rusting?",
+            "options": ["Prevents oxygen and water from reaching iron", "Makes iron less reactive", "Absorbs moisture", "Produces a protective gas"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Paint forms a barrier that prevents oxygen and water from coming into contact with the iron surface."
+        },
+        {
+            "id": 10,
+            "question": "Which metal reacts with dilute acid but not with cold water?",
+            "options": ["Zinc", "Sodium", "Potassium", "Calcium"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Zinc reacts with dilute acids but does not react with cold water."
+        },
+        {
+            "id": 11,
+            "question": "What happens when copper is placed in iron sulfate solution?",
+            "options": ["No reaction", "Copper dissolves", "Iron coats the copper", "Gas bubbles form"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Copper is less reactive than iron, so it cannot displace iron from its salt solution."
+        },
+        {
+            "id": 12,
+            "question": "Which metal requires the most electricity to obtain from its ore?",
+            "options": ["Aluminum", "Iron", "Zinc", "Copper"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Aluminum is the most reactive among these and requires the most electricity to extract from its ore."
+        },
+        {
+            "id": 13,
+            "question": "What are the products when calcium reacts with water?",
+            "options": ["Calcium hydroxide and hydrogen", "Calcium oxide and hydrogen", "Calcium hydride", "Calcium carbonate"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Calcium reacts with water to form calcium hydroxide and hydrogen gas."
+        },
+        {
+            "id": 14,
+            "question": "Which metal is stored under oil to prevent reaction with air?",
+            "options": ["Sodium", "Iron", "Copper", "Aluminum"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Sodium is very reactive and reacts with oxygen and moisture in air, so it's stored under oil."
+        },
+        {
+            "id": 15,
+            "question": "What is observed when a rusty iron nail is placed in dilute acid?",
+            "options": ["The rust dissolves", "The nail becomes shiny", "Gas bubbles form on rust", "The solution turns blue"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Rust (iron oxide) reacts with acid to form a soluble salt, so the rust dissolves."
+        }
+    ]
+}
