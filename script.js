@@ -73,6 +73,8 @@ const newGameBtn = document.getElementById('newGame');
 function init() {
     setupEventListeners();
     updateUI();
+    // Enable start button by default for testing
+    startGameBtn.disabled = false;
 }
 
 // Setup event listeners
@@ -134,9 +136,68 @@ async function loadWorksheet() {
     }
     
     try {
-        // For demo purposes, we'll create a sample worksheet
-        // In production, you would fetch from your JSON files
-        gameState.worksheet = createSampleWorksheet();
+        // Parse the code to determine file path
+        const level = parseInt(code[0]);
+        const subject = parseInt(code[1]);
+        const year = parseInt(code[2]);
+        const chapter = parseInt(code[3] + code[4]);
+        const worksheetNum = parseInt(code[5]);
+        
+        // Build file path based on code
+        let levelFolder = '';
+        let subjectFolder = '';
+        
+        // Determine level folder
+        if (level === 1) levelFolder = 'primary';
+        else if (level === 2) levelFolder = 'lower-secondary';
+        else if (level === 3) levelFolder = 'upper-secondary';
+        else {
+            throw new Error('Invalid level code');
+        }
+        
+        // Determine subject folder
+        if (level === 1) {
+            subjectFolder = subject === 0 ? 'math' : 'science';
+        } else if (level === 2) {
+            subjectFolder = subject === 0 ? 'math' : 'science';
+        } else if (level === 3) {
+            const subjectMap = {
+                0: 'math',
+                1: 'science',
+                2: 'combined-physics',
+                3: 'pure-physics',
+                4: 'combined-chemistry',
+                5: 'pure-chemistry'
+            };
+            subjectFolder = subjectMap[subject];
+            if (!subjectFolder) {
+                throw new Error('Invalid subject code');
+            }
+        }
+        
+        // Construct path to JSON file
+        const path = `data/${levelFolder}/${subjectFolder}/${code}.json`;
+        
+        // For GitHub Pages, we need to handle relative paths differently
+        const basePath = window.location.hostname.includes('github.io') ? 
+            window.location.pathname.split('/').slice(0, -1).join('/') : '';
+        
+        const fullPath = basePath ? `${basePath}/${path}` : path;
+        
+        console.log('Loading worksheet from:', fullPath);
+        
+        // Load JSON file
+        const response = await fetch(fullPath);
+        if (!response.ok) {
+            throw new Error('Worksheet not found');
+        }
+        
+        gameState.worksheet = await response.json();
+        
+        // Validate the worksheet has required fields
+        if (!gameState.worksheet.questions || !Array.isArray(gameState.worksheet.questions)) {
+            throw new Error('Invalid worksheet format');
+        }
         
         // Display worksheet info
         worksheetInfoDiv.innerHTML = `
@@ -148,76 +209,30 @@ async function loadWorksheet() {
             <p><strong>Questions:</strong> ${gameState.worksheet.questions.length}</p>
         `;
         
+        // Enable start game button
+        startGameBtn.disabled = false;
+        startGameBtn.textContent = `Start Game with "${gameState.worksheet.title}"`;
+        
     } catch (error) {
         console.error('Error loading worksheet:', error);
         worksheetInfoDiv.innerHTML = `
             <div style="color: #e74c3c;">
                 <i class="fas fa-exclamation-triangle"></i>
-                Worksheet not found. Please check the code and try again.
+                Error: ${error.message || 'Worksheet not found. Please check the code and try again.'}
             </div>
         `;
+        startGameBtn.disabled = true;
+        startGameBtn.textContent = 'Start Game';
     }
-}
-
-// Create sample worksheet for demo
-function createSampleWorksheet() {
-    return {
-        code: "321011",
-        title: "Sec 3 Combined Physics - Chapter 1: Measurements",
-        subject: "Combined Physics",
-        level: "Upper Secondary",
-        topic: "Chapter 1: Measurements and Physical Quantities",
-        difficulty: "Intermediate",
-        author: "Physics Department",
-        created: "2024-01-25",
-        description: "Worksheet covering physical quantities, SI units, prefixes, measurements, and scalar/vector quantities.",
-        questions: [
-            {
-                id: 1,
-                question: "What are the two components that typically make up a physical quantity?",
-                options: ["Magnitude and unit", "Number and symbol", "Value and direction", "Measurement and instrument"],
-                correctAnswer: 0,
-                points: 5,
-                explanation: "A physical quantity consists of a numerical magnitude and a unit."
-            },
-            {
-                id: 2,
-                question: "Which of the following is NOT a base SI quantity?",
-                options: ["Mass", "Length", "Volume", "Time"],
-                correctAnswer: 2,
-                points: 5,
-                explanation: "Volume is a derived quantity (length³), while mass, length, and time are base quantities."
-            },
-            {
-                id: 3,
-                question: "What is the SI unit for electric current?",
-                options: ["Ampere (A)", "Volt (V)", "Ohm (Ω)", "Watt (W)"],
-                correctAnswer: 0,
-                points: 5,
-                explanation: "The base unit for electric current is the ampere (A)."
-            },
-            {
-                id: 4,
-                question: "What prefix represents 10⁻⁶?",
-                options: ["Milli (m)", "Micro (µ)", "Nano (n)", "Centi (c)"],
-                correctAnswer: 1,
-                points: 5,
-                explanation: "Micro (µ) represents 10⁻⁶ or one millionth."
-            },
-            {
-                id: 5,
-                question: "Which prefix would you use to express 0.005 meters?",
-                options: ["5 mm", "5 cm", "5 µm", "5 km"],
-                correctAnswer: 0,
-                points: 5,
-                explanation: "0.005 m = 5 × 10⁻³ m = 5 mm (millimeters)."
-            }
-        ]
-    };
 }
 
 // Start the game
 function startGame() {
+    if (!gameState.worksheet) {
+        alert('Please load a worksheet first');
+        return;
+    }
+    
     // Update player names
     gameState.players.player1.name = player1NameInput.value || 'Player 1';
     gameState.players.player2.name = player2NameInput.value || 'Player 2';
@@ -257,7 +272,7 @@ function switchScreen(screenName) {
 // Load current question
 function loadQuestion() {
     if (!gameState.worksheet || !gameState.worksheet.questions) {
-        // Use sample questions if no worksheet loaded
+        // Fallback to sample questions if worksheet fails
         gameState.worksheet = createSampleWorksheet();
     }
     
@@ -494,7 +509,9 @@ function playAgain() {
 // New game
 function newGame() {
     switchScreen('home');
-    worksheetInfoDiv.innerHTML = '<p>Example code: <strong>321011</strong> (Sec 3 Physics - Measurements)</p>';
+    worksheetInfoDiv.innerHTML = '<p>Example codes: <strong>321011</strong> (Sec 3 Physics) or <strong>342121</strong> (Sec 4 Chemistry Ch12)</p>';
+    startGameBtn.disabled = true;
+    startGameBtn.textContent = 'Start Game';
 }
 
 // Update player turn indicator
@@ -529,6 +546,39 @@ function updateUI() {
     if (gameState.currentScreen === 'game') {
         updatePlayerTurnIndicator();
     }
+}
+
+// Create sample worksheet for fallback (this is just for testing)
+function createSampleWorksheet() {
+    return {
+        code: "321011",
+        title: "Sample Worksheet - Measurements",
+        subject: "Combined Physics",
+        level: "Upper Secondary",
+        topic: "Chapter 1: Measurements",
+        difficulty: "Intermediate",
+        author: "Physics Department",
+        created: "2024-01-25",
+        description: "Sample worksheet for testing",
+        questions: [
+            {
+                id: 1,
+                question: "What is the SI unit for length?",
+                options: ["Meter", "Kilogram", "Second", "Ampere"],
+                correctAnswer: 0,
+                points: 5,
+                explanation: "The SI unit for length is the meter (m)."
+            },
+            {
+                id: 2,
+                question: "Which prefix means one thousandth?",
+                options: ["Kilo", "Milli", "Centi", "Micro"],
+                correctAnswer: 1,
+                points: 5,
+                explanation: "Milli (m) means one thousandth (10⁻³)."
+            }
+        ]
+    };
 }
 
 // Initialize the game when page loads
