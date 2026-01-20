@@ -3,217 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Challenge - Educational Game</title>
+    <title>🎮 Quiz Challenge - Code Activated Worksheets</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>">
 </head>
 <body>
+    <div class="background-animation">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
     <div class="container">
-        <!-- Header Section -->
-        <header>
-            <button class="mobile-menu-btn" id="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="header-content">
-                <h1><i class="fas fa-brain"></i> <span class="logo-text">Quiz Challenge</span></h1>
-                <p class="tagline">Test your knowledge • Take risks • Win big!</p>
-                <div class="stats-bar">
-                    <div class="stat">
-                        <span class="stat-label">Worksheets:</span>
-                        <span id="worksheet-count">0</span>
+        <header class="game-header">
+            <div class="header-graphics">
+                <div class="game-logo">
+                    <div class="logo-icon">🔢</div>
+                    <div class="logo-text">
+                        <h1>QUIZ <span class="highlight">CODE</span></h1>
+                        <p class="tagline">Activate Worksheets • Test Knowledge • Win Big!</p>
                     </div>
-                    <div class="stat">
-                        <span class="stat-label">Questions:</span>
-                        <span id="question-count">0</span>
+                </div>
+                
+                <div class="header-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="active-code">------</span>
+                            <span class="stat-label">Active Code</span>
+                        </div>
                     </div>
-                    <div class="stat">
-                        <span class="stat-label">Subjects:</span>
-                        <span id="subject-count">0</span>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="worksheet-count">0</span>
+                            <span class="stat-label">Worksheets</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="question-count">0</span>
+                            <span class="stat-label">Questions</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main>
-            <!-- Game Stats Panel -->
-            <div class="game-stats">
-                <div class="coin-balance">
+        <div class="stats-bar">
+            <div class="coin-display">
+                <div class="coin-animation">
                     <i class="fas fa-coins"></i>
-                    <div class="coin-info">
-                        <span class="stat-label-mobile">Coins</span>
-                        <span id="coins" class="coin-value">1000</span>
+                    <div class="coin-count" id="coins">1,000</div>
+                </div>
+                <div class="coin-label">COINS</div>
+            </div>
+            
+            <div class="multiplier-display">
+                <div class="multiplier-graphic">
+                    <div class="multiplier-value" id="multiplier">1.0x</div>
+                    <div class="multiplier-bar">
+                        <div class="multiplier-fill" id="multiplier-fill"></div>
                     </div>
                 </div>
-                <div class="multiplier-display">
-                    <span class="stat-label-mobile">Multiplier</span>
-                    <span id="multiplier" class="multiplier-value">1x</span>
-                </div>
-                <div class="streak-counter">
-                    <span class="stat-label-mobile">Streak</span>
-                    <span id="streak" class="streak-value">0</span>
-                </div>
+                <div class="multiplier-label">MULTIPLIER</div>
             </div>
+            
+            <div class="streak-display">
+                <div class="streak-graphic">
+                    <div class="streak-value" id="streak">0</div>
+                    <div class="streak-fire">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                </div>
+                <div class="streak-label">STREAK</div>
+            </div>
+            
+            <div class="score-display">
+                <div class="score-graphic">
+                    <div class="score-value" id="score">0</div>
+                    <div class="score-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <div class="score-label">SCORE</div>
+            </div>
+        </div>
 
-            <div class="main-content">
-                <!-- Left Panel - Quiz Selection -->
-                <div class="selection-panel mobile-hidden" id="selection-panel">
-                    <div class="panel-header">
-                        <h2><i class="fas fa-book-open"></i> <span class="panel-title">Select Your Challenge</span></h2>
-                        <button id="refresh-btn" class="btn-refresh">
-                            <i class="fas fa-sync-alt"></i> <span class="btn-text">Refresh</span>
+        <main class="game-container">
+            <section class="worksheets-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-key"></i>
+                        <h2>ACTIVATE WORKSHEET</h2>
+                    </div>
+                    <button class="refresh-btn" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>SCAN FILES</span>
+                    </button>
+                </div>
+                
+                <!-- CODE INPUT SECTION -->
+                <div class="code-activation-section">
+                    <div class="code-input-container">
+                        <div class="code-input-header">
+                            <i class="fas fa-terminal"></i>
+                            <h3>Enter 6-Digit Code</h3>
+                        </div>
+                        
+                        <div class="code-digits-input">
+                            <div class="digit-input" data-index="0">
+                                <input type="text" maxlength="1" pattern="[0-3]" 
+                                       title="Level (1-3)">
+                                <label>Level</label>
+                            </div>
+                            <div class="digit-input" data-index="1">
+                                <input type="text" maxlength="1" pattern="[0-5]" 
+                                       title="Subject (0-5)">
+                                <label>Subject</label>
+                            </div>
+                            <div class="digit-input" data-index="2">
+                                <input type="text" maxlength="1" pattern="[1-6]" 
+                                       title="Grade (1-6)">
+                                <label>Grade</label>
+                            </div>
+                            <div class="digit-input" data-index="3">
+                                <input type="text" maxlength="1" pattern="[0-9]" 
+                                       title="Chapter Ten">
+                                <label>Ch Ten</label>
+                            </div>
+                            <div class="digit-input" data-index="4">
+                                <input type="text" maxlength="1" pattern="[0-9]" 
+                                       title="Chapter One">
+                                <label>Ch One</label>
+                            </div>
+                            <div class="digit-input" data-index="5">
+                                <input type="text" maxlength="1" pattern="[1-9]" 
+                                       title="Worksheet (1-9)">
+                                <label>WS</label>
+                            </div>
+                        </div>
+                        
+                        <div class="code-display" id="full-code-display">
+                            <span class="code-placeholder">_ _ _ _ _ _</span>
+                        </div>
+                        
+                        <button class="activate-btn" id="activate-btn">
+                            <i class="fas fa-bolt"></i>
+                            ACTIVATE WORKSHEET
                         </button>
                     </div>
-
-                    <!-- Filters -->
-                    <div class="filters">
-                        <div class="filter-group">
-                            <label for="level-filter"><i class="fas fa-graduation-cap"></i> <span class="filter-label">Level</span></label>
-                            <select id="level-filter">
-                                <option value="all">All Levels</option>
-                                <option value="1">Primary School</option>
-                                <option value="2">Lower Secondary</option>
-                                <option value="3">Upper Secondary</option>
-                            </select>
+                    
+                    <!-- CODE GUIDE -->
+                    <div class="code-guide">
+                        <div class="guide-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h4>Code Format Guide</h4>
                         </div>
-                        <div class="filter-group">
-                            <label for="subject-filter"><i class="fas fa-atom"></i> <span class="filter-label">Subject</span></label>
-                            <select id="subject-filter">
-                                <option value="all">All Subjects</option>
-                                <option value="0">Mathematics</option>
-                                <option value="1">Science (General/Combined)</option>
-                                <option value="2">Combined Physics</option>
-                                <option value="3">Pure Physics</option>
-                                <option value="4">Combined Chemistry</option>
-                                <option value="5">Pure Chemistry</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="difficulty-filter"><i class="fas fa-chart-line"></i> <span class="filter-label">Difficulty</span></label>
-                            <select id="difficulty-filter">
-                                <option value="all">All Difficulties</option>
-                                <option value="Beginner">Beginner</option>
-                                <option value="Intermediate">Intermediate</option>
-                                <option value="Advanced">Advanced</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Worksheets List -->
-                    <div class="worksheets-container">
-                        <div id="worksheets-list" class="worksheets-list">
-                            <div class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Loading worksheets...
+                        
+                        <div class="code-breakdown">
+                            <div class="breakdown-example">
+                                <div class="code-example">
+                                    <span class="digit-example">3</span>
+                                    <span class="digit-example">4</span>
+                                    <span class="digit-example">4</span>
+                                    <span class="digit-example">0</span>
+                                    <span class="digit-example">9</span>
+                                    <span class="digit-example">1</span>
+                                </div>
+                                <div class="example-explanation">
+                                    Upper Sec | Combined Chem | Sec 4 | Ch 09 | WS 1
+                                </div>
+                            </div>
+                            
+                            <div class="digit-meanings">
+                                <div class="meaning-row">
+                                    <span class="digit-label">1st Digit - Level:</span>
+                                    <span class="digit-value">1=Primary, 2=Lower Sec, 3=Upper Sec</span>
+                                </div>
+                                <div class="meaning-row">
+                                    <span class="digit-label">2nd Digit - Subject:</span>
+                                    <span class="digit-value">0=Math, 1=Science, 2=Comb Physics, 3=Pure Physics, 4=Comb Chem, 5=Pure Chem</span>
+                                </div>
+                                <div class="meaning-row">
+                                    <span class="digit-label">3rd Digit - Grade:</span>
+                                    <span class="digit-value">P1-P6 (1-6) or S1-S4 (1-4)</span>
+                                </div>
+                                <div class="meaning-row">
+                                    <span class="digit-label">4th/5th - Chapter:</span>
+                                    <span class="digit-value">Tens & Ones digits (00-99)</span>
+                                </div>
+                                <div class="meaning-row">
+                                    <span class="digit-label">6th Digit - Worksheet:</span>
+                                    <span class="digit-value">Worksheet number (1-9)</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- AVAILABLE WORKSHEETS -->
+                <div class="worksheets-section">
+                    <div class="section-header">
+                        <i class="fas fa-list"></i>
+                        <h3>Available Worksheets</h3>
+                        <div class="worksheet-count" id="available-count">0</div>
+                    </div>
+                    
+                    <div class="worksheets-grid" id="worksheets-list">
+                        <!-- Worksheets will be loaded here -->
+                        <div class="loading-worksheets">
+                            <div class="loader"></div>
+                            <p>Scanning for worksheets...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                <!-- Right Panel - Game Area -->
-                <div class="game-panel">
-                    <div class="game-header">
-                        <h2 id="game-title"><i class="fas fa-gamepad"></i> <span class="game-title-text">Quiz Arena</span></h2>
-                        <div class="game-controls">
-                            <button id="bet-btn" class="btn-bet" disabled>
-                                <i class="fas fa-dice"></i> <span class="btn-text">Bet: <span id="bet-amount">50</span> coins</span>
-                            </button>
-                            <div class="bet-slider">
-                                <input type="range" id="bet-slider" min="10" max="500" value="50" step="10">
-                                <div class="slider-labels">
+            <section class="game-arena">
+                <div class="game-header">
+                    <div class="game-title">
+                        <i class="fas fa-gamepad"></i>
+                        <h2 id="game-title">QUIZ ARENA</h2>
+                    </div>
+                    
+                    <div class="bet-controls">
+                        <div class="bet-card">
+                            <div class="bet-header">
+                                <i class="fas fa-dice"></i>
+                                <span>PLACE YOUR BET</span>
+                            </div>
+                            <div class="bet-amount" id="bet-amount">50</div>
+                            <div class="bet-slider-container">
+                                <input type="range" id="bet-slider" min="10" max="500" value="50" step="10" class="bet-slider">
+                                <div class="slider-ticks">
                                     <span>10</span>
                                     <span>250</span>
                                     <span>500</span>
                                 </div>
                             </div>
+                            <button class="bet-btn" id="bet-btn" disabled>
+                                <i class="fas fa-play"></i>
+                                START GAME
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Question Display -->
-                    <div id="question-display" class="question-display">
-                        <div class="welcome-message">
-                            <i class="fas fa-arrow-left mobile-only-arrow"></i>
-                            <h3>Select a worksheet to begin!</h3>
-                            <p>Choose from the available worksheets on the left to start the quiz.</p>
-                            <div class="tips">
-                                <div class="tip">
-                                    <i class="fas fa-lightbulb"></i>
-                                    <span>Higher bets = Higher rewards!</span>
-                                </div>
-                                <div class="tip">
-                                    <i class="fas fa-fire"></i>
-                                    <span>Build win streaks for multipliers!</span>
-                                </div>
-                                <div class="tip tip-mobile">
-                                    <i class="fas fa-mobile-alt"></i>
-                                    <span>Tap menu icon for worksheets</span>
+                </div>
+                
+                <!-- ACTIVE WORKSHEET INFO -->
+                <div class="worksheet-info-card" id="worksheet-info">
+                    <div class="worksheet-info-header">
+                        <div class="info-code" id="active-worksheet-code">------</div>
+                        <div class="info-status" id="worksheet-status">
+                            <i class="fas fa-clock"></i>
+                            <span>NO WORKSHEET ACTIVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="worksheet-details" id="worksheet-details">
+                        <div class="no-worksheet-selected">
+                            <div class="empty-state">
+                                <i class="fas fa-key"></i>
+                                <h3>Enter a Worksheet Code</h3>
+                                <p>Use the 6-digit code system to activate a worksheet</p>
+                                <div class="quick-codes">
+                                    <button class="quick-code-btn" data-code="341011">
+                                        <span class="code">341011</span>
+                                        <span class="desc">P3 Math Ch1</span>
+                                    </button>
+                                    <button class="quick-code-btn" data-code="342091">
+                                        <span class="code">342091</span>
+                                        <span class="desc">S4 Comb Chem Ch9</span>
+                                    </button>
+                                    <button class="quick-code-btn" data-code="334151">
+                                        <span class="code">334151</span>
+                                        <span class="desc">S4 Pure Physics Ch15</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Options Grid -->
-                    <div id="options-grid" class="options-grid">
-                        <!-- Options will be populated here -->
-                    </div>
-
-                    <!-- Game Controls -->
-                    <div class="game-actions">
-                        <button id="hint-btn" class="btn-hint" disabled>
-                            <i class="fas fa-lightbulb"></i> <span class="btn-text">Hint (50)</span>
-                        </button>
-                        <button id="skip-btn" class="btn-skip" disabled>
-                            <i class="fas fa-forward"></i> <span class="btn-text">Skip (25)</span>
-                        </button>
-                        <button id="next-btn" class="btn-next" disabled>
-                            <i class="fas fa-arrow-right"></i> <span class="btn-text">Next</span>
-                        </button>
-                    </div>
-
-                    <!-- Progress and Feedback -->
-                    <div class="progress-section">
-                        <div class="progress-bar">
-                            <div id="progress-fill" class="progress-fill"></div>
-                        </div>
-                        <div class="progress-info">
-                            <span id="progress-text">Question 0/0</span>
-                            <span id="score-display">Score: 0</span>
+                </div>
+                
+                <!-- QUESTION DISPLAY -->
+                <div class="question-card" id="question-card">
+                    <div class="question-header">
+                        <div class="question-number" id="question-number">--</div>
+                        <div class="question-points" id="question-points">
+                            <i class="fas fa-star"></i>
+                            <span>-- POINTS</span>
                         </div>
                     </div>
-
-                    <!-- Feedback Message -->
-                    <div id="feedback" class="feedback">
-                        <!-- Feedback messages will appear here -->
+                    
+                    <div class="question-content" id="question-content">
+                        <div class="welcome-message">
+                            <div class="welcome-icon">🎯</div>
+                            <h3>ACTIVATE A WORKSHEET</h3>
+                            <p>Enter a 6-digit code or select from available worksheets to start</p>
+                            <div class="game-tips">
+                                <div class="tip">
+                                    <i class="fas fa-key"></i>
+                                    <span>Use the code format: Level-Subject-Grade-Chapter-Worksheet</span>
+                                </div>
+                                <div class="tip">
+                                    <i class="fas fa-coins"></i>
+                                    <span>Higher bets = Higher rewards!</span>
+                                </div>
+                                <div class="tip">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Build streaks for bigger multipliers!</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+                
+                <!-- OPTIONS GRID -->
+                <div class="options-grid" id="options-grid">
+                    <!-- Options will be loaded here -->
+                </div>
+                
+                <!-- GAME CONTROLS -->
+                <div class="game-controls">
+                    <button class="control-btn hint-btn" id="hint-btn" disabled>
+                        <i class="fas fa-lightbulb"></i>
+                        <span>HINT <small>(50 coins)</small></span>
+                    </button>
+                    
+                    <button class="control-btn skip-btn" id="skip-btn" disabled>
+                        <i class="fas fa-forward"></i>
+                        <span>SKIP <small>(25 coins)</small></span>
+                    </button>
+                    
+                    <button class="control-btn next-btn" id="next-btn" disabled>
+                        <i class="fas fa-arrow-right"></i>
+                        <span>NEXT QUESTION</span>
+                    </button>
+                </div>
+                
+                <!-- PROGRESS -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span id="progress-text">PROGRESS</span>
+                        <span id="progress-count">0/0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                
+                <!-- FEEDBACK -->
+                <div class="feedback-container" id="feedback-container">
+                    <div class="feedback-message" id="feedback-message">
+                        <!-- Feedback will appear here -->
+                    </div>
+                </div>
+            </section>
         </main>
 
-        <!-- Footer -->
-        <footer>
+        <footer class="game-footer">
             <div class="footer-content">
-                <p>Educational Quiz Game • Questions auto-detected from JSON files</p>
-                <p class="file-structure">
-                    <span class="file-structure-label">File structure:</span> 
-                    <code>Level-Subject-Grade-Chapter-Worksheet.json</code>
-                </p>
-                <div class="mobile-controls">
-                    <button id="mobile-worksheet-btn" class="mobile-control-btn">
-                        <i class="fas fa-book"></i> Worksheets
-                    </button>
-                    <button id="mobile-game-btn" class="mobile-control-btn active">
-                        <i class="fas fa-gamepad"></i> Game
-                    </button>
+                <div class="footer-info">
+                    <div class="footer-icon">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <div class="footer-text">
+                        <p>Worksheet Code System • JSON Auto-Detection</p>
+                        <p class="file-info">
+                            <i class="fas fa-folder"></i>
+                            Files: <code>[Level][Subject][Grade][ChapterTens][ChapterOnes][Worksheet].json</code>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="footer-stats">
+                    <div class="game-timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="game-timer">00:00</span>
+                    </div>
+                    <div class="accuracy-rate">
+                        <i class="fas fa-bullseye"></i>
+                        <span id="accuracy-rate">0%</span>
+                    </div>
                 </div>
             </div>
         </footer>
-
-        <!-- Mobile Overlay -->
-        <div class="mobile-overlay" id="mobile-overlay"></div>
     </div>
 
-    <!-- Confetti Container -->
-    <div id="confetti-container"></div>
+    <div class="effects-container">
+        <div id="confetti-container"></div>
+        <div id="coin-effect"></div>
+        <div id="streak-effect"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
