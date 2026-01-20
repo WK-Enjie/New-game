@@ -3,281 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Worksheet Quiz Game</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Quiz Challenge - Competitive Learning Game</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <header class="main-header">
-            <div class="logo-container">
-                <div class="logo-icon">📚</div>
-                <div class="logo-text">
-                    <h1>WORKSHEET <span class="highlight">QUIZ GAME</span></h1>
-                    <p class="subtitle">Enter Code • Upload JSON • Play Quiz</p>
-                </div>
+        <!-- Home Screen -->
+        <div id="homeScreen" class="screen active">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <h1>Quiz Challenge</h1>
+                <p>Test your knowledge against a friend!</p>
             </div>
             
-            <div class="header-stats">
-                <div class="stat-card">
-                    <i class="fas fa-key stat-icon"></i>
-                    <div class="stat-content">
-                        <div class="stat-value" id="active-code">------</div>
-                        <div class="stat-label">Active Code</div>
+            <div class="player-setup">
+                <div class="player-input">
+                    <h3><i class="fas fa-user"></i> Player 1</h3>
+                    <input type="text" id="player1Name" placeholder="Enter Player 1 Name" value="Player 1">
+                    <div class="color-picker">
+                        <span>Color:</span>
+                        <div class="color-option" style="background-color: #3498db;" data-color="#3498db"></div>
+                        <div class="color-option" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
+                        <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+                        <div class="color-option" style="background-color: #f39c12;" data-color="#f39c12"></div>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <i class="fas fa-file-alt stat-icon"></i>
-                    <div class="stat-content">
-                        <div class="stat-value" id="worksheet-count">0</div>
-                        <div class="stat-label">Worksheets</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <i class="fas fa-question-circle stat-icon"></i>
-                    <div class="stat-content">
-                        <div class="stat-value" id="question-count">0</div>
-                        <div class="stat-label">Questions</div>
+                <div class="player-input">
+                    <h3><i class="fas fa-user"></i> Player 2</h3>
+                    <input type="text" id="player2Name" placeholder="Enter Player 2 Name" value="Player 2">
+                    <div class="color-picker">
+                        <span>Color:</span>
+                        <div class="color-option" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
+                        <div class="color-option" style="background-color: #1abc9c;" data-color="#1abc9c"></div>
+                        <div class="color-option" style="background-color: #d35400;" data-color="#d35400"></div>
+                        <div class="color-option" style="background-color: #34495e;" data-color="#34495e"></div>
                     </div>
                 </div>
             </div>
-        </header>
-
-        <div class="game-stats">
-            <div class="stat-item">
-                <div class="stat-display">
-                    <i class="fas fa-coins"></i>
-                    <span id="coins">1,000</span>
-                </div>
-                <div class="stat-title">COINS</div>
+            
+            <div class="worksheet-input">
+                <h3><i class="fas fa-file-code"></i> Worksheet Code</h3>
+                <input type="text" id="worksheetCode" placeholder="Enter 6-digit code (e.g., 321011)" maxlength="6">
+                <button id="loadWorksheet" class="btn-primary">
+                    <i class="fas fa-search"></i> Load Worksheet
+                </button>
+                <div id="worksheetInfo" class="worksheet-info"></div>
             </div>
             
-            <div class="stat-item">
-                <div class="stat-display">
-                    <span id="multiplier">1.0x</span>
-                </div>
-                <div class="stat-title">MULTIPLIER</div>
-            </div>
+            <button id="startGame" class="btn-start" disabled>
+                <i class="fas fa-play"></i> Start Game
+            </button>
             
-            <div class="stat-item">
-                <div class="stat-display">
-                    <i class="fas fa-fire"></i>
-                    <span id="streak">0</span>
-                </div>
-                <div class="stat-title">STREAK</div>
-            </div>
-            
-            <div class="stat-item">
-                <div class="stat-display">
-                    <i class="fas fa-star"></i>
-                    <span id="score">0</span>
-                </div>
-                <div class="stat-title">SCORE</div>
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> How to Play</h3>
+                <ul>
+                    <li>Enter both players' names and choose colors</li>
+                    <li>Enter a 6-digit worksheet code (e.g., 321011 for Sec 3 Physics)</li>
+                    <li>Answer questions correctly to earn points</li>
+                    <li>Use power-ups strategically to gain advantage</li>
+                    <li>First to reach 100 points wins!</li>
+                </ul>
             </div>
         </div>
-
-        <main class="main-content">
-            <!-- LEFT PANEL -->
-            <div class="left-panel">
-                <div class="panel-section">
-                    <div class="section-header">
-                        <h2><i class="fas fa-key"></i> ENTER 6-DIGIT CODE</h2>
-                    </div>
-                    
-                    <div class="code-input-section">
-                        <div class="digit-inputs">
-                            <div class="digit-group">
-                                <div class="digit-label">Level (1-3)</div>
-                                <input type="text" maxlength="1" id="digit-0" data-index="0" placeholder="1">
-                                <div class="digit-help">1=Primary, 2=Lower Sec, 3=Upper Sec</div>
-                            </div>
-                            
-                            <div class="digit-group">
-                                <div class="digit-label">Subject (0-5)</div>
-                                <input type="text" maxlength="1" id="digit-1" data-index="1" placeholder="0">
-                                <div class="digit-help">0=Math, 1=Science, 2=Comb Physics, 3=Pure Physics, 4=Comb Chem, 5=Pure Chem</div>
-                            </div>
-                            
-                            <div class="digit-group">
-                                <div class="digit-label">Grade (1-6)</div>
-                                <input type="text" maxlength="1" id="digit-2" data-index="2" placeholder="1">
-                                <div class="digit-help">1=P1/S1, 2=P2/S2, 3=P3/S3, 4=P4/S4, 5=P5, 6=P6</div>
-                            </div>
-                            
-                            <div class="digit-group">
-                                <div class="digit-label">Chapter Tens (0-9)</div>
-                                <input type="text" maxlength="1" id="digit-3" data-index="3" placeholder="0">
-                            </div>
-                            
-                            <div class="digit-group">
-                                <div class="digit-label">Chapter Ones (0-9)</div>
-                                <input type="text" maxlength="1" id="digit-4" data-index="4" placeholder="1">
-                            </div>
-                            
-                            <div class="digit-group">
-                                <div class="digit-label">Worksheet (1-9)</div>
-                                <input type="text" maxlength="1" id="digit-5" data-index="5" placeholder="1">
-                            </div>
-                        </div>
-                        
-                        <div class="code-display">
-                            <div class="display-label">FULL CODE:</div>
-                            <div class="full-code" id="full-code">_ _ _ _ _ _</div>
-                        </div>
-                        
-                        <button class="activate-button" id="activate-btn" disabled>
-                            <i class="fas fa-bolt"></i> ACTIVATE WORKSHEET
-                        </button>
+        
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="game-header">
+                <div class="player-stats player1-stats">
+                    <div class="player-name"></div>
+                    <div class="player-score">0</div>
+                    <div class="player-color"></div>
+                </div>
+                
+                <div class="game-info">
+                    <div class="question-counter">Question: <span id="currentQuestion">1</span>/<span id="totalQuestions">0</span></div>
+                    <div class="timer" id="timer">30</div>
+                    <div class="powerup-indicator" id="powerupIndicator">
+                        <i class="fas fa-bolt"></i> Power-up Available
                     </div>
                 </div>
                 
-                <div class="panel-section">
-                    <div class="section-header">
-                        <h2><i class="fas fa-upload"></i> UPLOAD JSON FILES</h2>
-                    </div>
-                    
-                    <div class="upload-section">
-                        <div class="upload-area" id="upload-area">
-                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                            <p>Click to select JSON files</p>
-                            <p class="upload-note">File names should be 6 digits: 301011.json, 342091.json, etc.</p>
-                        </div>
-                        
-                        <div class="quick-codes">
-                            <h3>Test Codes:</h3>
-                            <div class="code-buttons">
-                                <button class="quick-code" data-code="301011">301011</button>
-                                <button class="quick-code" data-code="341011">341011</button>
-                                <button class="quick-code" data-code="342091">342091</button>
-                                <button class="quick-code" data-code="334151">334151</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="player-stats player2-stats">
+                    <div class="player-name"></div>
+                    <div class="player-score">0</div>
+                    <div class="player-color"></div>
                 </div>
             </div>
             
-            <!-- RIGHT PANEL -->
-            <div class="right-panel">
-                <div class="worksheet-info">
-                    <div class="info-header">
-                        <div class="code-display">
-                            <span class="current-code" id="current-code">------</span>
-                            <span class="status-badge" id="worksheet-status">
-                                <i class="fas fa-clock"></i> INACTIVE
-                            </span>
-                        </div>
-                        <h2 id="worksheet-title">NO WORKSHEET ACTIVATED</h2>
-                    </div>
-                    
-                    <div class="worksheet-details" id="worksheet-details">
-                        <div class="empty-state">
-                            <i class="fas fa-key empty-icon"></i>
-                            <h3>Enter a Worksheet Code</h3>
-                            <p>Use the 6-digit code system to activate a worksheet</p>
-                            <div class="folder-structure">
-                                <h4>Expected File Location:</h4>
-                                <code>Questions/[level]/[subject]/[code].json</code>
-                                <p class="structure-example">Example: Questions/upper-secondary/math/301011.json</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="game-controls">
-                    <div class="bet-section">
-                        <h3><i class="fas fa-dice"></i> PLACE YOUR BET</h3>
-                        <div class="bet-amount">
-                            <span id="bet-value">50</span> COINS
-                        </div>
-                        <input type="range" id="bet-slider" min="10" max="500" value="50" step="10">
-                        <div class="bet-range">
-                            <span>10</span>
-                            <span>250</span>
-                            <span>500</span>
-                        </div>
-                        <button class="start-button" id="start-btn" disabled>
-                            <i class="fas fa-play"></i> START GAME
-                        </button>
-                    </div>
-                    
-                    <div class="game-buttons">
-                        <button class="game-button hint-btn" id="hint-btn" disabled>
-                            <i class="fas fa-lightbulb"></i> HINT (50)
-                        </button>
-                        <button class="game-button skip-btn" id="skip-btn" disabled>
-                            <i class="fas fa-forward"></i> SKIP (25)
-                        </button>
-                        <button class="game-button next-btn" id="next-btn" disabled>
-                            <i class="fas fa-arrow-right"></i> NEXT
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="question-area">
-                    <div class="question-header">
-                        <div class="question-meta">
-                            <span class="question-number" id="question-number">--</span>
-                            <span class="question-points" id="question-points">-- POINTS</span>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progress-fill"></div>
-                            </div>
-                            <div class="progress-text" id="progress-text">0/0</div>
-                        </div>
-                    </div>
-                    
-                    <div class="question-content" id="question-content">
-                        <div class="welcome-screen">
-                            <div class="welcome-icon">🎯</div>
-                            <h2>ACTIVATE A WORKSHEET</h2>
-                            <p>Enter a 6-digit code above, then activate and start playing!</p>
-                        </div>
-                    </div>
-                    
-                    <div class="options-grid" id="options-grid">
-                        <!-- Options will load here -->
-                    </div>
-                </div>
-                
-                <div class="feedback-area" id="feedback-area">
-                    <div class="feedback-message" id="feedback-message"></div>
-                </div>
+            <div class="question-container">
+                <div class="question-text" id="questionText"></div>
+                <div class="options-container" id="optionsContainer"></div>
             </div>
-        </main>
-
-        <footer class="main-footer">
-            <div class="footer-content">
-                <div class="footer-info">
-                    <i class="fas fa-code"></i>
-                    <div>
-                        <h4>Worksheet Code System</h4>
-                        <p>6-digit code: Level(1) Subject(2) Grade(3) Chapter(4-5) Worksheet(6)</p>
+            
+            <div class="game-controls">
+                <button id="usePowerup" class="btn-powerup" disabled>
+                    <i class="fas fa-bolt"></i> Use Power-up
+                </button>
+                <button id="nextQuestion" class="btn-next" disabled>
+                    Next Question <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            
+            <div class="powerup-modal" id="powerupModal">
+                <div class="powerup-content">
+                    <h3><i class="fas fa-magic"></i> Choose a Power-up!</h3>
+                    <p id="powerupPlayer">Player 1's turn</p>
+                    <div class="powerup-options">
+                        <div class="powerup-option" data-powerup="double">
+                            <i class="fas fa-times-circle"></i>
+                            <h4>Double Points</h4>
+                            <p>Double your current score</p>
+                        </div>
+                        <div class="powerup-option" data-powerup="halve">
+                            <i class="fas fa-divide"></i>
+                            <h4>Halve Opponent</h4>
+                            <p>Halve opponent's score</p>
+                        </div>
+                        <div class="powerup-option" data-powerup="triple">
+                            <i class="fas fa-cube"></i>
+                            <h4>Triple Points</h4>
+                            <p>Triple your current score</p>
+                        </div>
+                        <div class="powerup-option" data-powerup="swap">
+                            <i class="fas fa-exchange-alt"></i>
+                            <h4>Swap Scores</h4>
+                            <p>Swap scores with opponent</p>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="footer-actions">
-                    <div class="file-count">
-                        <i class="fas fa-database"></i>
-                        <span id="loaded-files">0 files loaded</span>
-                    </div>
-                    <button id="refresh-btn" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> Refresh Files
-                    </button>
-                    <button id="clear-btn" class="clear-btn">
-                        <i class="fas fa-trash"></i> Clear All
+                    <button id="cancelPowerup" class="btn-cancel">
+                        <i class="fas fa-times"></i> Skip Power-up
                     </button>
                 </div>
             </div>
+        </div>
+        
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="screen">
+            <div class="results-container">
+                <h2><i class="fas fa-trophy"></i> Game Over!</h2>
+                <div class="winner-announcement" id="winnerAnnouncement"></div>
+                
+                <div class="final-scores">
+                    <div class="final-score player1-final">
+                        <h3 id="finalPlayer1Name"></h3>
+                        <div class="final-score-value" id="finalPlayer1Score"></div>
+                    </div>
+                    <div class="final-score player2-final">
+                        <h3 id="finalPlayer2Name"></h3>
+                        <div class="final-score-value" id="finalPlayer2Score"></div>
+                    </div>
+                </div>
+                
+                <div class="game-summary">
+                    <h3><i class="fas fa-chart-bar"></i> Game Summary</h3>
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Questions Answered: </span>
+                            <strong id="totalAnswered">0</strong>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Correct Answers: </span>
+                            <strong id="totalCorrect">0</strong>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-bolt"></i>
+                            <span>Power-ups Used: </span>
+                            <strong id="powerupsUsed">0</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="results-controls">
+                    <button id="playAgain" class="btn-primary">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                    <button id="newGame" class="btn-secondary">
+                        <i class="fas fa-home"></i> New Game
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer>
+            <p>Educational Quiz Game | Created for Interactive Learning</p>
         </footer>
     </div>
-
-    <input type="file" id="file-input" accept=".json" multiple style="display: none;">
-
+    
     <script src="script.js"></script>
 </body>
 </html>
