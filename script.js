@@ -1,1044 +1,1140 @@
-// Brain Battle Card Game - Searches Subfolders for JSON Files
-document.addEventListener('DOMContentLoaded', function() {
-    // Game State
-    let currentScreen = 'start';
-    let currentQuestion = 0;
-    let currentPlayer = 1;
-    let selectedQuiz = null;
-    let quizData = null;
-    let scores = { 1: 0, 2: 0 };
-    let selectedOption = null;
-    let playerGambles = { 1: null, 2: null };
-    let gameStats = {
-        questionsAnswered: 0,
-        correctAnswers: 0
-    };
+class QuizGame {
+    constructor() {
+        this.worksheets = [];
+        this.currentWorksheet = null;
+        this.currentQuestionIndex = 0;
+        this.shuffledQuestions = [];
+        this.score = 0;
+        this.coins = 1000;
+        this.currentBet = 50;
+        this.winStreak = 0;
+        this.multiplier = 1;
+        this.isGameActive = false;
+        this.usedHints = new Set();
+        this.isMobile = window.innerWidth <= 992;
+        
+        // Initialize the game
+        this.init();
+    }
     
-    // Store shuffled questions
-    let shuffledQuestions = [];
-
-    // Gambling Options Configuration (ONLY AT END)
-    const GAMBLING_OPTIONS = [
-        { 
-            id: 1, 
-            title: "Double or Nothing", 
-            description: "Risk it all! Double your points or lose them all",
-            icon: "🎲",
-            type: "doubleOrNothing"
-        },
-        { 
-            id: 2, 
-            title: "Safe 50%", 
-            description: "Play it safe with a guaranteed 50% increase",
-            icon: "🛡️",
-            type: "safe"
-        },
-        { 
-            id: 3, 
-            title: "Lucky Dip", 
-            description: "Random multiplier between 0.5x and 2x",
-            icon: "🎁",
-            type: "random"
-        },
-        { 
-            id: 4, 
-            title: "Skip Gamble", 
-            description: "Keep your current points, no risk taken",
-            icon: "✋",
-            type: "skip"
-        }
-    ];
-
-    // DOM Elements
-    const elements = {
-        // Screens
-        startScreen: document.getElementById('start-screen'),
-        gameScreen: document.getElementById('game-screen'),
-        gamblingScreen: document.getElementById('gambling-screen'),
-        gameOverScreen: document.getElementById('game-over'),
-        
-        // Code input
-        codeDigits: document.querySelectorAll('.code-digit'),
-        keypadButtons: document.querySelectorAll('.keypad-btn'),
-        backspaceBtn: document.getElementById('backspace'),
-        clearBtn: document.getElementById('clear'),
-        validateBtn: document.getElementById('validate-code'),
-        startGameBtn: document.getElementById('start-game'),
-        startError: document.getElementById('start-error'),
-        loadingIndicator: document.getElementById('loading-indicator'),
-        
-        // Quiz info
-        quizInfo: document.getElementById('quiz-info'),
-        quizTitleDisplay: document.getElementById('quiz-title-display'),
-        quizSubjectDisplay: document.getElementById('quiz-subject-display'),
-        quizLevelDisplay: document.getElementById('quiz-level-display'),
-        quizCountDisplay: document.getElementById('quiz-count-display'),
-        
-        // Game screen
-        gameQuizTitle: document.getElementById('game-quiz-title'),
-        currentQ: document.getElementById('current-q'),
-        totalQ: document.getElementById('total-q'),
-        currentPlayerName: document.getElementById('current-player-name'),
-        player1Score: document.getElementById('player1-score'),
-        player2Score: document.getElementById('player2-score'),
-        player1Display: document.getElementById('player1-display'),
-        player2Display: document.getElementById('player2-display'),
-        
-        // Question elements
-        questionText: document.getElementById('question-text'),
-        optionsContainer: document.getElementById('options-container'),
-        basePoints: document.getElementById('base-points'),
-        
-        // Game controls
-        submitBtn: document.getElementById('submit-answer'),
-        nextBtn: document.getElementById('next-question'),
-        homeBtn: document.getElementById('home-btn'),
-        
-        // Results
-        resultsDisplay: document.getElementById('results-display'),
-        answerResult: document.getElementById('answer-result'),
-        pointsEarned: document.getElementById('points-earned'),
-        
-        // Gambling screen
-        gamblingTitle: document.getElementById('gambling-title'),
-        gamblingPlayerInfo: document.getElementById('gambling-player-info'),
-        gamblingOptions: document.getElementById('gambling-options'),
-        gamblingResult: document.getElementById('gambling-result'),
-        resultIcon: document.getElementById('result-icon'),
-        resultTitle: document.getElementById('result-title'),
-        resultDescription: document.getElementById('result-description'),
-        resultPoints: document.getElementById('result-points'),
-        finalPoints1: document.getElementById('final-points1'),
-        finalPoints2: document.getElementById('final-points2'),
-        continueBtn: document.getElementById('continue-after-gamble'),
-        nextGamblerBtn: document.getElementById('next-gambler'),
-        
-        // Game over
-        winnerTrophy: document.getElementById('winner-trophy'),
-        winnerTitle: document.getElementById('winner-title'),
-        winnerMessage: document.getElementById('winner-message'),
-        finalScore1: document.getElementById('final-score1'),
-        finalScore2: document.getElementById('final-score2'),
-        questionsAnswered: document.getElementById('questions-answered'),
-        correctAnswers: document.getElementById('correct-answers'),
-        accuracyRate: document.getElementById('accuracy-rate'),
-        playAgainBtn: document.getElementById('play-again'),
-        newGameBtn: document.getElementById('new-game')
-    };
-
-    // Initialize Game
-    init();
-
-    function init() {
-        console.log('Brain Battle Game - Searches Subfolders');
-        setupEventListeners();
-        initCodeInput();
-        console.log('Game initialized successfully');
+    init() {
+        // Load worksheets and set up event listeners
+        this.loadWorksheets();
+        this.setupEventListeners();
+        this.setupMobileEvents();
+        this.updateUI();
+        this.handleResize();
     }
-
-    function setupEventListeners() {
-        console.log('Setting up event listeners...');
+    
+    async loadWorksheets() {
+        try {
+            // Sample worksheets data
+            const worksheetData = [
+                {
+                    "code": "341-01-1",
+                    "title": "Primary 3 Mathematics - Chapter 1",
+                    "subject": "Mathematics",
+                    "level": "Primary School",
+                    "topic": "Chapter 1: Numbers to 1000",
+                    "difficulty": "Beginner",
+                    "author": "Math Department",
+                    "created": "2024-01-15",
+                    "description": "Basic number concepts for Primary 3 students.",
+                    "questions": [
+                        {
+                            "id": 1,
+                            "question": "What is the value of the digit 5 in the number 359?",
+                            "options": ["5", "50", "500", "5000"],
+                            "correctAnswer": 1,
+                            "points": 10,
+                            "explanation": "The digit 5 is in the tens place, so its value is 50."
+                        },
+                        {
+                            "id": 2,
+                            "question": "Which number comes after 299?",
+                            "options": ["298", "300", "399", "301"],
+                            "correctAnswer": 1,
+                            "points": 10,
+                            "explanation": "After 299 comes 300."
+                        },
+                        {
+                            "id": 3,
+                            "question": "What is 145 + 328?",
+                            "options": ["463", "473", "483", "493"],
+                            "correctAnswer": 1,
+                            "points": 15,
+                            "explanation": "145 + 328 = 473"
+                        }
+                    ]
+                },
+                {
+                    "code": "342-09-1",
+                    "title": "Secondary 4 Combined Chemistry - Chapter 9",
+                    "subject": "Combined Chemistry",
+                    "level": "Upper Secondary",
+                    "topic": "Chapter 9: The Periodic Table",
+                    "difficulty": "Intermediate",
+                    "author": "Science Department",
+                    "created": "2024-01-20",
+                    "description": "Periodic table concepts and trends for combined chemistry.",
+                    "questions": [
+                        {
+                            "id": 1,
+                            "question": "Which group of elements are known as noble gases?",
+                            "options": ["Group 1", "Group 2", "Group 7", "Group 0"],
+                            "correctAnswer": 3,
+                            "points": 15,
+                            "explanation": "Noble gases are in Group 0 (or Group 18) of the periodic table."
+                        },
+                        {
+                            "id": 2,
+                            "question": "What is the trend in atomic radius across a period?",
+                            "options": ["Increases", "Decreases", "Stays the same", "Increases then decreases"],
+                            "correctAnswer": 1,
+                            "points": 20,
+                            "explanation": "Atomic radius decreases across a period due to increasing nuclear charge."
+                        }
+                    ]
+                },
+                {
+                    "code": "334-15-1",
+                    "title": "Static Electricity (Conceptual)",
+                    "subject": "Pure Physics",
+                    "level": "Upper Secondary",
+                    "topic": "15. Static Electricity",
+                    "difficulty": "Intermediate",
+                    "author": "Physics Department",
+                    "created": "2024-01-19",
+                    "description": "Conceptual questions on static electricity covering charges, fields, charging methods, and applications.",
+                    "questions": [
+                        {
+                            "id": 1,
+                            "question": "What is the SI unit for measuring electric charge?",
+                            "options": ["Coulomb", "Newton", "Joule", "Watt"],
+                            "correctAnswer": 0,
+                            "points": 10,
+                            "explanation": "The coulomb (C) is the SI unit of electric charge."
+                        },
+                        {
+                            "id": 2,
+                            "question": "When a plastic rod is rubbed with wool, the plastic becomes negatively charged. What has been transferred?",
+                            "options": [
+                                "Electrons from wool to plastic",
+                                "Protons from plastic to wool",
+                                "Electrons from plastic to wool",
+                                "Protons from wool to plastic"
+                            ],
+                            "correctAnswer": 0,
+                            "points": 10,
+                            "explanation": "Electrons are transferred from the wool to the plastic rod."
+                        }
+                    ]
+                },
+                {
+                    "code": "201-01-1",
+                    "title": "Secondary 1 Mathematics - Chapter 1",
+                    "subject": "Mathematics",
+                    "level": "Lower Secondary",
+                    "topic": "Chapter 1: LCM and HCF",
+                    "difficulty": "Intermediate",
+                    "author": "Math Department",
+                    "created": "2024-01-25",
+                    "description": "LCM and HCF concepts for Secondary 1 students.",
+                    "questions": [
+                        {
+                            "id": 1,
+                            "question": "What is the LCM of 12 and 18?",
+                            "options": ["24", "36", "48", "72"],
+                            "correctAnswer": 1,
+                            "points": 15,
+                            "explanation": "LCM of 12 and 18 is 36."
+                        },
+                        {
+                            "id": 2,
+                            "question": "What is the HCF of 24 and 36?",
+                            "options": ["6", "8", "12", "24"],
+                            "correctAnswer": 2,
+                            "points": 15,
+                            "explanation": "HCF of 24 and 36 is 12."
+                        }
+                    ]
+                }
+            ];
+            
+            this.worksheets = worksheetData;
+            
+            this.updateWorksheetList();
+            this.updateStats();
+            
+            // Simulate loading delay
+            setTimeout(() => {
+                document.querySelector('.loading').style.display = 'none';
+            }, 800);
+            
+        } catch (error) {
+            console.error("Error loading worksheets:", error);
+            this.showError("Failed to load worksheets. Please check your internet connection.");
+        }
+    }
+    
+    setupEventListeners() {
+        // Bet slider
+        const betSlider = document.getElementById('bet-slider');
+        betSlider.addEventListener('input', (e) => {
+            this.currentBet = parseInt(e.target.value);
+            document.getElementById('bet-amount').textContent = this.currentBet;
+        });
         
-        // Code keypad
-        elements.keypadButtons.forEach(btn => {
-            if (!btn.id) {
-                btn.addEventListener('click', function() {
-                    handleCodeInput(this.dataset.key);
-                });
+        // Add touch support for slider on mobile
+        betSlider.addEventListener('touchstart', () => {
+            betSlider.classList.add('slider-active');
+        });
+        
+        betSlider.addEventListener('touchend', () => {
+            setTimeout(() => {
+                betSlider.classList.remove('slider-active');
+            }, 300);
+        });
+        
+        // Place bet button
+        document.getElementById('bet-btn').addEventListener('click', () => this.startGame());
+        
+        // Option buttons - using event delegation for better mobile performance
+        document.getElementById('options-grid').addEventListener('click', (e) => {
+            const optionBtn = e.target.closest('.option-btn');
+            if (optionBtn && !optionBtn.disabled) {
+                const selectedOption = parseInt(optionBtn.dataset.index);
+                this.checkAnswer(selectedOption);
             }
         });
         
-        elements.backspaceBtn.addEventListener('click', handleBackspace);
-        elements.clearBtn.addEventListener('click', handleClear);
-        elements.validateBtn.addEventListener('click', validateCode);
-        elements.startGameBtn.addEventListener('click', startGame);
+        // Add touch feedback for option buttons
+        document.getElementById('options-grid').addEventListener('touchstart', (e) => {
+            const optionBtn = e.target.closest('.option-btn');
+            if (optionBtn && !optionBtn.disabled) {
+                optionBtn.classList.add('touch-active');
+            }
+        }, { passive: true });
         
-        // Game controls
-        elements.submitBtn.addEventListener('click', submitAnswer);
-        elements.nextBtn.addEventListener('click', nextQuestion);
-        elements.homeBtn.addEventListener('click', goHome);
+        document.getElementById('options-grid').addEventListener('touchend', (e) => {
+            const optionBtn = e.target.closest('.option-btn');
+            if (optionBtn) {
+                optionBtn.classList.remove('touch-active');
+            }
+        }, { passive: true });
         
-        // Gambling buttons
-        elements.continueBtn.addEventListener('click', continueToGameOver);
-        elements.nextGamblerBtn.addEventListener('click', nextGambler);
+        // Game control buttons
+        document.getElementById('hint-btn').addEventListener('click', () => this.useHint());
+        document.getElementById('skip-btn').addEventListener('click', () => this.skipQuestion());
+        document.getElementById('next-btn').addEventListener('click', () => this.nextQuestion());
         
-        // Game over buttons
-        elements.playAgainBtn.addEventListener('click', playAgain);
-        elements.newGameBtn.addEventListener('click', newGame);
+        // Refresh button
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            this.loadWorksheets();
+            this.showToast('Worksheets refreshed!', 'success');
+        });
         
-        console.log('Event listeners setup complete');
+        // Filters
+        document.getElementById('level-filter').addEventListener('change', () => this.updateWorksheetList());
+        document.getElementById('subject-filter').addEventListener('change', () => this.updateWorksheetList());
+        document.getElementById('difficulty-filter').addEventListener('change', () => this.updateWorksheetList());
+        
+        // Window resize handler
+        window.addEventListener('resize', () => this.handleResize());
+        
+        // Prevent zoom on mobile for better UX
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // Prevent double tap zoom
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
     }
-
-    function initCodeInput() {
-        elements.codeDigits[0].classList.add('active');
-        elements.codeDigits.forEach(digit => {
-            digit.addEventListener('click', function() {
-                elements.codeDigits.forEach(d => d.classList.remove('active'));
-                this.classList.add('active');
-            });
+    
+    setupMobileEvents() {
+        // Mobile menu button
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const selectionPanel = document.getElementById('selection-panel');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const mobileWorksheetBtn = document.getElementById('mobile-worksheet-btn');
+        const mobileGameBtn = document.getElementById('mobile-game-btn');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            selectionPanel.classList.toggle('active');
+            mobileOverlay.classList.toggle('active');
+            document.body.style.overflow = selectionPanel.classList.contains('active') ? 'hidden' : '';
+        });
+        
+        mobileOverlay.addEventListener('click', () => {
+            selectionPanel.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+        
+        mobileWorksheetBtn.addEventListener('click', () => {
+            selectionPanel.classList.add('active');
+            mobileOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            mobileWorksheetBtn.classList.add('active');
+            mobileGameBtn.classList.remove('active');
+        });
+        
+        mobileGameBtn.addEventListener('click', () => {
+            selectionPanel.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            mobileGameBtn.classList.add('active');
+            mobileWorksheetBtn.classList.remove('active');
+        });
+        
+        // Close panel when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (this.isMobile && 
+                !selectionPanel.contains(e.target) && 
+                !mobileMenuBtn.contains(e.target) &&
+                selectionPanel.classList.contains('active')) {
+                selectionPanel.classList.remove('active');
+                mobileOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
         });
     }
-
-    function handleCodeInput(key) {
-        const activeDigit = document.querySelector('.code-digit.active');
-        if (!activeDigit) return;
+    
+    handleResize() {
+        this.isMobile = window.innerWidth <= 992;
+        const selectionPanel = document.getElementById('selection-panel');
+        const mobileOverlay = document.getElementById('mobile-overlay');
         
-        const index = parseInt(activeDigit.dataset.index);
-        activeDigit.textContent = key;
-        activeDigit.classList.remove('active');
-        
-        if (index < 5) {
-            elements.codeDigits[index + 1].classList.add('active');
-        }
-        
-        updateValidateButton();
-    }
-
-    function handleBackspace() {
-        const activeDigit = document.querySelector('.code-digit.active');
-        let index;
-        
-        if (activeDigit) {
-            index = parseInt(activeDigit.dataset.index);
+        // Reset mobile menu on desktop
+        if (!this.isMobile) {
+            selectionPanel.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            selectionPanel.classList.remove('mobile-hidden');
         } else {
-            index = 5;
-            while (index >= 0 && elements.codeDigits[index].textContent === '_') {
-                index--;
-            }
-            if (index < 0) return;
+            selectionPanel.classList.add('mobile-hidden');
         }
         
-        elements.codeDigits[index].textContent = '_';
-        elements.codeDigits[index].classList.add('active');
+        // Update any mobile-specific UI
+        this.updateMobileUI();
+    }
+    
+    updateMobileUI() {
+        // Add mobile-specific classes if needed
+        if (this.isMobile) {
+            document.body.classList.add('mobile-view');
+        } else {
+            document.body.classList.remove('mobile-view');
+        }
+    }
+    
+    updateWorksheetList() {
+        const worksheetsList = document.getElementById('worksheets-list');
+        const levelFilter = document.getElementById('level-filter').value;
+        const subjectFilter = document.getElementById('subject-filter').value;
+        const difficultyFilter = document.getElementById('difficulty-filter').value;
         
-        elements.codeDigits.forEach((digit, i) => {
-            if (i !== index) digit.classList.remove('active');
+        // Filter worksheets
+        const filteredWorksheets = this.worksheets.filter(ws => {
+            const levelMatch = levelFilter === 'all' || 
+                (levelFilter === '1' && ws.level.includes('Primary')) ||
+                (levelFilter === '2' && ws.level.includes('Lower Secondary')) ||
+                (levelFilter === '3' && ws.level.includes('Upper Secondary'));
+            
+            const subjectMatch = subjectFilter === 'all' || 
+                ws.subject.toLowerCase().includes(this.getSubjectName(subjectFilter).toLowerCase());
+            
+            const difficultyMatch = difficultyFilter === 'all' || 
+                ws.difficulty === difficultyFilter;
+            
+            return levelMatch && subjectMatch && difficultyMatch;
         });
         
-        updateValidateButton();
-    }
-
-    function handleClear() {
-        elements.codeDigits.forEach(digit => {
-            digit.textContent = '_';
-            digit.classList.remove('active');
-        });
-        elements.codeDigits[0].classList.add('active');
-        updateValidateButton();
-        hideQuizInfo();
-    }
-
-    function updateValidateButton() {
-        const code = getCurrentCode();
-        elements.validateBtn.disabled = code.length !== 6;
-    }
-
-    function getCurrentCode() {
-        let code = '';
-        elements.codeDigits.forEach(digit => {
-            if (digit.textContent !== '_') {
-                code += digit.textContent;
-            }
-        });
-        return code;
-    }
-
-    async function validateCode() {
-        const code = getCurrentCode();
+        // Update worksheet count
+        document.getElementById('worksheet-count').textContent = filteredWorksheets.length;
         
-        if (code.length !== 6) {
-            showError('Code must be 6 digits');
+        // Clear current list
+        worksheetsList.innerHTML = '';
+        
+        if (filteredWorksheets.length === 0) {
+            worksheetsList.innerHTML = `
+                <div class="no-worksheets">
+                    <i class="fas fa-search"></i>
+                    <p>No worksheets found matching your criteria.</p>
+                    <button class="btn-refresh" onclick="quizGame.loadWorksheets()" style="margin-top: 10px;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            `;
             return;
         }
         
-        // Show loading indicator
-        showLoading(true);
-        
-        try {
-            // Search for JSON file in multiple locations including subfolders
-            const foundPath = await findQuizFile(code);
-            
-            if (!foundPath) {
-                throw new Error(`Quiz ${code}.json not found in Questions/ folder or subfolders`);
+        // Add worksheets to list
+        filteredWorksheets.forEach((worksheet) => {
+            const worksheetElement = document.createElement('div');
+            worksheetElement.className = 'worksheet-item';
+            if (this.currentWorksheet && this.currentWorksheet.code === worksheet.code) {
+                worksheetElement.classList.add('active');
             }
             
-            console.log('Found quiz at:', foundPath);
-            const response = await fetch(foundPath);
+            // Truncate description for mobile
+            const description = this.isMobile && worksheet.description.length > 80 
+                ? worksheet.description.substring(0, 80) + '...' 
+                : worksheet.description;
             
-            if (!response.ok) {
-                throw new Error(`Failed to load: ${response.status} ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            
-            // Validate the JSON structure
-            if (!validateQuizJSON(data, code)) {
-                throw new Error('Invalid JSON structure');
-            }
-            
-            // Store quiz data
-            quizData = data;
-            selectedQuiz = {
-                code: code,
-                title: quizData.title || 'Untitled Quiz',
-                subject: quizData.subject || 'General',
-                level: quizData.level || 'Not specified',
-                questions: quizData.questions.length,
-                path: foundPath
-            };
-            
-            // Shuffle questions immediately when loaded
-            shuffleQuestions();
-            
-            // Update UI
-            showQuizInfo(selectedQuiz);
-            elements.startError.textContent = '';
-            elements.startGameBtn.disabled = false;
-            showLoading(false);
-            
-            console.log(`Quiz loaded successfully from ${foundPath} with ${quizData.questions.length} questions`);
-            
-        } catch (error) {
-            console.error('Error loading quiz:', error);
-            showError(`Cannot load quiz: ${error.message}`);
-            showLoading(false);
-        }
-    }
-
-    // Function to search for quiz file in subfolders
-    async function findQuizFile(code) {
-        console.log(`Searching for quiz: ${code}.json`);
-        
-        // Define search paths including subfolders
-        const searchPaths = [
-            // Root level
-            `Questions/${code}.json`,
-            `./Questions/${code}.json`,
-            `${code}.json`,
-            `./${code}.json`,
-            
-            // Common subfolder patterns
-            `Questions/Physics/${code}.json`,
-            `Questions/Math/${code}.json`,
-            `Questions/Science/${code}.json`,
-            `Questions/English/${code}.json`,
-            `Questions/Chemistry/${code}.json`,
-            `Questions/Biology/${code}.json`,
-            `Questions/Geography/${code}.json`,
-            `Questions/History/${code}.json`,
-            
-            // Year-based subfolders
-            `Questions/2024/${code}.json`,
-            `Questions/2023/${code}.json`,
-            `Questions/2022/${code}.json`,
-            
-            // Level-based subfolders
-            `Questions/Primary/${code}.json`,
-            `Questions/Secondary/${code}.json`,
-            `Questions/College/${code}.json`,
-            
-            // Subject-based subfolders with years
-            `Questions/Physics/2024/${code}.json`,
-            `Questions/Math/2024/${code}.json`,
-            `Questions/Science/2024/${code}.json`,
-            
-            // Two-level deep
-            `Questions/Physics/Secondary/${code}.json`,
-            `Questions/Math/Primary/${code}.json`,
-            `Questions/Science/Secondary/${code}.json`,
-            
-            // Try with lowercase/uppercase variations
-            `questions/${code}.json`,
-            `QUESTIONS/${code}.json`,
-            `questions/${code.toLowerCase()}.json`,
-            `questions/${code.toUpperCase()}.json`
-        ];
-        
-        // Also try to find all JSON files recursively (more advanced)
-        try {
-            // Method 1: Try to get directory listing (works on some servers)
-            const recursiveResult = await searchRecursively(code);
-            if (recursiveResult) {
-                return recursiveResult;
-            }
-        } catch (recursiveError) {
-            console.log('Recursive search failed, trying predefined paths');
-        }
-        
-        // Method 2: Try all predefined paths
-        for (const path of searchPaths) {
-            try {
-                console.log(`Trying path: ${path}`);
-                const response = await fetch(path, { method: 'HEAD' });
-                if (response.ok) {
-                    return path;
-                }
-            } catch (error) {
-                // Continue to next path
-                continue;
-            }
-        }
-        
-        // Method 3: Try with .txt extension too (some servers block .json)
-        const txtPaths = [
-            `Questions/${code}.txt`,
-            `./Questions/${code}.txt`,
-            `Questions/${code}.json.txt`
-        ];
-        
-        for (const path of txtPaths) {
-            try {
-                console.log(`Trying txt path: ${path}`);
-                const response = await fetch(path, { method: 'HEAD' });
-                if (response.ok) {
-                    return path;
-                }
-            } catch (error) {
-                continue;
-            }
-        }
-        
-        return null;
-    }
-
-    // Advanced recursive search (works if server allows directory listing)
-    async function searchRecursively(code) {
-        try {
-            // Try to get list of all available quizzes
-            const indexResponse = await fetch('Questions/quiz-index.json');
-            if (indexResponse.ok) {
-                const index = await indexResponse.json();
-                if (index[code]) {
-                    return index[code];
-                }
-            }
-        } catch (error) {
-            console.log('No quiz index found');
-        }
-        
-        // Try to scan directory (requires server support)
-        try {
-            const scanResponse = await fetch('Questions/scan.php?code=' + code);
-            if (scanResponse.ok) {
-                const result = await scanResponse.json();
-                if (result.found) {
-                    return result.path;
-                }
-            }
-        } catch (error) {
-            console.log('Directory scan not available');
-        }
-        
-        return null;
-    }
-
-    function validateQuizJSON(data, expectedCode) {
-        // Basic validation
-        if (!data || typeof data !== 'object') {
-            console.error('Quiz data is not an object');
-            return false;
-        }
-        
-        // Check if code matches (optional but good practice)
-        if (data.code && data.code !== expectedCode) {
-            console.warn(`Code mismatch: JSON has ${data.code}, expected ${expectedCode}`);
-            // Still accept it - filename is the primary identifier
-        }
-        
-        // Check for required questions array
-        if (!Array.isArray(data.questions) || data.questions.length === 0) {
-            console.error('Invalid or empty questions array');
-            return false;
-        }
-        
-        // Validate each question
-        for (let i = 0; i < data.questions.length; i++) {
-            const q = data.questions[i];
-            if (!q.question || !Array.isArray(q.options) || q.options.length < 2) {
-                console.error(`Invalid question at index ${i}`);
-                return false;
-            }
-            
-            // Convert correctAnswer to number if it's a string
-            if (typeof q.correctAnswer === 'string') {
-                q.correctAnswer = parseInt(q.correctAnswer);
-            }
-            
-            if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer >= q.options.length) {
-                console.error(`Invalid correctAnswer at index ${i}: ${q.correctAnswer}`);
-                return false;
-            }
-        }
-        
-        return true;
-    }
-
-    function shuffleQuestions() {
-        if (!quizData || !quizData.questions) return;
-        
-        // Create a copy of the questions array
-        const questionsCopy = [...quizData.questions];
-        
-        // Fisher-Yates shuffle algorithm
-        for (let i = questionsCopy.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [questionsCopy[i], questionsCopy[j]] = [questionsCopy[j], questionsCopy[i]];
-        }
-        
-        // Store shuffled questions
-        shuffledQuestions = questionsCopy;
-        
-        console.log(`${shuffledQuestions.length} questions shuffled`);
-    }
-
-    function showLoading(show) {
-        if (show) {
-            elements.loadingIndicator.style.display = 'block';
-            elements.validateBtn.disabled = true;
-            elements.validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-        } else {
-            elements.loadingIndicator.style.display = 'none';
-            elements.validateBtn.disabled = false;
-            elements.validateBtn.innerHTML = '<i class="fas fa-search"></i> Load Quiz';
-        }
-    }
-
-    function showQuizInfo(quiz) {
-        elements.quizTitleDisplay.textContent = quiz.title;
-        elements.quizSubjectDisplay.textContent = quiz.subject;
-        elements.quizLevelDisplay.textContent = quiz.level;
-        elements.quizCountDisplay.textContent = quiz.questions;
-        
-        // Show path if available (for debugging)
-        if (quiz.path) {
-            console.log(`Quiz loaded from: ${quiz.path}`);
-        }
-        
-        elements.quizInfo.style.display = 'block';
-    }
-
-    function hideQuizInfo() {
-        elements.quizInfo.style.display = 'none';
-        selectedQuiz = null;
-        quizData = null;
-        shuffledQuestions = [];
-        elements.startGameBtn.disabled = true;
-    }
-
-    function startGame() {
-        if (!selectedQuiz || !quizData || shuffledQuestions.length === 0) {
-            showError('Please select a valid quiz first.');
-            return;
-        }
-        
-        // Reset game state
-        resetGameState();
-        
-        // Switch to game screen
-        switchScreen('game');
-        
-        // Initialize game
-        initializeGame();
-        
-        // Load first question (from shuffled list)
-        loadQuestion(currentQuestion);
-    }
-
-    function resetGameState() {
-        currentQuestion = 0;
-        currentPlayer = 1;
-        scores = { 1: 0, 2: 0 };
-        selectedOption = null;
-        playerGambles = { 1: null, 2: null };
-        gameStats = {
-            questionsAnswered: 0,
-            correctAnswers: 0
-        };
-        
-        // Re-shuffle questions for new game
-        if (quizData && quizData.questions) {
-            shuffleQuestions();
-        }
-    }
-
-    function switchScreen(screenName) {
-        currentScreen = screenName;
-        
-        // Hide all screens
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.remove('active');
-        });
-        
-        // Show the requested screen
-        const screen = document.getElementById(`${screenName}-screen`);
-        if (screen) {
-            screen.classList.add('active');
-            console.log(`Switched to screen: ${screenName}`);
-        }
-    }
-
-    function initializeGame() {
-        elements.gameQuizTitle.textContent = quizData.title || 'Quiz';
-        elements.totalQ.textContent = shuffledQuestions.length;
-        updateScores();
-        updateCurrentPlayer();
-        console.log('Game initialized with', shuffledQuestions.length, 'shuffled questions');
-    }
-
-    function updateScores() {
-        elements.player1Score.textContent = scores[1];
-        elements.player2Score.textContent = scores[2];
-    }
-
-    function updateCurrentPlayer() {
-        elements.currentPlayerName.textContent = `Player ${currentPlayer}`;
-        
-        // Update player highlights
-        elements.player1Display.classList.remove('active');
-        elements.player2Display.classList.remove('active');
-        
-        if (currentPlayer === 1) {
-            elements.player1Display.classList.add('active');
-        } else {
-            elements.player2Display.classList.add('active');
-        }
-    }
-
-    function loadQuestion(index) {
-        if (shuffledQuestions.length === 0 || !shuffledQuestions[index]) {
-            console.error('Question not found at index:', index);
-            return;
-        }
-        
-        const question = shuffledQuestions[index];
-        
-        // Update question counter
-        elements.currentQ.textContent = index + 1;
-        
-        // Set base points
-        elements.basePoints.textContent = question.points || 10;
-        
-        // Set question text
-        elements.questionText.innerHTML = question.question;
-        
-        // Clear and add options
-        elements.optionsContainer.innerHTML = '';
-        
-        const letters = ['A', 'B', 'C', 'D', 'E', 'F'].slice(0, question.options.length);
-        question.options.forEach((option, i) => {
-            const optionElement = document.createElement('div');
-            optionElement.className = 'option';
-            optionElement.dataset.index = i;
-            optionElement.innerHTML = `
-                <div class="option-letter">${letters[i] || String.fromCharCode(65 + i)}</div>
-                <div class="option-text">${option}</div>
+            worksheetElement.innerHTML = `
+                <div class="worksheet-header">
+                    <div class="worksheet-title">${worksheet.title}</div>
+                    <div class="worksheet-difficulty difficulty-${worksheet.difficulty.toLowerCase()}">
+                        ${worksheet.difficulty}
+                    </div>
+                </div>
+                <div class="worksheet-meta">
+                    <span><i class="fas fa-graduation-cap"></i> ${worksheet.level}</span>
+                    <span><i class="fas fa-atom"></i> ${worksheet.subject}</span>
+                    <span><i class="fas fa-question-circle"></i> ${worksheet.questions.length} questions</span>
+                </div>
+                <div class="worksheet-description">${description}</div>
             `;
             
-            optionElement.addEventListener('click', function() {
-                selectOption(optionElement);
+            worksheetElement.addEventListener('click', (e) => {
+                this.selectWorksheet(worksheet);
+                
+                // Close panel on mobile after selection
+                if (this.isMobile) {
+                    document.getElementById('selection-panel').classList.remove('active');
+                    document.getElementById('mobile-overlay').classList.remove('active');
+                    document.body.style.overflow = '';
+                    document.getElementById('mobile-game-btn').classList.add('active');
+                    document.getElementById('mobile-worksheet-btn').classList.remove('active');
+                }
             });
             
-            elements.optionsContainer.appendChild(optionElement);
+            // Add touch feedback
+            worksheetElement.addEventListener('touchstart', () => {
+                worksheetElement.classList.add('touch-active');
+            }, { passive: true });
+            
+            worksheetElement.addEventListener('touchend', () => {
+                setTimeout(() => {
+                    worksheetElement.classList.remove('touch-active');
+                }, 150);
+            }, { passive: true });
+            
+            worksheetsList.appendChild(worksheetElement);
+        });
+    }
+    
+    getSubjectName(code) {
+        const subjects = {
+            '0': 'Mathematics',
+            '1': 'Science',
+            '2': 'Combined Physics',
+            '3': 'Pure Physics',
+            '4': 'Combined Chemistry',
+            '5': 'Pure Chemistry'
+        };
+        return subjects[code] || 'Unknown';
+    }
+    
+    selectWorksheet(worksheet) {
+        this.currentWorksheet = worksheet;
+        this.currentQuestionIndex = 0;
+        this.shuffledQuestions = [...worksheet.questions].sort(() => Math.random() - 0.5);
+        this.score = 0;
+        this.winStreak = 0;
+        this.multiplier = 1;
+        this.usedHints.clear();
+        
+        // Update UI
+        document.querySelectorAll('.worksheet-item').forEach(item => {
+            item.classList.remove('active');
         });
         
-        // Reset selection state
-        selectedOption = null;
-        
-        // Hide results
-        elements.resultsDisplay.style.display = 'none';
-        
-        // Show submit button, hide next button
-        elements.submitBtn.style.display = 'flex';
-        elements.nextBtn.style.display = 'none';
-        
-        // Enable submit button when option is selected
-        elements.submitBtn.disabled = true;
-        
-        // Make options clickable again
-        document.querySelectorAll('.option').forEach(opt => {
-            opt.style.pointerEvents = 'auto';
+        // Find and highlight the selected worksheet
+        const worksheetElements = document.querySelectorAll('.worksheet-item');
+        worksheetElements.forEach(item => {
+            if (item.querySelector('.worksheet-title').textContent === worksheet.title) {
+                item.classList.add('active');
+                // Scroll into view on mobile
+                if (this.isMobile) {
+                    setTimeout(() => {
+                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
+            }
         });
         
-        // Process MathJax
-        if (window.MathJax) {
+        // Enable bet button
+        document.getElementById('bet-btn').disabled = false;
+        
+        // Update game panel
+        const gameTitle = document.getElementById('game-title');
+        gameTitle.innerHTML = `
+            <i class="fas fa-gamepad"></i> 
+            <span class="game-title-text">${this.isMobile ? worksheet.title.substring(0, 30) + '...' : worksheet.title}</span>
+        `;
+        
+        // Reset question display with mobile-friendly content
+        document.getElementById('question-display').innerHTML = `
+            <div class="welcome-message">
+                ${this.isMobile ? '<i class="fas fa-arrow-left mobile-only-arrow"></i>' : ''}
+                <h3>Ready to Play?</h3>
+                <p>${worksheet.title}</p>
+                <div class="worksheet-info">
+                    <p><strong>Topic:</strong> ${worksheet.topic}</p>
+                    <p><strong>Difficulty:</strong> ${worksheet.difficulty}</p>
+                    <p><strong>Questions:</strong> ${worksheet.questions.length}</p>
+                    <p><strong>Points Available:</strong> ${worksheet.questions.reduce((sum, q) => sum + q.points, 0)}</p>
+                </div>
+                ${this.isMobile ? `
+                    <div class="mobile-tip">
+                        <i class="fas fa-hand-point-up"></i>
+                        <span>Adjust your bet using the slider above</span>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        // Clear options and feedback
+        document.getElementById('options-grid').innerHTML = '';
+        document.getElementById('feedback').innerHTML = '';
+        document.getElementById('feedback').className = 'feedback';
+        
+        // Update progress
+        this.updateProgress();
+        this.updateUI();
+        
+        // Show selection toast
+        this.showToast(`Selected: ${worksheet.title}`, 'info');
+    }
+    
+    startGame() {
+        if (!this.currentWorksheet || this.coins < this.currentBet) {
+            this.showError("Not enough coins to place bet!");
+            return;
+        }
+        
+        // Deduct bet from coins
+        this.coins -= this.currentBet;
+        this.isGameActive = true;
+        
+        // Disable bet button
+        document.getElementById('bet-btn').disabled = true;
+        
+        // Enable game controls
+        document.getElementById('hint-btn').disabled = false;
+        document.getElementById('skip-btn').disabled = false;
+        document.getElementById('next-btn').disabled = true;
+        
+        // Load first question
+        this.loadQuestion();
+        this.updateUI();
+        
+        // Show game start toast
+        this.showToast(`Game started! Bet: ${this.currentBet} coins`, 'success');
+    }
+    
+    loadQuestion() {
+        if (this.currentQuestionIndex >= this.shuffledQuestions.length) {
+            this.endGame();
+            return;
+        }
+        
+        const question = this.shuffledQuestions[this.currentQuestionIndex];
+        
+        // Display question with mobile optimization
+        const questionText = this.isMobile && question.question.length > 150 
+            ? question.question.substring(0, 150) + '...' 
+            : question.question;
+        
+        document.getElementById('question-display').innerHTML = `
+            <div id="question-text">${questionText}</div>
+            <div class="question-meta">
+                <span><i class="fas fa-star"></i> ${question.points} points</span>
+                <span><i class="fas fa-coins"></i> Win: ${question.points * this.multiplier} coins</span>
+                <span><i class="fas fa-bolt"></i> Multiplier: ${this.multiplier.toFixed(1)}x</span>
+            </div>
+        `;
+        
+        // Display options optimized for mobile
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = '';
+        
+        const optionLabels = ['A', 'B', 'C', 'D'];
+        question.options.forEach((option, index) => {
+            const optionButton = document.createElement('button');
+            optionButton.className = 'option-btn';
+            optionButton.dataset.index = index;
+            
+            // Truncate long options for mobile
+            const optionText = this.isMobile && option.length > 50 
+                ? option.substring(0, 50) + '...' 
+                : option;
+            
+            optionButton.innerHTML = `
+                <div class="option-label">${optionLabels[index]}</div>
+                <div class="option-text">${optionText}</div>
+            `;
+            
+            // Add aria-label for accessibility
+            optionButton.setAttribute('aria-label', `Option ${optionLabels[index]}: ${optionText}`);
+            
+            optionsGrid.appendChild(optionButton);
+        });
+        
+        // Clear feedback
+        document.getElementById('feedback').innerHTML = '';
+        document.getElementById('feedback').className = 'feedback';
+        
+        // Update progress
+        this.updateProgress();
+        
+        // Auto-focus on first option for keyboard users (desktop only)
+        if (!this.isMobile) {
             setTimeout(() => {
-                MathJax.typesetPromise([elements.questionText]).catch(err => {
-                    console.warn('MathJax rendering error:', err);
-                });
+                const firstOption = document.querySelector('.option-btn');
+                if (firstOption) firstOption.focus();
             }, 100);
         }
     }
-
-    function selectOption(optionElement) {
-        // Deselect all options
-        document.querySelectorAll('.option').forEach(opt => {
-            opt.classList.remove('selected');
+    
+    checkAnswer(selectedIndex) {
+        if (!this.isGameActive) return;
+        
+        const question = this.shuffledQuestions[this.currentQuestionIndex];
+        const isCorrect = selectedIndex === question.correctAnswer;
+        
+        // Add visual feedback immediately for better mobile UX
+        const optionButtons = document.querySelectorAll('.option-btn');
+        optionButtons.forEach(btn => btn.disabled = true);
+        
+        // Highlight correct/wrong answers
+        optionButtons.forEach((btn, index) => {
+            if (index === question.correctAnswer) {
+                setTimeout(() => {
+                    btn.classList.add('correct');
+                }, 100);
+            } else if (index === selectedIndex && !isCorrect) {
+                setTimeout(() => {
+                    btn.classList.add('wrong');
+                }, 100);
+            }
         });
         
-        // Select clicked option
-        optionElement.classList.add('selected');
-        selectedOption = parseInt(optionElement.dataset.index);
+        // Update score and coins
+        if (isCorrect) {
+            this.score += question.points;
+            const coinsWon = Math.round(question.points * this.multiplier);
+            this.coins += coinsWon;
+            this.winStreak++;
+            this.multiplier = Math.min(this.multiplier + 0.2, 3);
+            
+            // Show success feedback
+            document.getElementById('feedback').className = 'feedback correct';
+            document.getElementById('feedback').innerHTML = `
+                <div class="feedback-content">
+                    <i class="fas fa-check-circle"></i> 
+                    <div>
+                        <strong>Correct!</strong> +${question.points} points
+                        <div class="coins-won">+${coinsWon} coins!</div>
+                        <div class="explanation">${question.explanation}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Celebrate with confetti for big wins
+            if (coinsWon >= 100 || this.winStreak >= 3) {
+                this.createConfetti();
+            }
+            
+            // Haptic feedback for mobile
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 50, 50]);
+            }
+        } else {
+            this.winStreak = 0;
+            this.multiplier = Math.max(this.multiplier - 0.5, 1);
+            
+            // Show error feedback
+            document.getElementById('feedback').className = 'feedback incorrect';
+            const correctOption = question.options[question.correctAnswer];
+            const correctOptionText = this.isMobile && correctOption.length > 40 
+                ? correctOption.substring(0, 40) + '...' 
+                : correctOption;
+            
+            document.getElementById('feedback').innerHTML = `
+                <div class="feedback-content">
+                    <i class="fas fa-times-circle"></i> 
+                    <div>
+                        <strong>Incorrect!</strong> 
+                        <div class="correct-answer">Correct: ${correctOptionText}</div>
+                        <div class="explanation">${question.explanation}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Haptic feedback for mobile
+            if (navigator.vibrate) {
+                navigator.vibrate([200]);
+            }
+        }
         
-        // Enable submit button
-        elements.submitBtn.disabled = false;
+        // Enable next button
+        document.getElementById('next-btn').disabled = false;
+        document.getElementById('next-btn').focus();
+        
+        this.updateUI();
     }
-
-    function submitAnswer() {
-        if (selectedOption === null) {
-            showError('Please select an answer first.');
+    
+    useHint() {
+        if (!this.isGameActive || this.coins < 50 || this.usedHints.has(this.currentQuestionIndex)) {
             return;
         }
         
-        const question = shuffledQuestions[currentQuestion];
-        const isCorrect = selectedOption === question.correctAnswer;
+        const question = this.shuffledQuestions[this.currentQuestionIndex];
+        const wrongOptions = question.options
+            .map((_, index) => index)
+            .filter(index => index !== question.correctAnswer);
         
-        // Update game stats
-        gameStats.questionsAnswered++;
-        if (isCorrect) gameStats.correctAnswers++;
+        // Randomly remove one wrong option
+        const optionToRemove = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
         
-        // Calculate points - CORRECT: gain points, WRONG: lose points
-        let pointsEarned = 0;
+        // Disable the removed option with animation
+        const optionButtons = document.querySelectorAll('.option-btn');
+        optionButtons[optionToRemove].style.transition = 'all 0.3s ease';
+        optionButtons[optionToRemove].style.opacity = '0.3';
+        optionButtons[optionToRemove].style.transform = 'scale(0.95)';
+        optionButtons[optionToRemove].disabled = true;
         
-        if (isCorrect) {
-            // Gain points for correct answer
-            pointsEarned = question.points || 10;
-            scores[currentPlayer] += pointsEarned;
-        } else {
-            // Lose points for wrong answer
-            pointsEarned = -(question.points || 10);
-            scores[currentPlayer] += pointsEarned; // This will subtract points
+        // Deduct coins
+        this.coins -= 50;
+        this.usedHints.add(this.currentQuestionIndex);
+        
+        // Show hint feedback
+        document.getElementById('feedback').className = 'feedback hint';
+        document.getElementById('feedback').innerHTML = `
+            <div class="feedback-content">
+                <i class="fas fa-lightbulb"></i> 
+                <div>
+                    <strong>Hint used!</strong> One wrong option removed.
+                    <div class="hint-cost">Cost: 50 coins</div>
+                </div>
+            </div>
+        `;
+        
+        // Disable hint button for this question
+        document.getElementById('hint-btn').disabled = true;
+        
+        // Haptic feedback for mobile
+        if (navigator.vibrate) {
+            navigator.vibrate([50]);
         }
         
-        // Update scores
-        updateScores();
+        this.updateUI();
+    }
+    
+    skipQuestion() {
+        if (!this.isGameActive || this.coins < 25) {
+            return;
+        }
         
-        // Show results
-        showResults(isCorrect, pointsEarned);
+        // Deduct coins
+        this.coins -= 25;
         
-        // Disable options
-        document.querySelectorAll('.option').forEach(opt => {
-            opt.style.pointerEvents = 'none';
+        // Move to next question
+        this.currentQuestionIndex++;
+        
+        // Show skip feedback
+        document.getElementById('feedback').className = 'feedback feedback-info';
+        document.getElementById('feedback').innerHTML = `
+            <div class="feedback-content">
+                <i class="fas fa-forward"></i> 
+                <div>
+                    <strong>Question skipped!</strong>
+                    <div class="skip-cost">Cost: 25 coins</div>
+                </div>
+            </div>
+        `;
+        
+        // Load next question
+        this.loadQuestion();
+        
+        // Reset hint button
+        document.getElementById('hint-btn').disabled = false;
+        document.getElementById('next-btn').disabled = true;
+        
+        this.updateUI();
+    }
+    
+    nextQuestion() {
+        this.currentQuestionIndex++;
+        
+        // Reset hint button
+        document.getElementById('hint-btn').disabled = false;
+        document.getElementById('next-btn').disabled = true;
+        
+        // Load next question
+        this.loadQuestion();
+    }
+    
+    endGame() {
+        this.isGameActive = false;
+        
+        // Calculate final score
+        const totalPossiblePoints = this.shuffledQuestions.reduce((sum, q) => sum + q.points, 0);
+        const percentage = (this.score / totalPossiblePoints) * 100;
+        
+        let message = '';
+        let messageIcon = '';
+        
+        if (percentage >= 90) {
+            message = 'Perfect Score! You\'re a genius! 🏆';
+            messageIcon = 'fas fa-trophy';
+            this.createConfetti();
+        } else if (percentage >= 80) {
+            message = 'Excellent! You\'re a quiz master! ⭐';
+            messageIcon = 'fas fa-star';
+            this.createConfetti();
+        } else if (percentage >= 70) {
+            message = 'Great job! You passed with flying colors! 👍';
+            messageIcon = 'fas fa-thumbs-up';
+        } else if (percentage >= 60) {
+            message = 'Good job! You passed the challenge. ✅';
+            messageIcon = 'fas fa-check-circle';
+        } else {
+            message = 'Keep practicing! You\'ll do better next time. 💪';
+            messageIcon = 'fas fa-redo';
+        }
+        
+        // Show game over screen optimized for mobile
+        document.getElementById('question-display').innerHTML = `
+            <div class="welcome-message">
+                <h3><i class="${messageIcon}"></i> Game Complete!</h3>
+                <p>${message}</p>
+                <div class="final-score">
+                    <div class="score-item">
+                        <span>Final Score:</span>
+                        <span class="score-value">${this.score}/${totalPossiblePoints}</span>
+                    </div>
+                    <div class="score-item">
+                        <span>Percentage:</span>
+                        <span class="score-value">${percentage.toFixed(1)}%</span>
+                    </div>
+                    <div class="score-item">
+                        <span>Coin Balance:</span>
+                        <span class="score-value">${this.coins}</span>
+                    </div>
+                    <div class="score-item">
+                        <span>Highest Streak:</span>
+                        <span class="score-value">${this.winStreak}</span>
+                    </div>
+                </div>
+                <div class="game-complete-buttons">
+                    <button id="play-again" class="btn-bet" style="margin-top: 15px;">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                    <button id="select-new" class="btn-refresh" style="margin-top: 10px;">
+                        <i class="fas fa-book"></i> Select New Worksheet
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Clear options and feedback
+        document.getElementById('options-grid').innerHTML = '';
+        document.getElementById('feedback').innerHTML = '';
+        
+        // Add event listeners for game complete buttons
+        document.getElementById('play-again').addEventListener('click', () => {
+            this.selectWorksheet(this.currentWorksheet);
         });
         
-        // Show next button
-        elements.submitBtn.style.display = 'none';
-        elements.nextBtn.style.display = 'flex';
+        document.getElementById('select-new').addEventListener('click', () => {
+            if (this.isMobile) {
+                document.getElementById('mobile-worksheet-btn').click();
+            }
+            this.showToast('Select a new worksheet to play!', 'info');
+        });
+        
+        // Enable bet button for new game
+        document.getElementById('bet-btn').disabled = false;
+        
+        // Show completion toast
+        this.showToast(`Game complete! Score: ${this.score}/${totalPossiblePoints}`, 'success');
     }
-
-    function showResults(isCorrect, points) {
-        // Update result display
-        elements.answerResult.textContent = isCorrect ? 'Correct' : 'Incorrect';
-        elements.answerResult.className = `result-value ${isCorrect ? 'correct' : 'incorrect'}`;
-        
-        elements.pointsEarned.textContent = points >= 0 ? `+${points}` : points;
-        elements.pointsEarned.className = `result-value ${points >= 0 ? 'positive' : 'negative'}`;
-        
-        // Show results
-        elements.resultsDisplay.style.display = 'block';
+    
+    updateProgress() {
+        const progress = ((this.currentQuestionIndex) / this.shuffledQuestions.length) * 100;
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+        document.getElementById('progress-text').textContent = 
+            `Q ${this.currentQuestionIndex + 1}/${this.shuffledQuestions.length}`;
+        document.getElementById('score-display').textContent = `Score: ${this.score}`;
     }
-
-    function nextQuestion() {
-        // Switch to next player
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
-        updateCurrentPlayer();
+    
+    updateUI() {
+        // Update coin display
+        document.getElementById('coins').textContent = this.coins;
         
-        // Check if there are more questions
-        if (currentQuestion < shuffledQuestions.length - 1) {
-            currentQuestion++;
-            loadQuestion(currentQuestion);
-        } else {
-            // All questions answered - go to gambling screen
-            showGamblingScreen();
+        // Update multiplier
+        document.getElementById('multiplier').textContent = `${this.multiplier.toFixed(1)}x`;
+        
+        // Update streak
+        document.getElementById('streak').textContent = this.winStreak;
+        
+        // Update question count
+        const totalQuestions = this.worksheets.reduce((sum, ws) => sum + ws.questions.length, 0);
+        document.getElementById('question-count').textContent = totalQuestions;
+        
+        // Update subject count
+        const uniqueSubjects = new Set(this.worksheets.map(ws => ws.subject));
+        document.getElementById('subject-count').textContent = uniqueSubjects.size;
+        
+        // Update button states based on coin balance
+        document.getElementById('hint-btn').disabled = !this.isGameActive || this.coins < 50;
+        document.getElementById('skip-btn').disabled = !this.isGameActive || this.coins < 25;
+        
+        // Update bet slider max based on coins
+        const betSlider = document.getElementById('bet-slider');
+        const maxBet = Math.min(500, this.coins);
+        betSlider.max = maxBet;
+        if (this.currentBet > maxBet) {
+            this.currentBet = maxBet;
+            betSlider.value = maxBet;
+            document.getElementById('bet-amount').textContent = maxBet;
+        }
+        
+        // Update bet button text for mobile
+        const betButton = document.getElementById('bet-btn');
+        if (this.isMobile) {
+            betButton.querySelector('.btn-text').innerHTML = `Bet: <span id="bet-amount">${this.currentBet}</span>`;
         }
     }
-
-    let currentGambler = 1;
-
-    function showGamblingScreen() {
-        // Reset gambling state
-        currentGambler = 1;
-        playerGambles = { 1: null, 2: null };
+    
+    updateStats() {
+        document.getElementById('worksheet-count').textContent = this.worksheets.length;
         
-        // Create gambling screen for Player 1
-        createGamblingScreen();
+        const totalQuestions = this.worksheets.reduce((sum, ws) => sum + ws.questions.length, 0);
+        document.getElementById('question-count').textContent = totalQuestions;
         
-        // Update UI for Player 1
-        elements.gamblingTitle.textContent = 'Final Gamble!';
-        elements.gamblingPlayerInfo.textContent = 'Player 1: Choose Your Gamble';
-        elements.nextGamblerBtn.style.display = 'none';
-        elements.continueBtn.style.display = 'none';
-        
-        // Switch to gambling screen
-        switchScreen('gambling');
-        
-        // Reset gambling result
-        elements.gamblingResult.style.display = 'none';
+        const uniqueSubjects = new Set(this.worksheets.map(ws => ws.subject));
+        document.getElementById('subject-count').textContent = uniqueSubjects.size;
     }
-
-    function createGamblingScreen() {
-        elements.gamblingOptions.innerHTML = '';
+    
+    createConfetti() {
+        const container = document.getElementById('confetti-container');
+        const colors = ['#4cc9f0', '#4361ee', '#3a0ca3', '#7209b7', '#f72585'];
         
-        // Create gambling cards
-        GAMBLING_OPTIONS.forEach((option) => {
-            const gamblingCard = document.createElement('div');
-            gamblingCard.className = 'gambling-card';
-            gamblingCard.dataset.optionId = option.id;
+        // Clear existing confetti
+        container.innerHTML = '';
+        
+        for (let i = 0; i < (this.isMobile ? 50 : 100); i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            const size = Math.random() * 10 + 5;
+            confetti.style.width = size + 'px';
+            confetti.style.height = size + 'px';
+            confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
             
-            // Determine effect class
-            let effectClass = 'neutral';
-            if (option.type === 'safe') effectClass = 'positive';
-            if (option.type === 'doubleOrNothing') effectClass = 'negative';
+            container.appendChild(confetti);
             
-            let effectText = '';
-            if (option.type === 'doubleOrNothing') effectText = '2x or 0x';
-            else if (option.type === 'safe') effectText = '1.5x';
-            else if (option.type === 'random') effectText = '0.5x-2x';
-            else effectText = '1x';
-            
-            gamblingCard.innerHTML = `
-                <div class="gambling-icon">${option.icon}</div>
-                <div class="gambling-title">${option.title}</div>
-                <div class="gambling-description">${option.description}</div>
-                <div class="gambling-effect ${effectClass}">${effectText}</div>
-            `;
-            
-            gamblingCard.addEventListener('click', function() {
-                selectGamblingOption(gamblingCard, option);
+            // Animate confetti
+            const animation = confetti.animate([
+                { 
+                    transform: 'translateY(-100px) rotate(0deg)', 
+                    opacity: 1 
+                },
+                { 
+                    transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, 
+                    opacity: 0 
+                }
+            ], {
+                duration: Math.random() * 2000 + 2000,
+                easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
             });
             
-            elements.gamblingOptions.appendChild(gamblingCard);
-        });
-    }
-
-    function selectGamblingOption(cardElement, option) {
-        // Deselect all gambling cards
-        document.querySelectorAll('.gambling-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        
-        // Select clicked card
-        cardElement.classList.add('selected');
-        playerGambles[currentGambler] = option;
-        
-        // Show next gambler button
-        elements.nextGamblerBtn.style.display = 'flex';
-        elements.nextGamblerBtn.disabled = false;
-    }
-
-    function nextGambler() {
-        // Process current gambler's choice
-        processIndividualGamble(currentGambler, playerGambles[currentGambler]);
-        
-        // Move to next gambler
-        if (currentGambler === 1) {
-            currentGambler = 2;
-            
-            // Update UI for Player 2
-            elements.gamblingTitle.textContent = 'Player 2\'s Turn';
-            elements.gamblingPlayerInfo.textContent = 'Player 2: Choose Your Gamble';
-            elements.gamblingResult.style.display = 'none';
-            
-            // Reset card selection
-            document.querySelectorAll('.gambling-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            elements.nextGamblerBtn.style.display = 'none';
-            
-        } else {
-            // Both players have chosen - show results
-            showFinalGambleResults();
+            animation.onfinish = () => confetti.remove();
         }
     }
-
-    function processIndividualGamble(player, option) {
-        let multiplier = 1;
-        let result = '';
-        let description = '';
-        let icon = '';
-        let pointsClass = 'neutral';
+    
+    showError(message) {
+        const feedback = document.getElementById('feedback');
+        feedback.className = 'feedback incorrect';
+        feedback.innerHTML = `
+            <div class="feedback-content">
+                <i class="fas fa-exclamation-triangle"></i> 
+                <div><strong>Error:</strong> ${message}</div>
+            </div>
+        `;
         
-        // Apply different gambling effects
-        switch(option.type) {
-            case 'doubleOrNothing':
-                // 50% chance to double, 50% chance to lose everything
-                const isWin = Math.random() > 0.5;
-                if (isWin) {
-                    multiplier = 2;
-                    result = 'DOUBLED!';
-                    description = 'Player ' + player + ' got lucky! Points doubled!';
-                    icon = '🎉';
-                    pointsClass = 'positive';
-                } else {
-                    multiplier = 0;
-                    result = 'LOST ALL!';
-                    description = 'Player ' + player + ' was unlucky! Points lost!';
-                    icon = '💥';
-                    pointsClass = 'negative';
-                }
-                break;
-                
-            case 'safe':
-                multiplier = 1.5;
-                result = 'SAFE WIN';
-                description = 'Player ' + player + ' played safe! Points increased by 50%';
-                icon = '🛡️';
-                pointsClass = 'positive';
-                break;
-                
-            case 'random':
-                // Random multiplier between 0.5 and 2
-                multiplier = 0.5 + Math.random() * 1.5;
-                multiplier = Math.round(multiplier * 100) / 100; // Round to 2 decimal places
-                
-                if (multiplier > 1) {
-                    result = 'LUCKY!';
-                    description = `Player ${player} got a ${multiplier}x multiplier!`;
-                    icon = '🍀';
-                    pointsClass = 'positive';
-                } else if (multiplier < 1) {
-                    result = 'UNLUCKY!';
-                    description = `Player ${player} only got ${multiplier}x multiplier...`;
-                    icon = '😞';
-                    pointsClass = 'negative';
-                } else {
-                    result = 'NEUTRAL';
-                    description = 'Player ' + player + ' - no change to points';
-                    icon = '😐';
-                    pointsClass = 'neutral';
-                }
-                break;
-                
-            case 'skip':
-                multiplier = 1;
-                result = 'NO CHANGE';
-                description = 'Player ' + player + ' skipped the gamble';
-                icon = '✋';
-                pointsClass = 'neutral';
-                break;
+        // Haptic feedback for mobile
+        if (navigator.vibrate) {
+            navigator.vibrate([200, 100, 200]);
         }
         
-        // Store original score
-        const oldScore = scores[player];
-        
-        // Apply multiplier to player's score
-        scores[player] = Math.round(scores[player] * multiplier);
-        
-        // Ensure score doesn't go negative
-        scores[player] = Math.max(0, scores[player]);
-        
-        // Calculate point change
-        const playerChange = scores[player] - oldScore;
-        
-        // Update result display
-        elements.resultIcon.textContent = icon;
-        elements.resultTitle.textContent = `Player ${player}: ${result}`;
-        elements.resultDescription.textContent = description;
-        
-        // Show point change
-        if (player === 1) {
-            elements.finalPoints1.textContent = playerChange >= 0 ? `+${playerChange}` : playerChange;
-            elements.finalPoints1.className = `final-points-value ${playerChange >= 0 ? 'positive' : 'negative'}`;
-        } else {
-            elements.finalPoints2.textContent = playerChange >= 0 ? `+${playerChange}` : playerChange;
-            elements.finalPoints2.className = `final-points-value ${playerChange >= 0 ? 'positive' : 'negative'}`;
-        }
-        
-        // Show player's new score
-        elements.resultPoints.textContent = `New Score: ${scores[player]}`;
-        elements.resultPoints.className = `result-points ${pointsClass}`;
-        
-        // Show gambling result
-        elements.gamblingResult.style.display = 'block';
-    }
-
-    function showFinalGambleResults() {
-        // Update UI for final results
-        elements.gamblingTitle.textContent = 'Gamble Results';
-        elements.gamblingPlayerInfo.textContent = 'Both players have chosen!';
-        elements.gamblingOptions.style.display = 'none';
-        elements.nextGamblerBtn.style.display = 'none';
-        
-        // Show continue button
-        elements.continueBtn.style.display = 'flex';
-        elements.continueBtn.disabled = false;
-        
-        // Show final scores
-        elements.resultTitle.textContent = 'Final Scores';
-        elements.resultDescription.textContent = 'After individual gambles:';
-        elements.resultPoints.textContent = `Player 1: ${scores[1]} | Player 2: ${scores[2]}`;
-        elements.resultPoints.className = 'result-points neutral';
-        elements.resultIcon.textContent = '🏆';
-    }
-
-    function continueToGameOver() {
-        endGame();
-    }
-
-    function goHome() {
-        switchScreen('start');
-    }
-
-    function endGame() {
-        // Determine winner
-        let winner = 0;
-        let winnerText = "It's a Tie!";
-        let message = "Both players showed great skill!";
-        
-        if (scores[1] > scores[2]) {
-            winner = 1;
-            winnerText = "Player 1 Wins!";
-            message = `Congratulations Player 1 with ${scores[1]} points!`;
-        } else if (scores[2] > scores[1]) {
-            winner = 2;
-            winnerText = "Player 2 Wins!";
-            message = `Congratulations Player 2 with ${scores[2]} points!`;
-        }
-        
-        // Calculate accuracy
-        const accuracy = gameStats.questionsAnswered > 0 
-            ? Math.round((gameStats.correctAnswers / gameStats.questionsAnswered) * 100)
-            : 0;
-        
-        // Update game over screen
-        elements.winnerTitle.textContent = winnerText;
-        elements.winnerMessage.textContent = message;
-        elements.finalScore1.textContent = scores[1];
-        elements.finalScore2.textContent = scores[2];
-        elements.questionsAnswered.textContent = gameStats.questionsAnswered;
-        elements.correctAnswers.textContent = gameStats.correctAnswers;
-        elements.accuracyRate.textContent = `${accuracy}%`;
-        
-        // Highlight winner
-        document.querySelectorAll('.final-player').forEach(player => {
-            player.classList.remove('winner');
-        });
-        
-        if (winner === 1) {
-            document.querySelector('.final-player:first-child').classList.add('winner');
-        } else if (winner === 2) {
-            document.querySelector('.final-player:last-child').classList.add('winner');
-        }
-        
-        elements.winnerTrophy.textContent = winner === 0 ? "🤝" : "🏆";
-        
-        switchScreen('gameOver');
-    }
-
-    function playAgain() {
-        // Reset and start again (questions will be re-shuffled)
-        startGame();
-    }
-
-    function newGame() {
-        goHome();
-        handleClear();
-    }
-
-    function showError(message) {
-        elements.startError.textContent = message;
         setTimeout(() => {
-            elements.startError.textContent = '';
+            if (feedback.innerHTML.includes(message)) {
+                feedback.innerHTML = '';
+                feedback.className = 'feedback';
+            }
         }, 5000);
     }
+    
+    showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add to body
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Remove after delay
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+        
+        // Haptic feedback for mobile
+        if (navigator.vibrate && type === 'success') {
+            navigator.vibrate(50);
+        }
+    }
+}
+
+// Add toast styles dynamically
+const toastStyles = document.createElement('style');
+toastStyles.textContent = `
+    .toast {
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(10, 25, 47, 0.95);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 10000;
+        transition: transform 0.3s ease;
+        max-width: 90%;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+    }
+    
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+    }
+    
+    .toast-success {
+        border-color: var(--success-color);
+        background: rgba(46, 204, 113, 0.15);
+    }
+    
+    .toast-error {
+        border-color: var(--danger-color);
+        background: rgba(231, 76, 60, 0.15);
+    }
+    
+    .toast-info {
+        border-color: var(--primary-color);
+        background: rgba(76, 201, 240, 0.15);
+    }
+    
+    .touch-active {
+        transform: scale(0.98) !important;
+        opacity: 0.9 !important;
+    }
+    
+    .slider-active {
+        transform: scale(1.05);
+    }
+    
+    @media (max-width: 768px) {
+        .toast {
+            bottom: 120px;
+            font-size: 0.9rem;
+            padding: 10px 15px;
+        }
+    }
+`;
+document.head.appendChild(toastStyles);
+
+// Initialize the game when the page loads
+let quizGame;
+document.addEventListener('DOMContentLoaded', () => {
+    quizGame = new QuizGame();
+    
+    // Add CSS for option button active states
+    const activeStyles = document.createElement('style');
+    activeStyles.textContent = `
+        .option-btn:active {
+            transform: scale(0.98) !important;
+        }
+        
+        @media (hover: none) {
+            .option-btn:hover {
+                transform: none !important;
+            }
+        }
+        
+        /* Improve focus styles for accessibility */
+        button:focus, select:focus, input:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+        
+        /* Hide focus outline for mouse users */
+        .using-mouse button:focus,
+        .using-mouse select:focus,
+        .using-mouse input:focus {
+            outline: none;
+        }
+    `;
+    document.head.appendChild(activeStyles);
+    
+    // Detect mouse vs keyboard users for focus styles
+    document.addEventListener('mousedown', () => {
+        document.body.classList.add('using-mouse');
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            document.body.classList.remove('using-mouse');
+        }
+    });
+    
+    // Prevent context menu on mobile
+    document.addEventListener('contextmenu', (e) => {
+        if (window.innerWidth <= 768) {
+            e.preventDefault();
+        }
+    });
 });
+
+// Make quizGame available globally for console debugging
+window.quizGame = quizGame;

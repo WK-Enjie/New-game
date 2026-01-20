@@ -3,324 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Battle: Individual Gambles</title>
-    
-    <!-- MathJax for fractions -->
-    <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\\(', '\\)']],
-        displayMath: [['\\[', '\\]']]
-      },
-      startup: {
-        pageReady: () => {
-          return MathJax.startup.defaultPageReady().then(() => {
-            console.log('MathJax initialized');
-          });
-        }
-      }
-    };
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <link rel="stylesheet" href="style.css">
+    <title>Quiz Challenge - Educational Game</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 </head>
 <body>
     <div class="container">
-        <!-- Start Screen -->
-        <div id="start-screen" class="screen active">
-            <div class="start-content">
-                <div class="logo">
-                    <div class="logo-icon">🧠</div>
-                    <h1>Brain Battle</h1>
-                    <p class="tagline">Individual Gambles • Randomized Questions</p>
+        <!-- Header Section -->
+        <header>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="header-content">
+                <h1><i class="fas fa-brain"></i> <span class="logo-text">Quiz Challenge</span></h1>
+                <p class="tagline">Test your knowledge • Take risks • Win big!</p>
+                <div class="stats-bar">
+                    <div class="stat">
+                        <span class="stat-label">Worksheets:</span>
+                        <span id="worksheet-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Questions:</span>
+                        <span id="question-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Subjects:</span>
+                        <span id="subject-count">0</span>
+                    </div>
                 </div>
-                
-                <div class="code-section">
-                    <h3><i class="fas fa-key"></i> Enter Quiz Code</h3>
-                    
-                    <div class="code-display" id="code-display">
-                        <div class="code-digit" data-index="0">_</div>
-                        <div class="code-digit" data-index="1">_</div>
-                        <div class="code-digit" data-index="2">_</div>
-                        <div class="code-digit" data-index="3">_</div>
-                        <div class="code-digit" data-index="4">_</div>
-                        <div class="code-digit" data-index="5">_</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Game Stats Panel -->
+            <div class="game-stats">
+                <div class="coin-balance">
+                    <i class="fas fa-coins"></i>
+                    <div class="coin-info">
+                        <span class="stat-label-mobile">Coins</span>
+                        <span id="coins" class="coin-value">1000</span>
                     </div>
-                    
-                    <div class="code-keypad">
-                        <div class="keypad-row">
-                            <button class="keypad-btn" data-key="1">1</button>
-                            <button class="keypad-btn" data-key="2">2</button>
-                            <button class="keypad-btn" data-key="3">3</button>
-                        </div>
-                        <div class="keypad-row">
-                            <button class="keypad-btn" data-key="4">4</button>
-                            <button class="keypad-btn" data-key="5">5</button>
-                            <button class="keypad-btn" data-key="6">6</button>
-                        </div>
-                        <div class="keypad-row">
-                            <button class="keypad-btn" data-key="7">7</button>
-                            <button class="keypad-btn" data-key="8">8</button>
-                            <button class="keypad-btn" data-key="9">9</button>
-                        </div>
-                        <div class="keypad-row">
-                            <button class="keypad-btn" data-key="0">0</button>
-                            <button class="keypad-btn" id="backspace"><i class="fas fa-backspace"></i></button>
-                            <button class="keypad-btn" id="clear"><i class="fas fa-times"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="code-actions">
-                        <button id="validate-code" class="btn primary-btn" disabled>
-                            <i class="fas fa-search"></i> Validate Code
+                </div>
+                <div class="multiplier-display">
+                    <span class="stat-label-mobile">Multiplier</span>
+                    <span id="multiplier" class="multiplier-value">1x</span>
+                </div>
+                <div class="streak-counter">
+                    <span class="stat-label-mobile">Streak</span>
+                    <span id="streak" class="streak-value">0</span>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <!-- Left Panel - Quiz Selection -->
+                <div class="selection-panel mobile-hidden" id="selection-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-book-open"></i> <span class="panel-title">Select Your Challenge</span></h2>
+                        <button id="refresh-btn" class="btn-refresh">
+                            <i class="fas fa-sync-alt"></i> <span class="btn-text">Refresh</span>
                         </button>
                     </div>
-                    
-                    <div id="loading-indicator" class="loading-indicator" style="display: none;">
-                        <i class="fas fa-spinner fa-spin"></i> Loading quiz...
+
+                    <!-- Filters -->
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="level-filter"><i class="fas fa-graduation-cap"></i> <span class="filter-label">Level</span></label>
+                            <select id="level-filter">
+                                <option value="all">All Levels</option>
+                                <option value="1">Primary School</option>
+                                <option value="2">Lower Secondary</option>
+                                <option value="3">Upper Secondary</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="subject-filter"><i class="fas fa-atom"></i> <span class="filter-label">Subject</span></label>
+                            <select id="subject-filter">
+                                <option value="all">All Subjects</option>
+                                <option value="0">Mathematics</option>
+                                <option value="1">Science (General/Combined)</option>
+                                <option value="2">Combined Physics</option>
+                                <option value="3">Pure Physics</option>
+                                <option value="4">Combined Chemistry</option>
+                                <option value="5">Pure Chemistry</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="difficulty-filter"><i class="fas fa-chart-line"></i> <span class="filter-label">Difficulty</span></label>
+                            <select id="difficulty-filter">
+                                <option value="all">All Difficulties</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
                     </div>
-                    
-                    <div id="start-error" class="error-message"></div>
-                </div>
-                
-                <div id="quiz-info" class="quiz-info" style="display: none;">
-                    <h4><i class="fas fa-clipboard-list"></i> Quiz Details</h4>
-                    <div class="quiz-details">
-                        <div class="detail-row">
-                            <span class="detail-label">Title:</span>
-                            <span id="quiz-title-display" class="detail-value">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Subject:</span>
-                            <span id="quiz-subject-display" class="detail-value">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Level:</span>
-                            <span id="quiz-level-display" class="detail-value">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Questions:</span>
-                            <span id="quiz-count-display" class="detail-value">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Feature:</span>
-                            <span class="detail-value">Each player chooses own gamble!</span>
+
+                    <!-- Worksheets List -->
+                    <div class="worksheets-container">
+                        <div id="worksheets-list" class="worksheets-list">
+                            <div class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading worksheets...
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="start-action">
-                    <button id="start-game" class="btn start-btn" disabled>
-                        <i class="fas fa-play"></i> Start Game
+
+                <!-- Right Panel - Game Area -->
+                <div class="game-panel">
+                    <div class="game-header">
+                        <h2 id="game-title"><i class="fas fa-gamepad"></i> <span class="game-title-text">Quiz Arena</span></h2>
+                        <div class="game-controls">
+                            <button id="bet-btn" class="btn-bet" disabled>
+                                <i class="fas fa-dice"></i> <span class="btn-text">Bet: <span id="bet-amount">50</span> coins</span>
+                            </button>
+                            <div class="bet-slider">
+                                <input type="range" id="bet-slider" min="10" max="500" value="50" step="10">
+                                <div class="slider-labels">
+                                    <span>10</span>
+                                    <span>250</span>
+                                    <span>500</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Display -->
+                    <div id="question-display" class="question-display">
+                        <div class="welcome-message">
+                            <i class="fas fa-arrow-left mobile-only-arrow"></i>
+                            <h3>Select a worksheet to begin!</h3>
+                            <p>Choose from the available worksheets on the left to start the quiz.</p>
+                            <div class="tips">
+                                <div class="tip">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span>Higher bets = Higher rewards!</span>
+                                </div>
+                                <div class="tip">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Build win streaks for multipliers!</span>
+                                </div>
+                                <div class="tip tip-mobile">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span>Tap menu icon for worksheets</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options Grid -->
+                    <div id="options-grid" class="options-grid">
+                        <!-- Options will be populated here -->
+                    </div>
+
+                    <!-- Game Controls -->
+                    <div class="game-actions">
+                        <button id="hint-btn" class="btn-hint" disabled>
+                            <i class="fas fa-lightbulb"></i> <span class="btn-text">Hint (50)</span>
+                        </button>
+                        <button id="skip-btn" class="btn-skip" disabled>
+                            <i class="fas fa-forward"></i> <span class="btn-text">Skip (25)</span>
+                        </button>
+                        <button id="next-btn" class="btn-next" disabled>
+                            <i class="fas fa-arrow-right"></i> <span class="btn-text">Next</span>
+                        </button>
+                    </div>
+
+                    <!-- Progress and Feedback -->
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span id="progress-text">Question 0/0</span>
+                            <span id="score-display">Score: 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Message -->
+                    <div id="feedback" class="feedback">
+                        <!-- Feedback messages will appear here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <p>Educational Quiz Game • Questions auto-detected from JSON files</p>
+                <p class="file-structure">
+                    <span class="file-structure-label">File structure:</span> 
+                    <code>Level-Subject-Grade-Chapter-Worksheet.json</code>
+                </p>
+                <div class="mobile-controls">
+                    <button id="mobile-worksheet-btn" class="mobile-control-btn">
+                        <i class="fas fa-book"></i> Worksheets
+                    </button>
+                    <button id="mobile-game-btn" class="mobile-control-btn active">
+                        <i class="fas fa-gamepad"></i> Game
                     </button>
                 </div>
             </div>
-        </div>
-        
-        <!-- Game Screen -->
-        <div id="game-screen" class="screen">
-            <div class="game-header">
-                <div class="quiz-info-header">
-                    <h2 id="game-quiz-title">Quiz Title</h2>
-                    <div class="question-counter">
-                        <i class="fas fa-random"></i>
-                        Question <span id="current-q">1</span> of <span id="total-q">5</span>
-                    </div>
-                </div>
-                
-                <div class="players-score">
-                    <div class="player-score" id="player1-display">
-                        <div class="player-name">Player 1</div>
-                        <div class="score-value" id="player1-score">0</div>
-                    </div>
-                    <div class="vs">VS</div>
-                    <div class="player-score" id="player2-display">
-                        <div class="player-name">Player 2</div>
-                        <div class="score-value" id="player2-score">0</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="game-content">
-                <!-- Question Card -->
-                <div class="question-card">
-                    <div class="question-header">
-                        <div class="question-points">
-                            <i class="fas fa-star"></i> Points: <span id="base-points">10</span>
-                        </div>
-                        <div class="current-turn">
-                            <i class="fas fa-user"></i> Turn: <span id="current-player-name">Player 1</span>
-                        </div>
-                    </div>
-                    
-                    <div id="question-text" class="question-text">
-                        Question will appear here...
-                    </div>
-                    
-                    <!-- Answer Options -->
-                    <div id="options-container" class="options-container">
-                        <!-- Options will be added here -->
-                    </div>
-                </div>
-                
-                <!-- Game Info -->
-                <div class="cards-section">
-                    <div class="cards-header">
-                        <h3><i class="fas fa-info-circle"></i> Game Features</h3>
-                        <p class="cards-instruction">Correct: +Points | Wrong: -Points</p>
-                    </div>
-                    <div style="padding: 20px;">
-                        <div style="background: rgba(67, 97, 238, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                            <h4 style="color: var(--primary-purple); margin-bottom: 10px;">
-                                <i class="fas fa-random"></i> Randomized Questions
-                            </h4>
-                            <p style="color: #666; font-size: 0.9rem;">
-                                Questions shuffle every time! "Play Again" for new random order.
-                            </p>
-                        </div>
-                        <div style="background: rgba(46, 196, 182, 0.1); padding: 15px; border-radius: 10px;">
-                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">
-                                <i class="fas fa-user-friends"></i> Individual Gambles
-                            </h4>
-                            <p style="color: #666; font-size: 0.9rem;">
-                                Each player chooses their OWN gamble at the end!
-                                Different risks, different rewards.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Game Controls -->
-            <div class="game-controls">
-                <button id="submit-answer" class="btn primary-btn" disabled>
-                    <i class="fas fa-paper-plane"></i> Submit Answer
-                </button>
-                <button id="next-question" class="btn secondary-btn" style="display: none;">
-                    <i class="fas fa-arrow-right"></i> Next Question
-                </button>
-                <button id="home-btn" class="btn home-btn">
-                    <i class="fas fa-home"></i> Home
-                </button>
-            </div>
-            
-            <!-- Results Display -->
-            <div id="results-display" class="results-area" style="display: none;">
-                <h3><i class="fas fa-chart-bar"></i> Round Results</h3>
-                <div class="result-details">
-                    <div class="result-item">
-                        <span class="result-label">Answer:</span>
-                        <span id="answer-result" class="result-value correct">Correct</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Points Earned:</span>
-                        <span id="points-earned" class="result-value positive">+10</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Gambling Screen (Each Player Chooses INDIVIDUALLY) -->
-        <div id="gambling-screen" class="screen gambling-screen">
-            <div class="gambling-content">
-                <div class="gambling-header">
-                    <h2 id="gambling-title">Final Gamble!</h2>
-                    <p id="gambling-player-info" class="gambling-instruction">
-                        Player 1: Choose Your Gamble
-                    </p>
-                </div>
-                
-                <div class="gambling-options" id="gambling-options">
-                    <!-- Gambling options will be added here -->
-                </div>
-                
-                <div class="gambling-result" id="gambling-result" style="display: none;">
-                    <div id="result-icon" class="result-icon">🎉</div>
-                    <h3 id="result-title" class="result-title">Player 1: DOUBLED!</h3>
-                    <p id="result-description" class="result-description">
-                        Player 1 got lucky! Points doubled!
-                    </p>
-                    
-                    <div class="final-points-display">
-                        <div class="final-points-player">
-                            <div class="final-points-name">Player 1 Change</div>
-                            <div id="final-points1" class="final-points-value positive">+100</div>
-                        </div>
-                        <div class="final-points-player">
-                            <div class="final-points-name">Player 2 Change</div>
-                            <div id="final-points2" class="final-points-value positive">+100</div>
-                        </div>
-                    </div>
-                    
-                    <div id="result-points" class="result-points positive">
-                        New Score: 200
-                    </div>
-                </div>
-                
-                <div class="gambling-controls">
-                    <button id="next-gambler" class="btn secondary-btn" style="display: none;">
-                        <i class="fas fa-user"></i> Player 2's Turn
-                    </button>
-                    <button id="continue-after-gamble" class="btn primary-btn" style="display: none;" disabled>
-                        <i class="fas fa-trophy"></i> See Final Results
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Game Over Screen -->
-        <div id="game-over" class="screen">
-            <div class="game-over-content">
-                <div class="winner-section">
-                    <div id="winner-trophy" class="trophy">🏆</div>
-                    <h2 id="winner-title">Game Over!</h2>
-                    <p id="winner-message"></p>
-                </div>
-                
-                <div class="final-scores">
-                    <div class="final-player">
-                        <div class="final-player-name">Player 1</div>
-                        <div id="final-score1" class="final-score">0</div>
-                    </div>
-                    
-                    <div class="vs-final">VS</div>
-                    
-                    <div class="final-player">
-                        <div class="final-player-name">Player 2</div>
-                        <div id="final-score2" class="final-score">0</div>
-                    </div>
-                </div>
-                
-                <div class="game-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Questions Answered:</span>
-                        <span id="questions-answered" class="stat-value">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Correct Answers:</span>
-                        <span id="correct-answers" class="stat-value">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Accuracy:</span>
-                        <span id="accuracy-rate" class="stat-value">0%</span>
-                    </div>
-                </div>
-                
-                <div class="game-over-buttons">
-                    <button id="play-again" class="btn primary-btn">
-                        <i class="fas fa-redo"></i> Play Again (New Random Order)
-                    </button>
-                    <button id="new-game" class="btn secondary-btn">
-                        <i class="fas fa-plus"></i> New Quiz
-                    </button>
-                </div>
-            </div>
-        </div>
+        </footer>
+
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobile-overlay"></div>
     </div>
+
+    <!-- Confetti Container -->
+    <div id="confetti-container"></div>
 
     <script src="script.js"></script>
 </body>
