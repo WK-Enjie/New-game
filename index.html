@@ -3,204 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Challenge - Competitive Learning Game</title>
+    <title>Worksheet Battle Game</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <!-- Home Screen -->
-        <div id="homeScreen" class="screen active">
-            <div class="logo">
-                <i class="fas fa-brain"></i>
-                <h1>Quiz Challenge</h1>
-                <p>Test your knowledge against a friend!</p>
-            </div>
-            
-            <div class="player-setup">
-                <div class="player-input">
-                    <h3><i class="fas fa-user"></i> Player 1</h3>
-                    <input type="text" id="player1Name" placeholder="Enter Player 1 Name" value="Player 1">
-                    <div class="color-picker">
-                        <span>Color:</span>
-                        <div class="color-option active" style="background-color: #3498db;" data-color="#3498db"></div>
-                        <div class="color-option" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
-                        <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
-                        <div class="color-option" style="background-color: #f39c12;" data-color="#f39c12"></div>
-                    </div>
-                </div>
+        <header>
+            <h1><i class="fas fa-gamepad"></i> Worksheet Battle Game</h1>
+            <p class="subtitle">Test your knowledge against a friend with exciting power-ups!</p>
+        </header>
+
+        <!-- Game Setup Screen -->
+        <div id="setup-screen" class="screen active">
+            <div class="setup-container">
+                <h2><i class="fas fa-cogs"></i> Game Setup</h2>
                 
-                <div class="player-input">
-                    <h3><i class="fas fa-user"></i> Player 2</h3>
-                    <input type="text" id="player2Name" placeholder="Enter Player 2 Name" value="Player 2">
-                    <div class="color-picker">
-                        <span>Color:</span>
-                        <div class="color-option active" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
-                        <div class="color-option" style="background-color: #1abc9c;" data-color="#1abc9c"></div>
-                        <div class="color-option" style="background-color: #d35400;" data-color="#d35400"></div>
-                        <div class="color-option" style="background-color: #34495e;" data-color="#34495e"></div>
+                <div class="player-setup">
+                    <div class="player-input">
+                        <label for="player1-name"><i class="fas fa-user"></i> Player 1 Name</label>
+                        <input type="text" id="player1-name" placeholder="Enter Player 1 name" value="Player 1">
+                    </div>
+                    <div class="player-input">
+                        <label for="player2-name"><i class="fas fa-user-friends"></i> Player 2 Name</label>
+                        <input type="text" id="player2-name" placeholder="Enter Player 2 name" value="Player 2">
                     </div>
                 </div>
-            </div>
-            
-            <div class="worksheet-input">
-                <h3><i class="fas fa-file-code"></i> Worksheet Code</h3>
-                <input type="text" id="worksheetCode" placeholder="Enter 6-digit code (e.g., 321011)" maxlength="6">
-                <button id="loadWorksheet" class="btn-primary">
-                    <i class="fas fa-search"></i> Load Worksheet
-                </button>
-                <div id="worksheetInfo" class="worksheet-info">
-                    <p>Example code: <strong>321011</strong> (Sec 3 Physics - Measurements)</p>
-                </div>
-            </div>
-            
-            <button id="startGame" class="btn-start">
-                <i class="fas fa-play"></i> Start Game
-            </button>
-            
-            <div class="instructions">
-                <h3><i class="fas fa-info-circle"></i> How to Play</h3>
-                <ul>
-                    <li>Enter both players' names and choose colors</li>
-                    <li>Enter a 6-digit worksheet code (e.g., 321011 for Sec 3 Physics)</li>
-                    <li>Answer questions correctly to earn points</li>
-                    <li>Use power-ups strategically to gain advantage</li>
-                    <li>First to reach 100 points wins!</li>
-                </ul>
-            </div>
-        </div>
-        
-        <!-- Game Screen -->
-        <div id="gameScreen" class="screen">
-            <div class="game-header">
-                <div class="player-stats player1-stats">
-                    <div class="player-name">Player 1</div>
-                    <div class="player-score">0</div>
-                    <div class="player-color" style="background-color: #3498db;"></div>
-                </div>
-                
-                <div class="game-info">
-                    <div class="question-counter">Question: <span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></div>
-                    <div class="timer" id="timer">30</div>
-                    <div class="powerup-indicator" id="powerupIndicator" style="display: none;">
-                        <i class="fas fa-bolt"></i> Power-up Available
-                    </div>
-                </div>
-                
-                <div class="player-stats player2-stats">
-                    <div class="player-name">Player 2</div>
-                    <div class="player-score">0</div>
-                    <div class="player-color" style="background-color: #9b59b6;"></div>
-                </div>
-            </div>
-            
-            <div class="question-container">
-                <div class="question-text" id="questionText">What are the two components that typically make up a physical quantity?</div>
-                <div class="options-container" id="optionsContainer">
-                    <div class="option" data-index="0">Magnitude and unit</div>
-                    <div class="option" data-index="1">Number and symbol</div>
-                    <div class="option" data-index="2">Value and direction</div>
-                    <div class="option" data-index="3">Measurement and instrument</div>
-                </div>
-            </div>
-            
-            <div class="game-controls">
-                <button id="usePowerup" class="btn-powerup">
-                    <i class="fas fa-bolt"></i> Use Power-up
-                </button>
-                <button id="nextQuestion" class="btn-next">
-                    Next Question <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-            
-            <div class="powerup-modal" id="powerupModal">
-                <div class="powerup-content">
-                    <h3><i class="fas fa-magic"></i> Choose a Power-up!</h3>
-                    <p id="powerupPlayer">Player 1's turn</p>
-                    <div class="powerup-options">
-                        <div class="powerup-option" data-powerup="double">
-                            <i class="fas fa-times-circle"></i>
-                            <h4>Double Points</h4>
-                            <p>Double your current score</p>
+
+                <div class="worksheet-selection">
+                    <h3><i class="fas fa-file-alt"></i> Select Worksheet</h3>
+                    
+                    <div class="selection-row">
+                        <div class="form-group">
+                            <label for="level-select">Education Level</label>
+                            <select id="level-select">
+                                <option value="">-- Select Level --</option>
+                                <option value="primary">Primary School</option>
+                                <option value="lower-secondary">Lower Secondary</option>
+                                <option value="upper-secondary">Upper Secondary</option>
+                            </select>
                         </div>
-                        <div class="powerup-option" data-powerup="halve">
-                            <i class="fas fa-divide"></i>
-                            <h4>Halve Opponent</h4>
-                            <p>Halve opponent's score</p>
-                        </div>
-                        <div class="powerup-option" data-powerup="triple">
-                            <i class="fas fa-cube"></i>
-                            <h4>Triple Points</h4>
-                            <p>Triple your current score</p>
-                        </div>
-                        <div class="powerup-option" data-powerup="swap">
-                            <i class="fas fa-exchange-alt"></i>
-                            <h4>Swap Scores</h4>
-                            <p>Swap scores with opponent</p>
+                        
+                        <div class="form-group">
+                            <label for="subject-select">Subject</label>
+                            <select id="subject-select" disabled>
+                                <option value="">-- Select Subject --</option>
+                            </select>
                         </div>
                     </div>
-                    <button id="cancelPowerup" class="btn-cancel">
-                        <i class="fas fa-times"></i> Skip Power-up
+                    
+                    <div class="selection-row">
+                        <div class="form-group">
+                            <label for="grade-select">Grade</label>
+                            <select id="grade-select" disabled>
+                                <option value="">-- Select Grade --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="chapter-select">Chapter</label>
+                            <select id="chapter-select" disabled>
+                                <option value="">-- Select Chapter --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="worksheet-select">Worksheet</label>
+                            <select id="worksheet-select" disabled>
+                                <option value="">-- Select Worksheet --</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="selected-worksheet-info" class="worksheet-info" style="display: none;">
+                        <h4><i class="fas fa-info-circle"></i> Selected Worksheet</h4>
+                        <p id="worksheet-details"></p>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button id="start-game-btn" class="btn btn-primary" disabled>
+                        <i class="fas fa-play"></i> Start Game
+                    </button>
+                    <button id="reset-btn" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Reset
                     </button>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Power-up Selection Screen -->
+        <div id="powerup-screen" class="screen">
+            <div class="powerup-container">
+                <h2><i class="fas fa-gift"></i> Power-up Selection</h2>
+                <p class="instructions">Each player will select a random power-up that will affect their final score!</p>
+                
+                <div class="powerup-grid">
+                    <div class="powerup-box" data-powerup="double">
+                        <div class="powerup-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <h3>Double Points</h3>
+                        <p>Multiply your final score by 2</p>
+                    </div>
+                    
+                    <div class="powerup-box" data-powerup="halve">
+                        <div class="powerup-icon">
+                            <i class="fas fa-divide"></i>
+                        </div>
+                        <h3>Halve Points</h3>
+                        <p>Divide your final score by 2</p>
+                    </div>
+                    
+                    <div class="powerup-box" data-powerup="increase30">
+                        <div class="powerup-icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <h3>+30% Points</h3>
+                        <p>Increase your score by 30%</p>
+                    </div>
+                    
+                    <div class="powerup-box" data-powerup="decrease30">
+                        <div class="powerup-icon">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <h3>-30% Points</h3>
+                        <p>Decrease your score by 30%</p>
+                    </div>
+                    
+                    <div class="powerup-box" data-powerup="switch">
+                        <div class="powerup-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <h3>Switch Scores</h3>
+                        <p>Swap scores with your opponent</p>
+                    </div>
+                </div>
+                
+                <div class="player-powerups">
+                    <div class="player-powerup" id="player1-powerup">
+                        <h3><i class="fas fa-user"></i> <span id="player1-display">Player 1</span></h3>
+                        <div class="selected-powerup">
+                            <p class="no-powerup">No power-up selected yet</p>
+                        </div>
+                        <button class="btn btn-small select-powerup-btn" data-player="1">
+                            <i class="fas fa-dice"></i> Select Random Power-up
+                        </button>
+                    </div>
+                    
+                    <div class="player-powerup" id="player2-powerup">
+                        <h3><i class="fas fa-user-friends"></i> <span id="player2-display">Player 2</span></h3>
+                        <div class="selected-powerup">
+                            <p class="no-powerup">No power-up selected yet</p>
+                        </div>
+                        <button class="btn btn-small select-powerup-btn" data-player="2">
+                            <i class="fas fa-dice"></i> Select Random Power-up
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="start-quiz-btn" class="btn btn-primary" disabled>
+                        <i class="fas fa-question-circle"></i> Start Quiz
+                    </button>
+                    <button id="back-to-setup-btn" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Setup
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    <h2><i class="fas fa-brain"></i> Worksheet Challenge</h2>
+                    <div class="quiz-info">
+                        <div class="info-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span id="current-worksheet-name">Worksheet</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Question <span id="current-question">1</span> of <span id="total-questions">10</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="players-status">
+                    <div class="player-status" id="player1-status">
+                        <div class="player-header">
+                            <h3><i class="fas fa-user"></i> <span id="quiz-player1-name">Player 1</span></h3>
+                            <div class="player-score">Score: <span id="player1-score">0</span></div>
+                        </div>
+                        <div class="player-powerup-display">
+                            <small>Power-up: <span id="player1-powerup-name">None</span></small>
+                        </div>
+                        <div class="current-turn" id="player1-turn-indicator">Current Turn</div>
+                    </div>
+                    
+                    <div class="player-status" id="player2-status">
+                        <div class="player-header">
+                            <h3><i class="fas fa-user-friends"></i> <span id="quiz-player2-name">Player 2</span></h3>
+                            <div class="player-score">Score: <span id="player2-score">0</span></div>
+                        </div>
+                        <div class="player-powerup-display">
+                            <small>Power-up: <span id="player2-powerup-name">None</span></small>
+                        </div>
+                        <div class="current-turn" id="player2-turn-indicator">Current Turn</div>
+                    </div>
+                </div>
+                
+                <div class="question-container">
+                    <div class="question-card">
+                        <h3 id="question-text">Question will appear here</h3>
+                        
+                        <div class="options-container" id="options-container">
+                            <!-- Options will be populated by JavaScript -->
+                        </div>
+                        
+                        <div class="question-footer">
+                            <div class="points-info">
+                                <i class="fas fa-star"></i>
+                                Points for this question: <span id="question-points">10</span>
+                            </div>
+                            <div class="timer" id="timer">
+                                <i class="fas fa-clock"></i> Time: <span id="time-remaining">30</span>s
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quiz-controls">
+                    <button id="submit-answer-btn" class="btn btn-primary" disabled>
+                        <i class="fas fa-paper-plane"></i> Submit Answer
+                    </button>
+                    <button id="next-question-btn" class="btn btn-secondary">
+                        <i class="fas fa-forward"></i> Next Question
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Results Screen -->
-        <div id="resultsScreen" class="screen">
+        <div id="results-screen" class="screen">
             <div class="results-container">
-                <h2><i class="fas fa-trophy"></i> Game Over!</h2>
-                <div class="winner-announcement" id="winnerAnnouncement">🏆 Player 1 Wins! 🏆</div>
+                <h2><i class="fas fa-trophy"></i> Game Results</h2>
+                
+                <div class="results-header">
+                    <h3 id="results-worksheet-name">Worksheet Name</h3>
+                    <p class="completion-time">Completed in <span id="completion-time">0</span> minutes</p>
+                </div>
                 
                 <div class="final-scores">
-                    <div class="final-score player1-final">
-                        <h3 id="finalPlayer1Name">Player 1</h3>
-                        <div class="final-score-value" id="finalPlayer1Score">100</div>
+                    <div class="final-score-card" id="player1-final">
+                        <div class="score-header">
+                            <h3><i class="fas fa-user"></i> <span id="results-player1-name">Player 1</span></h3>
+                            <div class="score-badge">
+                                <span class="score-label">Raw Score</span>
+                                <span class="raw-score" id="player1-raw-score">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="powerup-effect">
+                            <div class="powerup-info">
+                                <i class="fas fa-gift"></i>
+                                <span>Power-up: <strong id="player1-final-powerup">None</strong></span>
+                            </div>
+                            <div class="effect-arrow">
+                                <i class="fas fa-long-arrow-alt-right"></i>
+                            </div>
+                            <div class="final-score-value">
+                                <span class="final-label">Final Score</span>
+                                <span class="final-score" id="player1-final-score">0</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="final-score player2-final">
-                        <h3 id="finalPlayer2Name">Player 2</h3>
-                        <div class="final-score-value" id="finalPlayer2Score">75</div>
+                    
+                    <div class="final-score-card winner" id="player2-final">
+                        <div class="score-header">
+                            <h3><i class="fas fa-user-friends"></i> <span id="results-player2-name">Player 2</span></h3>
+                            <div class="score-badge">
+                                <span class="score-label">Raw Score</span>
+                                <span class="raw-score" id="player2-raw-score">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="powerup-effect">
+                            <div class="powerup-info">
+                                <i class="fas fa-gift"></i>
+                                <span>Power-up: <strong id="player2-final-powerup">None</strong></span>
+                            </div>
+                            <div class="effect-arrow">
+                                <i class="fas fa-long-arrow-alt-right"></i>
+                            </div>
+                            <div class="final-score-value">
+                                <span class="final-label">Final Score</span>
+                                <span class="final-score" id="player2-final-score">0</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="game-summary">
-                    <h3><i class="fas fa-chart-bar"></i> Game Summary</h3>
-                    <div class="summary-stats">
-                        <div class="stat">
-                            <i class="fas fa-question-circle"></i>
-                            <span>Questions Answered: </span>
-                            <strong id="totalAnswered">10</strong>
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Correct Answers: </span>
-                            <strong id="totalCorrect">8</strong>
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-bolt"></i>
-                            <span>Power-ups Used: </span>
-                            <strong id="powerupsUsed">2</strong>
-                        </div>
+                <div class="winner-announcement">
+                    <div class="winner-trophy">
+                        <i class="fas fa-trophy"></i>
                     </div>
+                    <h2 id="winner-name">Player Wins!</h2>
+                    <p id="winning-message">Congratulations on your victory!</p>
                 </div>
                 
-                <div class="results-controls">
-                    <button id="playAgain" class="btn-primary">
+                <div class="button-group">
+                    <button id="play-again-btn" class="btn btn-primary">
                         <i class="fas fa-redo"></i> Play Again
                     </button>
-                    <button id="newGame" class="btn-secondary">
-                        <i class="fas fa-home"></i> New Game
+                    <button id="new-worksheet-btn" class="btn btn-secondary">
+                        <i class="fas fa-file-alt"></i> New Worksheet
                     </button>
                 </div>
             </div>
         </div>
-        
-        <!-- Footer -->
-        <footer>
-            <p>Educational Quiz Game | Created for Interactive Learning</p>
-        </footer>
     </div>
-    
+
     <script src="script.js"></script>
 </body>
 </html>
