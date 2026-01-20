@@ -17,25 +17,25 @@ class QuizGame {
         this.codeDigits = ['', '', '', '', '', ''];
         this.codeDefinitions = {
             level: {
-                '1': { name: 'Primary School', color: '#4CC9F0', icon: '👦' },
-                '2': { name: 'Lower Secondary', color: '#36D399', icon: '👨‍🎓' },
-                '3': { name: 'Upper Secondary', color: '#6C63FF', icon: '👩‍🎓' }
+                '1': { name: 'Primary School', folder: 'primary', icon: '👦' },
+                '2': { name: 'Lower Secondary', folder: 'lower-secondary', icon: '👨‍🎓' },
+                '3': { name: 'Upper Secondary', folder: 'upper-secondary', icon: '👩‍🎓' }
             },
             subject: {
-                '0': { name: 'Mathematics', color: '#4CC9F0', icon: '🧮' },
-                '1': { name: 'Science (General/Combined)', color: '#36D399', icon: '🔬' },
-                '2': { name: 'Combined Physics', color: '#6C63FF', icon: '⚛️' },
-                '3': { name: 'Pure Physics', color: '#6C63FF', icon: '⚡' },
-                '4': { name: 'Combined Chemistry', color: '#FF6584', icon: '⚗️' },
-                '5': { name: 'Pure Chemistry', color: '#FF6584', icon: '🧪' }
+                '0': { name: 'Mathematics', folder: 'math', icon: '🧮' },
+                '1': { name: 'Science (General/Combined)', folder: 'science', icon: '🔬' },
+                '2': { name: 'Combined Physics', folder: 'combined-physics', icon: '⚛️' },
+                '3': { name: 'Pure Physics', folder: 'pure-physics', icon: '⚡' },
+                '4': { name: 'Combined Chemistry', folder: 'combined-chem', icon: '⚗️' },
+                '5': { name: 'Pure Chemistry', folder: 'pure-chem', icon: '🧪' }
             },
             grade: {
-                '1': { name: 'Primary 1 / Secondary 1', color: '#FBBD23' },
-                '2': { name: 'Primary 2 / Secondary 2', color: '#FBBD23' },
-                '3': { name: 'Primary 3 / Secondary 3', color: '#FBBD23' },
-                '4': { name: 'Primary 4 / Secondary 4', color: '#FBBD23' },
-                '5': { name: 'Primary 5', color: '#FBBD23' },
-                '6': { name: 'Primary 6', color: '#FBBD23' }
+                '1': { name: 'Primary 1 / Secondary 1', icon: '1️⃣' },
+                '2': { name: 'Primary 2 / Secondary 2', icon: '2️⃣' },
+                '3': { name: 'Primary 3 / Secondary 3', icon: '3️⃣' },
+                '4': { name: 'Primary 4 / Secondary 4', icon: '4️⃣' },
+                '5': { name: 'Primary 5', icon: '5️⃣' },
+                '6': { name: 'Primary 6', icon: '6️⃣' }
             }
         };
         
@@ -44,7 +44,7 @@ class QuizGame {
     
     init() {
         this.setupEventListeners();
-        this.loadSampleWorksheets();
+        this.scanForJSONFiles();
         this.updateUI();
         this.updateCodeDisplay();
     }
@@ -70,12 +70,14 @@ class QuizGame {
             this.activateWorksheet();
         });
         
-        // Quick code buttons
-        document.querySelectorAll('.quick-code-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const code = e.currentTarget.dataset.code;
-                this.loadQuickCode(code);
-            });
+        // Refresh button
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            this.scanForJSONFiles();
+        });
+        
+        // Upload button
+        document.getElementById('upload-json-btn').addEventListener('click', () => {
+            this.openFileUpload();
         });
         
         // Bet controls
@@ -101,15 +103,8 @@ class QuizGame {
             }
         });
         
-        // Refresh button
-        document.getElementById('refresh-btn').addEventListener('click', () => {
-            this.loadSampleWorksheets();
-            this.showFeedback('Worksheets refreshed!', 'success');
-        });
-        
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Number keys for answers
             if (e.key >= '1' && e.key <= '4' && this.isGameActive) {
                 const index = parseInt(e.key) - 1;
                 const options = document.querySelectorAll('.option-card');
@@ -118,39 +113,159 @@ class QuizGame {
                 }
             }
             
-            // Enter to start game
             if (e.key === 'Enter' && this.currentWorksheet && !this.isGameActive) {
                 document.getElementById('bet-btn').click();
             }
         });
     }
     
+    async scanForJSONFiles() {
+        this.showFeedback('Scanning for JSON files in Questions/ folder...', 'info');
+        
+        try {
+            // Try to load from localStorage first
+            await this.loadFromLocalStorage();
+            
+            // Try to fetch from server if available
+            await this.fetchFromServer();
+            
+        } catch (error) {
+            console.log('Cannot auto-scan in browser. Use "Upload JSON File" button instead.');
+            this.showFeedback('Upload JSON files manually using the upload button', 'info');
+        }
+    }
+    
+    async fetchFromServer() {
+        // Try to fetch a list of available worksheets from the server
+        try {
+            // This would require a backend endpoint that returns available files
+            // For now, we'll just use the upload method
+        } catch (error) {
+            // Server fetch not available
+        }
+    }
+    
+    async loadFromLocalStorage() {
+        const storedWorksheets = localStorage.getItem('quiz-worksheets');
+        if (storedWorksheets) {
+            try {
+                const worksheets = JSON.parse(storedWorksheets);
+                this.worksheets.clear();
+                
+                for (const [code, worksheet] of Object.entries(worksheets)) {
+                    if (this.validateWorksheet(worksheet)) {
+                        this.worksheets.set(code, worksheet);
+                    }
+                }
+                
+                this.updateWorksheetsList();
+                this.updateStats();
+                
+                if (this.worksheets.size > 0) {
+                    this.showFeedback(`Loaded ${this.worksheets.size} worksheets from storage`, 'success');
+                }
+            } catch (error) {
+                console.error('Error loading from localStorage:', error);
+            }
+        }
+    }
+    
+    setupFileUpload() {
+        const fileInput = document.getElementById('json-file-input');
+        
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (!file.name.match(/\.json$/i)) {
+                this.showFeedback('Please select a JSON file', 'error');
+                return;
+            }
+            
+            try {
+                const text = await this.readFile(file);
+                const worksheet = JSON.parse(text);
+                
+                if (!this.validateWorksheet(worksheet)) {
+                    this.showFeedback('Invalid worksheet format', 'error');
+                    return;
+                }
+                
+                this.worksheets.set(worksheet.code, worksheet);
+                this.saveToLocalStorage();
+                
+                this.updateWorksheetsList();
+                this.updateStats();
+                
+                this.showFeedback(`Loaded: ${worksheet.code} - ${worksheet.title}`, 'success');
+                
+                // Auto-activate if it matches current code
+                const currentCode = this.codeDigits.join('');
+                if (currentCode === worksheet.code) {
+                    this.activateWorksheet();
+                }
+                
+            } catch (error) {
+                this.showFeedback('Error reading JSON file', 'error');
+                console.error(error);
+            }
+            
+            fileInput.value = '';
+        });
+    }
+    
+    readFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsText(file);
+        });
+    }
+    
+    validateWorksheet(worksheet) {
+        const requiredFields = ['code', 'title', 'subject', 'level', 'questions'];
+        for (const field of requiredFields) {
+            if (!worksheet[field]) {
+                console.error(`Missing required field: ${field}`);
+                return false;
+            }
+        }
+        
+        if (!/^\d{6}$/.test(worksheet.code)) {
+            console.error('Code must be 6 digits');
+            return false;
+        }
+        
+        if (!Array.isArray(worksheet.questions) || worksheet.questions.length === 0) {
+            console.error('Questions must be a non-empty array');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    saveToLocalStorage() {
+        const obj = Object.fromEntries(this.worksheets);
+        localStorage.setItem('quiz-worksheets', JSON.stringify(obj));
+    }
+    
+    openFileUpload() {
+        document.getElementById('json-file-input').click();
+    }
+    
     handleDigitInput(value, index) {
-        // Validate digit based on position
         let isValid = true;
         
         switch(index) {
-            case 0: // Level (1-3)
-                isValid = /^[1-3]$/.test(value);
-                break;
-            case 1: // Subject (0-5)
-                isValid = /^[0-5]$/.test(value);
-                break;
-            case 2: // Grade (1-6)
-                isValid = /^[1-6]$/.test(value);
-                break;
-            case 3: // Chapter tens (0-9)
-                isValid = /^[0-9]$/.test(value);
-                break;
-            case 4: // Chapter ones (0-9)
-                isValid = /^[0-9]$/.test(value);
-                break;
-            case 5: // Worksheet (1-9)
-                isValid = /^[1-9]$/.test(value);
-                break;
+            case 0: isValid = /^[1-3]$/.test(value); break;
+            case 1: isValid = /^[0-5]$/.test(value); break;
+            case 2: isValid = /^[1-6]$/.test(value); break;
+            case 3: isValid = /^[0-9]$/.test(value); break;
+            case 4: isValid = /^[0-9]$/.test(value); break;
+            case 5: isValid = /^[1-9]$/.test(value); break;
         }
         
-        // Update digit
         const input = document.querySelector(`.digit-input[data-index="${index}"] input`);
         input.classList.remove('valid', 'invalid');
         
@@ -171,14 +286,20 @@ class QuizGame {
     focusNextDigit(currentIndex) {
         if (currentIndex < 5) {
             const nextInput = document.querySelector(`.digit-input[data-index="${currentIndex + 1}"] input`);
-            nextInput.focus();
+            if (nextInput) {
+                nextInput.focus();
+                nextInput.select();
+            }
         }
     }
     
     focusPreviousDigit(currentIndex) {
         if (currentIndex > 0) {
             const prevInput = document.querySelector(`.digit-input[data-index="${currentIndex - 1}"] input`);
-            prevInput.focus();
+            if (prevInput) {
+                prevInput.focus();
+                prevInput.select();
+            }
         }
     }
     
@@ -188,22 +309,16 @@ class QuizGame {
         const placeholder = document.querySelector('.code-placeholder');
         
         if (fullCode.length === 6) {
-            // Show actual code
             placeholder.textContent = fullCode.split('').join(' ');
             codeDisplay.classList.add('active');
-            
-            // Enable activate button
             document.getElementById('activate-btn').disabled = false;
         } else {
-            // Show placeholder
             let display = '';
             for (let i = 0; i < 6; i++) {
                 display += this.codeDigits[i] ? this.codeDigits[i] + ' ' : '_ ';
             }
             placeholder.textContent = display.trim();
             codeDisplay.classList.remove('active');
-            
-            // Disable activate button
             document.getElementById('activate-btn').disabled = true;
         }
     }
@@ -238,26 +353,21 @@ class QuizGame {
             return;
         }
         
-        // Get meaning
         const meaning = this.getCodeMeaning(code);
         if (!meaning) {
             this.showFeedback('Invalid code format', 'error');
             return;
         }
         
-        // Check if worksheet exists
         if (this.worksheets.has(code)) {
-            // Worksheet exists, activate it
             this.currentWorksheet = this.worksheets.get(code);
             this.activateExistingWorksheet(code, meaning);
         } else {
-            // Worksheet doesn't exist, show info for manual creation
-            this.showNewWorksheetInfo(code, meaning);
+            this.showMissingWorksheet(code, meaning);
         }
     }
     
     activateExistingWorksheet(code, meaning) {
-        // Reset game state
         this.currentQuestionIndex = 0;
         this.shuffledQuestions = [...this.currentWorksheet.questions].sort(() => Math.random() - 0.5);
         this.score = 0;
@@ -266,7 +376,6 @@ class QuizGame {
         this.usedHints.clear();
         this.isGameActive = false;
         
-        // Update UI
         document.getElementById('active-code').textContent = code;
         document.getElementById('active-worksheet-code').textContent = code;
         document.getElementById('worksheet-status').innerHTML = `
@@ -274,61 +383,47 @@ class QuizGame {
             <span class="status-active">ACTIVE</span>
         `;
         
-        // Update worksheet info
         this.updateWorksheetInfo(code, meaning);
-        
-        // Enable bet button
         document.getElementById('bet-btn').disabled = false;
-        
-        // Show success
-        this.showFeedback(`Worksheet ${code} activated!`, 'success');
-        
-        // Update game title
         document.getElementById('game-title').textContent = this.currentWorksheet.title;
         
-        // Update available worksheets list
+        this.showFeedback(`Worksheet ${code} activated!`, 'success');
         this.updateWorksheetsList();
     }
     
-    showNewWorksheetInfo(code, meaning) {
-        // Show worksheet creation info
+    showMissingWorksheet(code, meaning) {
         document.getElementById('active-code').textContent = code;
         document.getElementById('active-worksheet-code').textContent = code;
         document.getElementById('worksheet-status').innerHTML = `
-            <i class="fas fa-plus-circle" style="color: #FBBD23"></i>
-            <span style="color: #FBBD23">CREATE FILE</span>
+            <i class="fas fa-times-circle" style="color: #F87272"></i>
+            <span style="color: #F87272">NOT FOUND</span>
         `;
         
-        // Show worksheet details for creation
         const detailsDiv = document.getElementById('worksheet-details');
         detailsDiv.innerHTML = `
             <div class="worksheet-create-info">
                 <div class="create-header">
-                    <div class="create-icon" style="background: ${meaning.subject.color}">
-                        ${meaning.subject.icon}
+                    <div class="create-icon" style="background: rgba(248, 114, 114, 0.1); color: #F87272;">
+                        <i class="fas fa-file-exclamation"></i>
                     </div>
                     <div class="create-details">
-                        <h3>Create Worksheet File</h3>
-                        <p>File not found. Create JSON file with this code.</p>
+                        <h3>Worksheet Not Found</h3>
+                        <p>No JSON file found for code: ${code}</p>
                     </div>
                 </div>
                 
                 <div class="code-breakdown-details">
                     <div class="breakdown-item">
                         <span class="breakdown-label">Level:</span>
-                        <span class="breakdown-value">
-                            ${meaning.level.icon} ${meaning.level.name}
-                        </span>
+                        <span class="breakdown-value">${meaning.level.icon} ${meaning.level.name}</span>
                     </div>
                     <div class="breakdown-item">
                         <span class="breakdown-label">Subject:</span>
-                        <span class="breakdown-value">
-                            ${meaning.subject.icon} ${meaning.subject.name}
-                        </span>
+                        <span class="breakdown-value">${meaning.subject.icon} ${meaning.subject.name}</span>
                     </div>
                     <div class="breakdown-item">
                         <span class="breakdown-label">Grade:</span>
-                        <span class="breakdown-value">${meaning.grade.name}</span>
+                        <span class="breakdown-value">${meaning.grade.icon} ${meaning.grade.name}</span>
                     </div>
                     <div class="breakdown-item">
                         <span class="breakdown-label">Chapter:</span>
@@ -341,51 +436,30 @@ class QuizGame {
                 </div>
                 
                 <div class="file-creation-guide">
-                    <h4>File Creation Guide:</h4>
+                    <h4>Expected File Location:</h4>
                     <div class="file-path">
-                        <code>Questions/${this.getFolderPath(code)}/${code}.json</code>
+                        <code>Questions/${meaning.level.folder}/${meaning.subject.folder}/${code}.json</code>
                     </div>
-                    <div class="json-template">
-                        <pre>{
-    "code": "${code}",
-    "title": "${meaning.subject.name} - Chapter ${meaning.chapter}",
-    "subject": "${meaning.subject.name}",
-    "level": "${meaning.level.name}",
-    "topic": "Chapter ${meaning.chapter}: [Topic Name]",
-    "difficulty": "Intermediate",
-    "author": "[Your Name]",
-    "created": "${new Date().toISOString().split('T')[0]}",
-    "description": "[Worksheet description]",
-    "questions": [...]
-}</pre>
-                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 10px;">
+                        Upload a JSON file with the correct code or place it in the folder structure above.
+                    </p>
                 </div>
                 
                 <div class="create-actions">
-                    <button class="create-btn" id="use-template-btn">
-                        <i class="fas fa-file-download"></i>
-                        DOWNLOAD TEMPLATE
-                    </button>
-                    <button class="create-btn secondary" id="load-sample-btn">
-                        <i class="fas fa-magic"></i>
-                        LOAD SAMPLE DATA
+                    <button class="create-btn" id="upload-json-manual">
+                        <i class="fas fa-upload"></i>
+                        UPLOAD JSON FILE
                     </button>
                 </div>
             </div>
         `;
         
-        // Add event listeners to new buttons
-        document.getElementById('use-template-btn').addEventListener('click', () => {
-            this.downloadTemplate(code, meaning);
+        document.getElementById('upload-json-manual').addEventListener('click', () => {
+            this.openFileUpload();
         });
         
-        document.getElementById('load-sample-btn').addEventListener('click', () => {
-            this.loadSampleForCode(code, meaning);
-        });
-        
-        // Disable game start
         document.getElementById('bet-btn').disabled = true;
-        this.showFeedback(`Worksheet ${code} not found. Create file or load sample.`, 'info');
+        this.showFeedback(`Worksheet ${code} not found. Upload JSON file.`, 'error');
     }
     
     updateWorksheetInfo(code, meaning) {
@@ -395,7 +469,7 @@ class QuizGame {
             detailsDiv.innerHTML = `
                 <div class="worksheet-active-info">
                     <div class="active-header">
-                        <div class="active-icon" style="background: ${meaning.subject.color}">
+                        <div class="active-icon" style="background: rgba(108, 99, 255, 0.1); color: #6C63FF;">
                             ${meaning.subject.icon}
                         </div>
                         <div class="active-details">
@@ -442,240 +516,6 @@ class QuizGame {
         }
     }
     
-    getFolderPath(code) {
-        const level = code[0];
-        const subject = code[1];
-        
-        let folder = '';
-        switch(level) {
-            case '1': folder += 'primary/'; break;
-            case '2': folder += 'lower-secondary/'; break;
-            case '3': folder += 'upper-secondary/'; break;
-        }
-        
-        switch(subject) {
-            case '0': folder += 'math/'; break;
-            case '1': folder += 'science/'; break;
-            case '2': folder += 'combined-physics/'; break;
-            case '3': folder += 'pure-physics/'; break;
-            case '4': folder += 'combined-chem/'; break;
-            case '5': folder += 'pure-chem/'; break;
-        }
-        
-        return folder;
-    }
-    
-    loadQuickCode(code) {
-        // Set code digits
-        const digits = code.split('');
-        digits.forEach((digit, index) => {
-            this.codeDigits[index] = digit;
-            const input = document.querySelector(`.digit-input[data-index="${index}"] input`);
-            input.value = digit;
-            input.classList.add('valid');
-        });
-        
-        this.updateCodeDisplay();
-        
-        // Check if worksheet exists
-        if (this.worksheets.has(code)) {
-            this.activateWorksheet();
-        } else {
-            // Auto-activate if it's a sample code
-            if (['341011', '342091', '334151'].includes(code)) {
-                setTimeout(() => this.activateWorksheet(), 300);
-            }
-        }
-    }
-    
-    loadSampleWorksheets() {
-        // Clear existing worksheets
-        this.worksheets.clear();
-        
-        // Sample worksheets with proper codes
-        const sampleWorksheets = [
-            {
-                code: '341011',
-                title: 'Primary 3 Mathematics - Chapter 1',
-                subject: 'Mathematics',
-                level: 'Primary School',
-                topic: 'Chapter 1: Numbers to 1000',
-                difficulty: 'Beginner',
-                author: 'Math Department',
-                created: '2024-01-15',
-                description: 'Basic number concepts for Primary 3 students.',
-                questions: [
-                    {
-                        id: 1,
-                        question: 'What is the value of the digit 5 in the number 359?',
-                        options: ['5', '50', '500', '5000'],
-                        correctAnswer: 1,
-                        points: 10,
-                        explanation: 'The digit 5 is in the tens place, so its value is 50.'
-                    },
-                    {
-                        id: 2,
-                        question: 'Which number comes after 299?',
-                        options: ['298', '300', '399', '301'],
-                        correctAnswer: 1,
-                        points: 10,
-                        explanation: 'After 299 comes 300.'
-                    }
-                ]
-            },
-            {
-                code: '342091',
-                title: 'Secondary 4 Combined Chemistry - Chapter 9',
-                subject: 'Combined Chemistry',
-                level: 'Upper Secondary',
-                topic: 'Chapter 9: The Periodic Table',
-                difficulty: 'Intermediate',
-                author: 'Science Department',
-                created: '2024-01-20',
-                description: 'Periodic table concepts and trends for combined chemistry.',
-                questions: [
-                    {
-                        id: 1,
-                        question: 'Which group of elements are known as noble gases?',
-                        options: ['Group 1', 'Group 2', 'Group 7', 'Group 0'],
-                        correctAnswer: 3,
-                        points: 15,
-                        explanation: 'Noble gases are in Group 0 (or Group 18) of the periodic table.'
-                    },
-                    {
-                        id: 2,
-                        question: 'What is the trend in atomic radius across a period?',
-                        options: ['Increases', 'Decreases', 'Stays the same', 'Increases then decreases'],
-                        correctAnswer: 1,
-                        points: 20,
-                        explanation: 'Atomic radius decreases across a period due to increasing nuclear charge.'
-                    }
-                ]
-            },
-            {
-                code: '334151',
-                title: 'Static Electricity (Conceptual)',
-                subject: 'Pure Physics',
-                level: 'Upper Secondary',
-                topic: 'Chapter 15: Static Electricity',
-                difficulty: 'Intermediate',
-                author: 'Physics Department',
-                created: '2024-01-19',
-                description: 'Conceptual questions on static electricity covering charges, fields, and applications.',
-                questions: [
-                    {
-                        id: 1,
-                        question: 'What is the SI unit for measuring electric charge?',
-                        options: ['Coulomb', 'Newton', 'Joule', 'Watt'],
-                        correctAnswer: 0,
-                        points: 10,
-                        explanation: 'The coulomb (C) is the SI unit of electric charge.'
-                    },
-                    {
-                        id: 2,
-                        question: 'When a plastic rod is rubbed with wool, the plastic becomes negatively charged. What has been transferred?',
-                        options: [
-                            'Electrons from wool to plastic',
-                            'Protons from plastic to wool',
-                            'Electrons from plastic to wool',
-                            'Protons from wool to plastic'
-                        ],
-                        correctAnswer: 0,
-                        points: 10,
-                        explanation: 'Electrons are transferred from the wool to the plastic rod.'
-                    }
-                ]
-            }
-        ];
-        
-        // Add to worksheets map
-        sampleWorksheets.forEach(ws => {
-            this.worksheets.set(ws.code, ws);
-        });
-        
-        // Update UI
-        this.updateWorksheetsList();
-        this.updateStats();
-        
-        this.showFeedback(`Loaded ${sampleWorksheets.length} sample worksheets`, 'success');
-    }
-    
-    loadSampleForCode(code, meaning) {
-        // Create sample worksheet for the code
-        const sampleWorksheet = {
-            code: code,
-            title: `${meaning.subject.name} - Chapter ${meaning.chapter}`,
-            subject: meaning.subject.name,
-            level: meaning.level.name,
-            topic: `Chapter ${meaning.chapter}: Sample Topic`,
-            difficulty: 'Intermediate',
-            author: 'Sample Author',
-            created: new Date().toISOString().split('T')[0],
-            description: `Sample worksheet for ${meaning.subject.name}, Chapter ${meaning.chapter}.`,
-            questions: [
-                {
-                    id: 1,
-                    question: `Sample question about ${meaning.subject.name} Chapter ${meaning.chapter}`,
-                    options: ['Option A', 'Option B', 'Option C', 'Option D'],
-                    correctAnswer: 0,
-                    points: 10,
-                    explanation: 'This is a sample explanation.'
-                },
-                {
-                    id: 2,
-                    question: 'Another sample question',
-                    options: ['Choice 1', 'Choice 2', 'Choice 3', 'Choice 4'],
-                    correctAnswer: 1,
-                    points: 15,
-                    explanation: 'Sample explanation for question 2.'
-                }
-            ]
-        };
-        
-        // Add to worksheets and activate
-        this.worksheets.set(code, sampleWorksheet);
-        this.currentWorksheet = sampleWorksheet;
-        this.activateExistingWorksheet(code, meaning);
-        
-        this.showFeedback('Loaded sample data for this code', 'success');
-    }
-    
-    downloadTemplate(code, meaning) {
-        const template = {
-            code: code,
-            title: `${meaning.subject.name} - Chapter ${meaning.chapter}`,
-            subject: meaning.subject.name,
-            level: meaning.level.name,
-            topic: `Chapter ${meaning.chapter}: [Topic Name]`,
-            difficulty: "Intermediate",
-            author: "[Your Name]",
-            created: new Date().toISOString().split('T')[0],
-            description: "[Worksheet description]",
-            questions: [
-                {
-                    id: 1,
-                    question: "[Question text here]",
-                    options: ["Option A", "Option B", "Option C", "Option D"],
-                    correctAnswer: 0,
-                    points: 10,
-                    explanation: "[Explanation for correct answer]"
-                }
-            ]
-        };
-        
-        const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${code}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        this.showFeedback(`Template ${code}.json downloaded`, 'success');
-    }
-    
     updateWorksheetsList() {
         const worksheetsGrid = document.getElementById('worksheets-list');
         const availableCount = document.getElementById('available-count');
@@ -683,16 +523,17 @@ class QuizGame {
         if (this.worksheets.size === 0) {
             worksheetsGrid.innerHTML = `
                 <div class="no-worksheets">
-                    <div class="no-worksheets-icon">📁</div>
+                    <div class="no-worksheets-icon">
+                        <i class="fas fa-folder-open" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
                     <h4>No Worksheets Found</h4>
-                    <p>Enter a code or scan for files</p>
+                    <p>Upload JSON files using the button above</p>
                 </div>
             `;
             availableCount.textContent = '0';
             return;
         }
         
-        // Clear and add worksheets
         worksheetsGrid.innerHTML = '';
         let count = 0;
         
@@ -704,12 +545,15 @@ class QuizGame {
             card.className = `worksheet-card ${this.currentWorksheet?.code === code ? 'active' : ''}`;
             card.dataset.code = code;
             
+            const difficultyClass = worksheet.difficulty ? 
+                `difficulty-${worksheet.difficulty.toLowerCase()}` : 'difficulty-intermediate';
+            
             card.innerHTML = `
                 <div class="worksheet-code">${code}</div>
                 <div class="worksheet-header">
                     <div class="worksheet-title">${meaning.subject.icon} ${worksheet.title}</div>
-                    <div class="worksheet-difficulty difficulty-${worksheet.difficulty.toLowerCase()}">
-                        ${worksheet.difficulty}
+                    <div class="worksheet-difficulty ${difficultyClass}">
+                        ${worksheet.difficulty || 'Intermediate'}
                     </div>
                 </div>
                 <div class="worksheet-meta">
@@ -717,11 +561,17 @@ class QuizGame {
                     <span><i class="fas fa-atom"></i> ${worksheet.subject}</span>
                     <span><i class="fas fa-question-circle"></i> ${worksheet.questions.length} questions</span>
                 </div>
-                <div class="worksheet-description">${worksheet.description}</div>
+                <div class="worksheet-description">${worksheet.description || 'No description'}</div>
             `;
             
             card.addEventListener('click', () => {
-                this.loadQuickCode(code);
+                // Auto-fill the code and activate
+                this.codeDigits = code.split('');
+                document.querySelectorAll('.digit-input input').forEach((input, index) => {
+                    input.value = this.codeDigits[index];
+                    input.classList.add('valid');
+                });
+                this.updateCodeDisplay();
                 this.activateWorksheet();
             });
             
@@ -743,25 +593,20 @@ class QuizGame {
         document.getElementById('question-count').textContent = totalQuestions;
     }
     
-    // GAME LOGIC METHODS (same as before, but updated for code system)
-    
     startGame() {
         if (!this.currentWorksheet || this.coins < this.currentBet) {
             this.showFeedback("Not enough coins!", "error");
             return;
         }
         
-        // Deduct bet
         this.coins -= this.currentBet;
         this.isGameActive = true;
         
-        // Update UI
         document.getElementById('bet-btn').disabled = true;
         document.getElementById('hint-btn').disabled = false;
         document.getElementById('skip-btn').disabled = false;
         document.getElementById('next-btn').disabled = true;
         
-        // Load first question
         this.loadQuestion();
         this.updateUI();
         
@@ -776,7 +621,6 @@ class QuizGame {
         
         const question = this.shuffledQuestions[this.currentQuestionIndex];
         
-        // Update question display
         document.getElementById('question-number').textContent = `Q${this.currentQuestionIndex + 1}`;
         document.getElementById('question-points').innerHTML = `
             <i class="fas fa-star"></i>
@@ -787,7 +631,6 @@ class QuizGame {
             <div class="question-text">${question.question}</div>
         `;
         
-        // Update options
         const optionsGrid = document.getElementById('options-grid');
         optionsGrid.innerHTML = '';
         
@@ -805,7 +648,6 @@ class QuizGame {
             optionsGrid.appendChild(optionCard);
         });
         
-        // Update progress
         this.updateProgress();
     }
     
@@ -815,12 +657,10 @@ class QuizGame {
         const question = this.shuffledQuestions[this.currentQuestionIndex];
         const isCorrect = selectedIndex === question.correctAnswer;
         
-        // Disable all options
         document.querySelectorAll('.option-card').forEach(card => {
             card.classList.add('disabled');
         });
         
-        // Highlight answers
         const optionCards = document.querySelectorAll('.option-card');
         optionCards.forEach((card, index) => {
             if (index === question.correctAnswer) {
@@ -830,7 +670,6 @@ class QuizGame {
             }
         });
         
-        // Handle result
         if (isCorrect) {
             this.handleCorrectAnswer(question);
         } else {
@@ -962,7 +801,7 @@ class QuizGame {
         `;
         
         document.getElementById('play-again-btn').addEventListener('click', () => {
-            this.activateWorksheet(); // Reactivate current worksheet
+            this.activateWorksheet();
         });
         
         document.getElementById('options-grid').innerHTML = '';
@@ -970,22 +809,15 @@ class QuizGame {
     }
     
     updateUI() {
-        // Update coins
         document.getElementById('coins').textContent = this.formatNumber(this.coins);
-        
-        // Update multiplier
         document.getElementById('multiplier').textContent = `${this.multiplier.toFixed(1)}x`;
         document.getElementById('multiplier-fill').style.width = `${((this.multiplier - 1) / 2) * 100}%`;
-        
-        // Update streak and score
         document.getElementById('streak').textContent = this.winStreak;
         document.getElementById('score').textContent = this.score;
         
-        // Update button states
         document.getElementById('hint-btn').disabled = !this.isGameActive || this.coins < 50;
         document.getElementById('skip-btn').disabled = !this.isGameActive || this.coins < 25;
         
-        // Update bet slider
         const betSlider = document.getElementById('bet-slider');
         const maxBet = Math.min(500, this.coins);
         betSlider.max = maxBet;
@@ -1036,278 +868,3 @@ class QuizGame {
 
 // Initialize the game
 const quizGame = new QuizGame();
-
-// Add additional styles
-const additionalStyles = document.createElement('style');
-additionalStyles.textContent = `
-    .worksheet-create-info, .worksheet-active-info {
-        padding: 15px;
-    }
-    
-    .create-header, .active-header {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .create-icon, .active-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        flex-shrink: 0;
-    }
-    
-    .create-details h3, .active-details h3 {
-        font-size: 1.3rem;
-        margin-bottom: 5px;
-        color: var(--text-primary);
-    }
-    
-    .create-details p, .active-details p {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-    }
-    
-    .code-breakdown-details {
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: var(--radius-md);
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .breakdown-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px dashed var(--border-color);
-    }
-    
-    .breakdown-item:last-child {
-        border-bottom: none;
-    }
-    
-    .breakdown-label {
-        color: var(--text-secondary);
-        font-weight: 500;
-    }
-    
-    .breakdown-value {
-        color: var(--text-primary);
-        font-weight: 600;
-        text-align: right;
-    }
-    
-    .file-creation-guide {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: var(--radius-md);
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid var(--border-color);
-    }
-    
-    .file-creation-guide h4 {
-        color: var(--text-primary);
-        margin-bottom: 10px;
-        font-size: 1rem;
-    }
-    
-    .file-path {
-        background: rgba(0, 0, 0, 0.3);
-        padding: 10px;
-        border-radius: var(--radius-sm);
-        margin-bottom: 15px;
-        font-family: monospace;
-        font-size: 0.9rem;
-        color: var(--primary-color);
-        word-break: break-all;
-    }
-    
-    .json-template pre {
-        background: rgba(0, 0, 0, 0.3);
-        padding: 15px;
-        border-radius: var(--radius-sm);
-        overflow-x: auto;
-        font-family: monospace;
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        line-height: 1.4;
-        margin: 0;
-    }
-    
-    .create-actions {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .create-btn {
-        flex: 1;
-        padding: 12px;
-        border: none;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all 0.3s ease;
-    }
-    
-    .create-btn:first-child {
-        background: var(--gradient-primary);
-        color: white;
-    }
-    
-    .create-btn.secondary {
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-    
-    .create-btn:hover {
-        transform: translateY(-3px);
-    }
-    
-    .worksheet-meta-info {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-    }
-    
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 15px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border-color);
-    }
-    
-    .meta-item i {
-        color: var(--primary-color);
-    }
-    
-    .meta-item span {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-    }
-    
-    .worksheet-description-box {
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: var(--radius-md);
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid var(--border-color);
-    }
-    
-    .worksheet-description-box p {
-        color: var(--text-secondary);
-        line-height: 1.5;
-        margin: 0;
-    }
-    
-    .worksheet-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-    }
-    
-    .stat-box {
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: var(--radius-md);
-        padding: 15px;
-        text-align: center;
-        border: 1px solid var(--border-color);
-    }
-    
-    .stat-number {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: 5px;
-    }
-    
-    .stat-label {
-        font-size: 0.7rem;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .game-results {
-        text-align: center;
-        padding: 20px;
-    }
-    
-    .result-header {
-        margin-bottom: 25px;
-    }
-    
-    .result-icon {
-        font-size: 3rem;
-        margin-bottom: 10px;
-    }
-    
-    .result-header h3 {
-        font-size: 1.5rem;
-        color: var(--text-primary);
-        margin-bottom: 5px;
-    }
-    
-    .result-stats {
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: var(--radius-md);
-        padding: 20px;
-        margin-bottom: 25px;
-        border: 1px solid var(--border-color);
-    }
-    
-    .stat-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .stat-row:last-child {
-        border-bottom: none;
-    }
-    
-    .coins-won {
-        color: #FBBD23 !important;
-    }
-    
-    .result-actions {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-    }
-    
-    .play-again-btn {
-        padding: 15px 30px;
-        background: var(--gradient-primary);
-        color: white;
-        border: none;
-        border-radius: var(--radius-md);
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transition: all 0.3s ease;
-    }
-    
-    .play-again-btn:hover {
-        transform: translateY(-3px);
-    }
-`;
-document.head.appendChild(additionalStyles);

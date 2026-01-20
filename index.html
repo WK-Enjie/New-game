@@ -116,6 +116,16 @@
                     </button>
                 </div>
                 
+                <div class="upload-section">
+                    <button class="upload-btn" id="upload-json-btn">
+                        <i class="fas fa-upload"></i>
+                        UPLOAD JSON FILE
+                    </button>
+                    <p class="upload-hint">
+                        Upload worksheets in JSON format (e.g., 301011.json)
+                    </p>
+                </div>
+                
                 <!-- CODE INPUT SECTION -->
                 <div class="code-activation-section">
                     <div class="code-input-container">
@@ -224,7 +234,6 @@
                     </div>
                     
                     <div class="worksheets-grid" id="worksheets-list">
-                        <!-- Worksheets will be loaded here -->
                         <div class="loading-worksheets">
                             <div class="loader"></div>
                             <p>Scanning for worksheets...</p>
@@ -408,6 +417,9 @@
         <div id="coin-effect"></div>
         <div id="streak-effect"></div>
     </div>
+
+    <!-- Hidden file input for JSON upload -->
+    <input type="file" id="json-file-input" accept=".json" style="display: none;">
 
     <script src="script.js"></script>
 </body>
