@@ -23,7 +23,7 @@
                     <input type="text" id="player1Name" placeholder="Enter Player 1 Name" value="Player 1">
                     <div class="color-picker">
                         <span>Color:</span>
-                        <div class="color-option" style="background-color: #3498db;" data-color="#3498db"></div>
+                        <div class="color-option active" style="background-color: #3498db;" data-color="#3498db"></div>
                         <div class="color-option" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
                         <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
                         <div class="color-option" style="background-color: #f39c12;" data-color="#f39c12"></div>
@@ -35,7 +35,7 @@
                     <input type="text" id="player2Name" placeholder="Enter Player 2 Name" value="Player 2">
                     <div class="color-picker">
                         <span>Color:</span>
-                        <div class="color-option" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
+                        <div class="color-option active" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
                         <div class="color-option" style="background-color: #1abc9c;" data-color="#1abc9c"></div>
                         <div class="color-option" style="background-color: #d35400;" data-color="#d35400"></div>
                         <div class="color-option" style="background-color: #34495e;" data-color="#34495e"></div>
@@ -49,10 +49,12 @@
                 <button id="loadWorksheet" class="btn-primary">
                     <i class="fas fa-search"></i> Load Worksheet
                 </button>
-                <div id="worksheetInfo" class="worksheet-info"></div>
+                <div id="worksheetInfo" class="worksheet-info">
+                    <p>Example code: <strong>321011</strong> (Sec 3 Physics - Measurements)</p>
+                </div>
             </div>
             
-            <button id="startGame" class="btn-start" disabled>
+            <button id="startGame" class="btn-start">
                 <i class="fas fa-play"></i> Start Game
             </button>
             
@@ -72,36 +74,41 @@
         <div id="gameScreen" class="screen">
             <div class="game-header">
                 <div class="player-stats player1-stats">
-                    <div class="player-name"></div>
+                    <div class="player-name">Player 1</div>
                     <div class="player-score">0</div>
-                    <div class="player-color"></div>
+                    <div class="player-color" style="background-color: #3498db;"></div>
                 </div>
                 
                 <div class="game-info">
-                    <div class="question-counter">Question: <span id="currentQuestion">1</span>/<span id="totalQuestions">0</span></div>
+                    <div class="question-counter">Question: <span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></div>
                     <div class="timer" id="timer">30</div>
-                    <div class="powerup-indicator" id="powerupIndicator">
+                    <div class="powerup-indicator" id="powerupIndicator" style="display: none;">
                         <i class="fas fa-bolt"></i> Power-up Available
                     </div>
                 </div>
                 
                 <div class="player-stats player2-stats">
-                    <div class="player-name"></div>
+                    <div class="player-name">Player 2</div>
                     <div class="player-score">0</div>
-                    <div class="player-color"></div>
+                    <div class="player-color" style="background-color: #9b59b6;"></div>
                 </div>
             </div>
             
             <div class="question-container">
-                <div class="question-text" id="questionText"></div>
-                <div class="options-container" id="optionsContainer"></div>
+                <div class="question-text" id="questionText">What are the two components that typically make up a physical quantity?</div>
+                <div class="options-container" id="optionsContainer">
+                    <div class="option" data-index="0">Magnitude and unit</div>
+                    <div class="option" data-index="1">Number and symbol</div>
+                    <div class="option" data-index="2">Value and direction</div>
+                    <div class="option" data-index="3">Measurement and instrument</div>
+                </div>
             </div>
             
             <div class="game-controls">
-                <button id="usePowerup" class="btn-powerup" disabled>
+                <button id="usePowerup" class="btn-powerup">
                     <i class="fas fa-bolt"></i> Use Power-up
                 </button>
-                <button id="nextQuestion" class="btn-next" disabled>
+                <button id="nextQuestion" class="btn-next">
                     Next Question <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
@@ -143,16 +150,16 @@
         <div id="resultsScreen" class="screen">
             <div class="results-container">
                 <h2><i class="fas fa-trophy"></i> Game Over!</h2>
-                <div class="winner-announcement" id="winnerAnnouncement"></div>
+                <div class="winner-announcement" id="winnerAnnouncement">🏆 Player 1 Wins! 🏆</div>
                 
                 <div class="final-scores">
                     <div class="final-score player1-final">
-                        <h3 id="finalPlayer1Name"></h3>
-                        <div class="final-score-value" id="finalPlayer1Score"></div>
+                        <h3 id="finalPlayer1Name">Player 1</h3>
+                        <div class="final-score-value" id="finalPlayer1Score">100</div>
                     </div>
                     <div class="final-score player2-final">
-                        <h3 id="finalPlayer2Name"></h3>
-                        <div class="final-score-value" id="finalPlayer2Score"></div>
+                        <h3 id="finalPlayer2Name">Player 2</h3>
+                        <div class="final-score-value" id="finalPlayer2Score">75</div>
                     </div>
                 </div>
                 
@@ -162,17 +169,17 @@
                         <div class="stat">
                             <i class="fas fa-question-circle"></i>
                             <span>Questions Answered: </span>
-                            <strong id="totalAnswered">0</strong>
+                            <strong id="totalAnswered">10</strong>
                         </div>
                         <div class="stat">
                             <i class="fas fa-check-circle"></i>
                             <span>Correct Answers: </span>
-                            <strong id="totalCorrect">0</strong>
+                            <strong id="totalCorrect">8</strong>
                         </div>
                         <div class="stat">
                             <i class="fas fa-bolt"></i>
                             <span>Power-ups Used: </span>
-                            <strong id="powerupsUsed">0</strong>
+                            <strong id="powerupsUsed">2</strong>
                         </div>
                     </div>
                 </div>

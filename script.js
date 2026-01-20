@@ -72,7 +72,6 @@ const newGameBtn = document.getElementById('newGame');
 // Initialize the game
 function init() {
     setupEventListeners();
-    loadInitialData();
     updateUI();
 }
 
@@ -106,50 +105,13 @@ function setupEventListeners() {
     // Results screen
     playAgainBtn.addEventListener('click', playAgain);
     newGameBtn.addEventListener('click', newGame);
-}
-
-// Load initial data
-function loadInitialData() {
-    // Set default colors as active
-    player1ColorOptions[0].classList.add('active');
-    player2ColorOptions[0].classList.add('active');
     
-    // Load example worksheet (for testing)
-    loadExampleWorksheet();
-}
-
-// Load example worksheet for testing
-function loadExampleWorksheet() {
-    // This is where you would load from your JSON files
-    // For now, we'll use a test worksheet
-    gameState.worksheet = {
-        code: "321011",
-        title: "Sec 3 Combined Physics - Chapter 1: Measurements",
-        subject: "Combined Physics",
-        level: "Upper Secondary",
-        topic: "Chapter 1: Measurements and Physical Quantities",
-        difficulty: "Intermediate",
-        description: "Worksheet covering physical quantities, SI units, prefixes, measurements, and scalar/vector quantities.",
-        questions: [
-            {
-                id: 1,
-                question: "What are the two components that typically make up a physical quantity?",
-                options: ["Magnitude and unit", "Number and symbol", "Value and direction", "Measurement and instrument"],
-                correctAnswer: 0,
-                points: 5,
-                explanation: "A physical quantity consists of a numerical magnitude and a unit."
-            },
-            {
-                id: 2,
-                question: "Which of the following is NOT a base SI quantity?",
-                options: ["Mass", "Length", "Volume", "Time"],
-                correctAnswer: 2,
-                points: 5,
-                explanation: "Volume is a derived quantity (length³), while mass, length, and time are base quantities."
-            },
-            // Add more questions as needed
-        ]
-    };
+    // Options click handlers
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('option')) {
+            selectOption(e.target, parseInt(e.target.dataset.index));
+        }
+    });
 }
 
 // Select color for player
@@ -172,49 +134,9 @@ async function loadWorksheet() {
     }
     
     try {
-        // Extract level, subject, and other info from code
-        const level = parseInt(code[0]);
-        const subject = parseInt(code[1]);
-        const year = parseInt(code[2]);
-        const chapter = parseInt(code[3] + code[4]);
-        const worksheetNum = parseInt(code[5]);
-        
-        // Build file path based on code
-        let subjectFolder = '';
-        let levelFolder = '';
-        
-        // Determine level folder
-        if (level === 1) levelFolder = 'primary';
-        else if (level === 2) levelFolder = 'lower-secondary';
-        else if (level === 3) levelFolder = 'upper-secondary';
-        
-        // Determine subject folder
-        if (level === 1) {
-            subjectFolder = subject === 0 ? 'math' : 'science';
-        } else if (level === 2) {
-            subjectFolder = subject === 0 ? 'math' : 'science';
-        } else if (level === 3) {
-            const subjectMap = {
-                0: 'math',
-                1: 'science',
-                2: 'combined-physics',
-                3: 'pure-physics',
-                4: 'combined-chemistry',
-                5: 'pure-chemistry'
-            };
-            subjectFolder = subjectMap[subject] || 'science';
-        }
-        
-        // Construct path
-        const path = `data/${levelFolder}/${subjectFolder}/${code}.json`;
-        
-        // Load JSON file
-        const response = await fetch(path);
-        if (!response.ok) {
-            throw new Error('Worksheet not found');
-        }
-        
-        gameState.worksheet = await response.json();
+        // For demo purposes, we'll create a sample worksheet
+        // In production, you would fetch from your JSON files
+        gameState.worksheet = createSampleWorksheet();
         
         // Display worksheet info
         worksheetInfoDiv.innerHTML = `
@@ -226,9 +148,6 @@ async function loadWorksheet() {
             <p><strong>Questions:</strong> ${gameState.worksheet.questions.length}</p>
         `;
         
-        // Enable start game button
-        startGameBtn.disabled = false;
-        
     } catch (error) {
         console.error('Error loading worksheet:', error);
         worksheetInfoDiv.innerHTML = `
@@ -237,8 +156,64 @@ async function loadWorksheet() {
                 Worksheet not found. Please check the code and try again.
             </div>
         `;
-        startGameBtn.disabled = true;
     }
+}
+
+// Create sample worksheet for demo
+function createSampleWorksheet() {
+    return {
+        code: "321011",
+        title: "Sec 3 Combined Physics - Chapter 1: Measurements",
+        subject: "Combined Physics",
+        level: "Upper Secondary",
+        topic: "Chapter 1: Measurements and Physical Quantities",
+        difficulty: "Intermediate",
+        author: "Physics Department",
+        created: "2024-01-25",
+        description: "Worksheet covering physical quantities, SI units, prefixes, measurements, and scalar/vector quantities.",
+        questions: [
+            {
+                id: 1,
+                question: "What are the two components that typically make up a physical quantity?",
+                options: ["Magnitude and unit", "Number and symbol", "Value and direction", "Measurement and instrument"],
+                correctAnswer: 0,
+                points: 5,
+                explanation: "A physical quantity consists of a numerical magnitude and a unit."
+            },
+            {
+                id: 2,
+                question: "Which of the following is NOT a base SI quantity?",
+                options: ["Mass", "Length", "Volume", "Time"],
+                correctAnswer: 2,
+                points: 5,
+                explanation: "Volume is a derived quantity (length³), while mass, length, and time are base quantities."
+            },
+            {
+                id: 3,
+                question: "What is the SI unit for electric current?",
+                options: ["Ampere (A)", "Volt (V)", "Ohm (Ω)", "Watt (W)"],
+                correctAnswer: 0,
+                points: 5,
+                explanation: "The base unit for electric current is the ampere (A)."
+            },
+            {
+                id: 4,
+                question: "What prefix represents 10⁻⁶?",
+                options: ["Milli (m)", "Micro (µ)", "Nano (n)", "Centi (c)"],
+                correctAnswer: 1,
+                points: 5,
+                explanation: "Micro (µ) represents 10⁻⁶ or one millionth."
+            },
+            {
+                id: 5,
+                question: "Which prefix would you use to express 0.005 meters?",
+                options: ["5 mm", "5 cm", "5 µm", "5 km"],
+                correctAnswer: 0,
+                points: 5,
+                explanation: "0.005 m = 5 × 10⁻³ m = 5 mm (millimeters)."
+            }
+        ]
+    };
 }
 
 // Start the game
@@ -281,7 +256,10 @@ function switchScreen(screenName) {
 
 // Load current question
 function loadQuestion() {
-    if (!gameState.worksheet || !gameState.worksheet.questions) return;
+    if (!gameState.worksheet || !gameState.worksheet.questions) {
+        // Use sample questions if no worksheet loaded
+        gameState.worksheet = createSampleWorksheet();
+    }
     
     const question = gameState.worksheet.questions[gameState.currentQuestionIndex];
     
@@ -297,9 +275,6 @@ function loadQuestion() {
         optionElement.className = 'option';
         optionElement.textContent = option;
         optionElement.dataset.index = index;
-        
-        optionElement.addEventListener('click', () => selectOption(optionElement, index));
-        
         optionsContainer.appendChild(optionElement);
     });
     
@@ -342,6 +317,7 @@ function selectOption(element, index) {
         if (gameState.players[gameState.currentPlayer].correctAnswers % 3 === 0) {
             gameState.powerupAvailable = true;
             powerupIndicator.style.display = 'inline-flex';
+            usePowerupBtn.disabled = false;
         }
     }
     
@@ -451,6 +427,7 @@ function usePowerup(powerupType) {
     gameState.gameStats.powerupsUsed++;
     powerupIndicator.style.display = 'none';
     powerupModal.style.display = 'none';
+    usePowerupBtn.disabled = true;
     
     updateUI();
     
@@ -466,18 +443,15 @@ function endGame() {
     switchScreen('results');
     
     // Determine winner
-    let winner;
     if (gameState.players.player1.score > gameState.players.player2.score) {
-        winner = gameState.players.player1;
-        winnerAnnouncement.textContent = `🏆 ${winner.name} Wins! 🏆`;
-        winnerAnnouncement.style.background = `linear-gradient(135deg, ${winner.color} 0%, #333 100%)`;
+        winnerAnnouncement.textContent = `🏆 ${gameState.players.player1.name} Wins! 🏆`;
+        winnerAnnouncement.style.background = gameState.players.player1.color;
     } else if (gameState.players.player2.score > gameState.players.player1.score) {
-        winner = gameState.players.player2;
-        winnerAnnouncement.textContent = `🏆 ${winner.name} Wins! 🏆`;
-        winnerAnnouncement.style.background = `linear-gradient(135deg, ${winner.color} 0%, #333 100%)`;
+        winnerAnnouncement.textContent = `🏆 ${gameState.players.player2.name} Wins! 🏆`;
+        winnerAnnouncement.style.background = gameState.players.player2.color;
     } else {
         winnerAnnouncement.textContent = "🤝 It's a Tie! 🤝";
-        winnerAnnouncement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        winnerAnnouncement.style.background = '#667eea';
     }
     
     // Update final scores
@@ -487,8 +461,8 @@ function endGame() {
     finalPlayer2Score.textContent = gameState.players.player2.score;
     
     // Apply player colors
-    document.querySelector('.player1-final').style.backgroundColor = `${gameState.players.player1.color}20`;
-    document.querySelector('.player2-final').style.backgroundColor = `${gameState.players.player2.color}20`;
+    document.querySelector('.player1-final').style.borderColor = gameState.players.player1.color;
+    document.querySelector('.player2-final').style.borderColor = gameState.players.player2.color;
     
     // Update stats
     totalAnswered.textContent = gameState.gameStats.totalAnswered;
@@ -520,25 +494,21 @@ function playAgain() {
 // New game
 function newGame() {
     switchScreen('home');
-    startGameBtn.disabled = true;
-    worksheetInfoDiv.innerHTML = '';
+    worksheetInfoDiv.innerHTML = '<p>Example code: <strong>321011</strong> (Sec 3 Physics - Measurements)</p>';
 }
 
 // Update player turn indicator
 function updatePlayerTurnIndicator() {
     const currentPlayer = gameState.players[gameState.currentPlayer];
     document.querySelectorAll('.player-stats').forEach(stats => {
-        stats.style.opacity = '0.7';
-        stats.style.transform = 'scale(0.95)';
+        stats.style.border = '2px solid #e0e0e0';
     });
     
     const activeStats = gameState.currentPlayer === 'player1' ? 
         document.querySelector('.player1-stats') : 
         document.querySelector('.player2-stats');
     
-    activeStats.style.opacity = '1';
-    activeStats.style.transform = 'scale(1.05)';
-    activeStats.style.boxShadow = `0 10px 30px ${currentPlayer.color}40`;
+    activeStats.style.border = `3px solid ${currentPlayer.color}`;
 }
 
 // Update UI
@@ -554,9 +524,6 @@ function updateUI() {
     // Update player stat backgrounds
     document.querySelector('.player1-stats').style.backgroundColor = `${gameState.players.player1.color}20`;
     document.querySelector('.player2-stats').style.backgroundColor = `${gameState.players.player2.color}20`;
-    
-    // Update power-up button
-    usePowerupBtn.disabled = !gameState.powerupAvailable;
     
     // Update player turn indicator
     if (gameState.currentScreen === 'game') {
