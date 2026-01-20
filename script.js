@@ -137,30 +137,36 @@ async function loadWorksheet() {
     
     try {
         // Parse the code to determine file path
-        const level = parseInt(code[0]);
-        const subject = parseInt(code[1]);
-        const year = parseInt(code[2]);
-        const chapter = parseInt(code[3] + code[4]);
-        const worksheetNum = parseInt(code[5]);
+        const levelCode = parseInt(code[0]);
+        const subjectCode = parseInt(code[1]);
         
         // Build file path based on code
         let levelFolder = '';
         let subjectFolder = '';
         
         // Determine level folder
-        if (level === 1) levelFolder = 'primary';
-        else if (level === 2) levelFolder = 'lower-secondary';
-        else if (level === 3) levelFolder = 'upper-secondary';
-        else {
-            throw new Error('Invalid level code');
+        if (levelCode === 1) {
+            levelFolder = 'primary';
+        } else if (levelCode === 2) {
+            levelFolder = 'lower-secondary';
+        } else if (levelCode === 3) {
+            levelFolder = 'upper-secondary';
+        } else {
+            throw new Error('Invalid level code (first digit should be 1-3)');
         }
         
         // Determine subject folder
-        if (level === 1) {
-            subjectFolder = subject === 0 ? 'math' : 'science';
-        } else if (level === 2) {
-            subjectFolder = subject === 0 ? 'math' : 'science';
-        } else if (level === 3) {
+        if (levelCode === 1 || levelCode === 2) {
+            // Primary and Lower Secondary only have Math and Science
+            if (subjectCode === 0) {
+                subjectFolder = 'math';
+            } else if (subjectCode === 1) {
+                subjectFolder = 'science';
+            } else {
+                throw new Error('Invalid subject code for this level (second digit should be 0-1)');
+            }
+        } else if (levelCode === 3) {
+            // Upper Secondary has more subjects
             const subjectMap = {
                 0: 'math',
                 1: 'science',
@@ -169,34 +175,29 @@ async function loadWorksheet() {
                 4: 'combined-chemistry',
                 5: 'pure-chemistry'
             };
-            subjectFolder = subjectMap[subject];
+            
+            subjectFolder = subjectMap[subjectCode];
             if (!subjectFolder) {
-                throw new Error('Invalid subject code');
+                throw new Error('Invalid subject code for upper secondary (second digit should be 0-5)');
             }
         }
         
         // Construct path to JSON file
         const path = `data/${levelFolder}/${subjectFolder}/${code}.json`;
         
-        // For GitHub Pages, we need to handle relative paths differently
-        const basePath = window.location.hostname.includes('github.io') ? 
-            window.location.pathname.split('/').slice(0, -1).join('/') : '';
-        
-        const fullPath = basePath ? `${basePath}/${path}` : path;
-        
-        console.log('Loading worksheet from:', fullPath);
+        console.log('Loading worksheet from:', path);
         
         // Load JSON file
-        const response = await fetch(fullPath);
+        const response = await fetch(path);
         if (!response.ok) {
-            throw new Error('Worksheet not found');
+            throw new Error(`Worksheet ${code} not found at ${path}`);
         }
         
         gameState.worksheet = await response.json();
         
         // Validate the worksheet has required fields
         if (!gameState.worksheet.questions || !Array.isArray(gameState.worksheet.questions)) {
-            throw new Error('Invalid worksheet format');
+            throw new Error('Invalid worksheet format - missing questions array');
         }
         
         // Display worksheet info
@@ -207,6 +208,7 @@ async function loadWorksheet() {
             <p><strong>Topic:</strong> ${gameState.worksheet.topic}</p>
             <p><strong>Difficulty:</strong> ${gameState.worksheet.difficulty}</p>
             <p><strong>Questions:</strong> ${gameState.worksheet.questions.length}</p>
+            <p><small>Code: ${code}</small></p>
         `;
         
         // Enable start game button
@@ -218,7 +220,8 @@ async function loadWorksheet() {
         worksheetInfoDiv.innerHTML = `
             <div style="color: #e74c3c;">
                 <i class="fas fa-exclamation-triangle"></i>
-                Error: ${error.message || 'Worksheet not found. Please check the code and try again.'}
+                <strong>Error:</strong> ${error.message || 'Worksheet not found. Please check the code and try again.'}
+                <p><small>Example codes: 342121 (Sec 4 Chemistry) or 321011 (Sec 3 Physics)</small></p>
             </div>
         `;
         startGameBtn.disabled = true;
@@ -509,7 +512,7 @@ function playAgain() {
 // New game
 function newGame() {
     switchScreen('home');
-    worksheetInfoDiv.innerHTML = '<p>Example codes: <strong>321011</strong> (Sec 3 Physics) or <strong>342121</strong> (Sec 4 Chemistry Ch12)</p>';
+    worksheetInfoDiv.innerHTML = '<p>Example codes: <strong>342121</strong> (Sec 4 Chemistry - Reactivity Series) or <strong>321011</strong> (Sec 3 Physics - Measurements)</p>';
     startGameBtn.disabled = true;
     startGameBtn.textContent = 'Start Game';
 }
