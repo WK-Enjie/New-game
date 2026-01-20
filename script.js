@@ -126,7 +126,7 @@ function selectColor(player, element) {
     updateUI();
 }
 
-// Load worksheet from code
+// FIXED: Load worksheet from code
 async function loadWorksheet() {
     const code = worksheetCodeInput.value.trim();
     
@@ -135,94 +135,95 @@ async function loadWorksheet() {
         return;
     }
     
+    // Clear previous info
+    worksheetInfoDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Loading worksheet...</p>';
+    startGameBtn.disabled = true;
+    
     try {
-        // Parse the code to determine file path
-        const level = parseInt(code[0]);
-        const subject = parseInt(code[1]);
-        const year = parseInt(code[2]);
-        const chapter = parseInt(code[3] + code[4]);
-        const worksheetNum = parseInt(code[5]);
+        console.log('Loading worksheet with code:', code);
         
-        // Build file path based on code
-        let levelFolder = '';
-        let subjectFolder = '';
+        // SIMPLIFIED PATH - Direct relative path
+        // For code 342121, the path is: data/upper-secondary/combined-chemistry/342121.json
+        const path = `data/upper-secondary/combined-chemistry/${code}.json`;
+        console.log('Trying to load from:', path);
         
-        // Determine level folder
-        if (level === 1) levelFolder = 'primary';
-        else if (level === 2) levelFolder = 'lower-secondary';
-        else if (level === 3) levelFolder = 'upper-secondary';
-        else {
-            throw new Error('Invalid level code');
-        }
+        // Try to load the file
+        const response = await fetch(path);
         
-        // Determine subject folder
-        if (level === 1) {
-            subjectFolder = subject === 0 ? 'math' : 'science';
-        } else if (level === 2) {
-            subjectFolder = subject === 0 ? 'math' : 'science';
-        } else if (level === 3) {
-            const subjectMap = {
-                0: 'math',
-                1: 'science',
-                2: 'combined-physics',
-                3: 'pure-physics',
-                4: 'combined-chemistry',
-                5: 'pure-chemistry'
-            };
-            subjectFolder = subjectMap[subject];
-            if (!subjectFolder) {
-                throw new Error('Invalid subject code');
-            }
-        }
-        
-        // Construct path to JSON file
-        const path = `data/${levelFolder}/${subjectFolder}/${code}.json`;
-        
-        // For GitHub Pages, we need to handle relative paths differently
-        const basePath = window.location.hostname.includes('github.io') ? 
-            window.location.pathname.split('/').slice(0, -1).join('/') : '';
-        
-        const fullPath = basePath ? `${basePath}/${path}` : path;
-        
-        console.log('Loading worksheet from:', fullPath);
-        
-        // Load JSON file
-        const response = await fetch(fullPath);
         if (!response.ok) {
-            throw new Error('Worksheet not found');
+            console.error('Fetch failed with status:', response.status);
+            
+            // Try alternative paths for debugging
+            const altPaths = [
+                `./data/upper-secondary/combined-chemistry/${code}.json`,
+                `/data/upper-secondary/combined-chemistry/${code}.json`,
+                `${code}.json`
+            ];
+            
+            let errorMessage = `Worksheet not found at: ${path}`;
+            
+            // Test alternative paths
+            for (const altPath of altPaths) {
+                console.log('Trying alternative path:', altPath);
+                try {
+                    const altResponse = await fetch(altPath);
+                    if (altResponse.ok) {
+                        const data = await altResponse.json();
+                        gameState.worksheet = data;
+                        console.log('Successfully loaded from alternative path:', altPath);
+                        break;
+                    }
+                } catch (altError) {
+                    console.log('Alternative path failed:', altPath);
+                }
+            }
+            
+            if (!gameState.worksheet) {
+                throw new Error(errorMessage);
+            }
+        } else {
+            // Success - load the worksheet
+            gameState.worksheet = await response.json();
+            console.log('Worksheet loaded successfully:', gameState.worksheet.title);
         }
         
-        gameState.worksheet = await response.json();
-        
-        // Validate the worksheet has required fields
-        if (!gameState.worksheet.questions || !Array.isArray(gameState.worksheet.questions)) {
-            throw new Error('Invalid worksheet format');
+        // Validate the worksheet
+        if (!gameState.worksheet || !gameState.worksheet.questions || !Array.isArray(gameState.worksheet.questions)) {
+            throw new Error('Invalid worksheet format: missing questions array');
         }
         
         // Display worksheet info
         worksheetInfoDiv.innerHTML = `
-            <h4>${gameState.worksheet.title}</h4>
+            <h4>✅ ${gameState.worksheet.title}</h4>
             <p><strong>Subject:</strong> ${gameState.worksheet.subject}</p>
             <p><strong>Level:</strong> ${gameState.worksheet.level}</p>
             <p><strong>Topic:</strong> ${gameState.worksheet.topic}</p>
             <p><strong>Difficulty:</strong> ${gameState.worksheet.difficulty}</p>
             <p><strong>Questions:</strong> ${gameState.worksheet.questions.length}</p>
+            <p style="color: #2ecc71; font-size: 0.9rem;">
+                <i class="fas fa-check-circle"></i> Worksheet loaded successfully!
+            </p>
         `;
         
         // Enable start game button
         startGameBtn.disabled = false;
-        startGameBtn.textContent = `Start Game with "${gameState.worksheet.title}"`;
+        startGameBtn.innerHTML = `<i class="fas fa-play"></i> Start "${gameState.worksheet.title.substring(0, 30)}..."`;
         
     } catch (error) {
         console.error('Error loading worksheet:', error);
         worksheetInfoDiv.innerHTML = `
-            <div style="color: #e74c3c;">
-                <i class="fas fa-exclamation-triangle"></i>
-                Error: ${error.message || 'Worksheet not found. Please check the code and try again.'}
+            <div style="color: #e74c3c; background: #fee; padding: 15px; border-radius: 10px; border: 1px solid #e74c3c;">
+                <h4 style="margin-top: 0;"><i class="fas fa-exclamation-triangle"></i> Error Loading Worksheet</h4>
+                <p><strong>Error:</strong> ${error.message}</p>
+                <p><strong>Code entered:</strong> ${code}</p>
+                <p><strong>Expected path:</strong> data/upper-secondary/combined-chemistry/${code}.json</p>
+                <p style="margin-top: 10px; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> Make sure the file exists in the correct folder.
+                </p>
             </div>
         `;
         startGameBtn.disabled = true;
-        startGameBtn.textContent = 'Start Game';
+        startGameBtn.innerHTML = '<i class="fas fa-play"></i> Start Game';
     }
 }
 
@@ -272,7 +273,7 @@ function switchScreen(screenName) {
 // Load current question
 function loadQuestion() {
     if (!gameState.worksheet || !gameState.worksheet.questions) {
-        // Fallback to sample questions if worksheet fails
+        alert('No questions available. Loading sample questions.');
         gameState.worksheet = createSampleWorksheet();
     }
     
@@ -509,9 +510,10 @@ function playAgain() {
 // New game
 function newGame() {
     switchScreen('home');
-    worksheetInfoDiv.innerHTML = '<p>Example codes: <strong>321011</strong> (Sec 3 Physics) or <strong>342121</strong> (Sec 4 Chemistry Ch12)</p>';
+    worksheetInfoDiv.innerHTML = '<p>Example code: <strong>342121</strong> (Sec 4 Chemistry Ch12)</p>';
     startGameBtn.disabled = true;
-    startGameBtn.textContent = 'Start Game';
+    startGameBtn.innerHTML = '<i class="fas fa-play"></i> Start Game';
+    worksheetCodeInput.value = '342121'; // Pre-fill with example code
 }
 
 // Update player turn indicator
@@ -542,44 +544,4 @@ function updateUI() {
     document.querySelector('.player1-stats').style.backgroundColor = `${gameState.players.player1.color}20`;
     document.querySelector('.player2-stats').style.backgroundColor = `${gameState.players.player2.color}20`;
     
-    // Update player turn indicator
-    if (gameState.currentScreen === 'game') {
-        updatePlayerTurnIndicator();
-    }
-}
-
-// Create sample worksheet for fallback (this is just for testing)
-function createSampleWorksheet() {
-    return {
-        code: "321011",
-        title: "Sample Worksheet - Measurements",
-        subject: "Combined Physics",
-        level: "Upper Secondary",
-        topic: "Chapter 1: Measurements",
-        difficulty: "Intermediate",
-        author: "Physics Department",
-        created: "2024-01-25",
-        description: "Sample worksheet for testing",
-        questions: [
-            {
-                id: 1,
-                question: "What is the SI unit for length?",
-                options: ["Meter", "Kilogram", "Second", "Ampere"],
-                correctAnswer: 0,
-                points: 5,
-                explanation: "The SI unit for length is the meter (m)."
-            },
-            {
-                id: 2,
-                question: "Which prefix means one thousandth?",
-                options: ["Kilo", "Milli", "Centi", "Micro"],
-                correctAnswer: 1,
-                points: 5,
-                explanation: "Milli (m) means one thousandth (10⁻³)."
-            }
-        ]
-    };
-}
-
-// Initialize the game when page loads
-document.addEventListener('DOMContentLoaded', init);
+    // Update player tur
