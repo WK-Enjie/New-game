@@ -1,0 +1,133 @@
+{
+    "code": "342121",
+    "title": "Sec 4 Combined Chemistry - Chapter 12: Reactivity Series",
+    "subject": "Combined Chemistry",
+    "level": "Upper Secondary",
+    "topic": "Chapter 12: Metals and Reactivity Series",
+    "difficulty": "Intermediate",
+    "author": "Chemistry Department",
+    "created": "2024-01-25",
+    "description": "Worksheet covering reactivity series of metals, displacement reactions, and corrosion of iron.",
+    "questions": [
+        {
+            "id": 1,
+            "question": "Which metal reacts most vigorously with cold water?",
+            "options": ["Potassium", "Sodium", "Calcium", "Magnesium"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Potassium is the most reactive metal among these and reacts most vigorously with cold water."
+        },
+        {
+            "id": 2,
+            "question": "Which of the following metals does NOT react with dilute hydrochloric acid?",
+            "options": ["Zinc", "Iron", "Copper", "Magnesium"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Copper is below hydrogen in the reactivity series and does not react with dilute hydrochloric acid."
+        },
+        {
+            "id": 3,
+            "question": "In the reactivity series, which element is usually placed as a reference point?",
+            "options": ["Carbon", "Hydrogen", "Oxygen", "Nitrogen"],
+            "correctAnswer": 1,
+            "points": 5,
+            "explanation": "Hydrogen is used as a reference point in the reactivity series to determine which metals can displace it from acids."
+        },
+        {
+            "id": 4,
+            "question": "Which metal will react with steam but not with cold water?",
+            "options": ["Sodium", "Magnesium", "Iron", "Copper"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Iron reacts with steam but not with cold water. Sodium and magnesium react with both, while copper reacts with neither."
+        },
+        {
+            "id": 5,
+            "question": "Arrange these metals in order of increasing reactivity: Copper, Iron, Magnesium, Potassium",
+            "options": ["Cu < Fe < Mg < K", "Fe < Cu < Mg < K", "K < Mg < Fe < Cu", "Mg < K < Fe < Cu"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Copper is least reactive, followed by iron, then magnesium, and potassium is most reactive."
+        },
+        {
+            "id": 6,
+            "question": "A metal X reacts slowly with dilute acid but does not react with cold water. Which metal could X be?",
+            "options": ["Potassium", "Sodium", "Zinc", "Calcium"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Zinc reacts slowly with dilute acids but does not react with cold water. Potassium and sodium react vigorously with both."
+        },
+        {
+            "id": 7,
+            "question": "Which statement about extracting metals from their ores is correct?",
+            "options": ["More reactive metals are easier to obtain from their ores", "Metals above carbon in the reactivity series are obtained by heating alone", "Less reactive metals can be found as pure elements in nature", "All metals require electricity to extract them from ores"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Less reactive metals like gold and silver can be found as pure elements in nature, while more reactive metals are always combined in ores."
+        },
+        {
+            "id": 8,
+            "question": "Why is it easier to obtain copper from its ore than aluminum?",
+            "options": ["Copper is less reactive than aluminum", "Copper ore is more common", "Aluminum is heavier than copper", "Copper reacts with water"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Copper is less reactive than aluminum, so it requires less energy to extract from its ore."
+        },
+        {
+            "id": 9,
+            "question": "What are the two essential conditions for the rusting of iron?",
+            "options": ["Water and carbon dioxide", "Oxygen and nitrogen", "Water and oxygen", "Heat and moisture"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Rusting of iron requires both oxygen and water (moisture) to occur."
+        },
+        {
+            "id": 10,
+            "question": "Which method prevents rusting by creating a barrier between iron and the environment?",
+            "options": ["Galvanizing", "Sacrificial protection", "Painting", "Alloying"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Painting creates a physical barrier that prevents oxygen and water from reaching the iron surface."
+        },
+        {
+            "id": 11,
+            "question": "In an experiment, metal A displaces metal B from its salt solution, but metal B does not displace metal A. What can be deduced?",
+            "options": ["A is more reactive than B", "B is more reactive than A", "A and B are equally reactive", "No conclusion can be drawn"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "A more reactive metal can displace a less reactive metal from its salt solution."
+        },
+        {
+            "id": 12,
+            "question": "Which metal requires the most energy to extract from its ore?",
+            "options": ["Iron", "Copper", "Aluminum", "Zinc"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Aluminum is the most reactive among these and requires the most energy (electricity) to extract from its ore."
+        },
+        {
+            "id": 13,
+            "question": "Why is sodium stored under oil?",
+            "options": ["To prevent reaction with oxygen", "To prevent reaction with nitrogen", "To make it easier to handle", "To increase its reactivity"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Sodium is highly reactive and reacts vigorously with oxygen and water in air, so it is stored under oil to prevent these reactions."
+        },
+        {
+            "id": 14,
+            "question": "What is the purpose of galvanizing iron?",
+            "options": ["To make it look shiny", "To provide sacrificial protection using zinc", "To make it magnetic", "To increase its melting point"],
+            "correctAnswer": 1,
+            "points": 5,
+            "explanation": "Galvanizing coats iron with zinc. Zinc is more reactive than iron and corrodes first, providing sacrificial protection."
+        },
+        {
+            "id": 15,
+            "question": "Which of these metals will NOT displace copper from copper(II) sulfate solution?",
+            "options": ["Zinc", "Iron", "Silver", "Magnesium"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Silver is less reactive than copper, so it cannot displace copper from its salt solution."
+        }
+    ]
+}
