@@ -74,8 +74,31 @@ const demoWorksheetData = {
             "correctAnswer": 2,
             "points": 5,
             "explanation": "Copper is below hydrogen in the reactivity series, so it cannot displace hydrogen from acids."
+        },
+        {
+            "id": 3,
+            "question": "What happens when iron is placed in copper sulfate solution?",
+            "options": ["Iron becomes coated with copper", "Copper becomes coated with iron", "No visible change", "The solution turns green"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Iron is more reactive than copper, so it displaces copper from the solution, forming a copper coating."
+        },
+        {
+            "id": 4,
+            "question": "Which metal reacts with cold water to form a hydroxide and hydrogen gas?",
+            "options": ["Sodium", "Iron", "Copper", "Silver"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Sodium reacts vigorously with cold water to form sodium hydroxide and hydrogen gas."
+        },
+        {
+            "id": 5,
+            "question": "What is the correct order of reactivity (most reactive first)?",
+            "options": ["K > Na > Ca > Mg", "Mg > Ca > Na > K", "Ca > Mg > K > Na", "Na > K > Mg > Ca"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Potassium (K) is most reactive, followed by sodium (Na), then calcium (Ca), then magnesium (Mg)."
         }
-        // Additional questions would be here in the full version
     ]
 };
 
@@ -91,7 +114,6 @@ const screens = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     populateDropdowns();
-    updateWorksheetInfo();
 });
 
 function initializeEventListeners() {
@@ -172,6 +194,10 @@ function initializeEventListeners() {
 }
 
 function populateDropdowns() {
+    // Clear existing options first to avoid duplicates
+    document.getElementById('level-select').innerHTML = '<option value="">-- Select Level --</option>';
+    document.getElementById('subject-select').innerHTML = '<option value="">-- Select Subject --</option>';
+    
     // Populate level options
     const levelSelect = document.getElementById('level-select');
     for (const [code, level] of Object.entries(gameState.levels)) {
@@ -194,12 +220,6 @@ function populateDropdowns() {
 function updateSubjectOptions(level) {
     const subjectSelect = document.getElementById('subject-select');
     subjectSelect.disabled = !level;
-    
-    if (level) {
-        // Enable all subjects for demo purposes
-        // In a real implementation, you might filter subjects based on level
-        subjectSelect.disabled = false;
-    }
 }
 
 function updateGradeOptions(level) {
@@ -414,7 +434,7 @@ async function loadDemoWorksheet() {
     }));
     
     // Add more demo questions if needed
-    while (gameState.questions.length < 10) {
+    while (gameState.questions.length < 5) {
         const id = gameState.questions.length + 1;
         gameState.questions.push({
             id: id,
@@ -611,16 +631,21 @@ function submitAnswer(isTimeout = false) {
     // Mark player as having answered
     currentPlayer.hasAnswered = true;
     
+    // FIX: This is where score should be updated
     if (isCorrect) {
-        // Add points
+        // Add points - FIXED
         currentPlayer.score += question.points;
-        
+        console.log(`Player ${gameState.currentPlayer} scored ${question.points} points. Total: ${currentPlayer.score}`);
+    }
+    
+    // Show feedback
+    if (isCorrect) {
         // Show correct feedback
         const correctOption = document.querySelector(`.option[data-option-id="${question.correctAnswer}"]`);
         correctOption.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
         correctOption.style.borderColor = '#4caf50';
         
-        // Update score display
+        // Update score display - FIXED
         if (gameState.currentPlayer === 1) {
             document.getElementById('player1-score').textContent = gameState.player1.score;
         } else {
@@ -651,29 +676,25 @@ function submitAnswer(isTimeout = false) {
 }
 
 function nextQuestion() {
-    // Check if both players have answered
+    // FIXED: Simplified logic for moving to next question
     if (gameState.player1.hasAnswered && gameState.player2.hasAnswered) {
-        // Both players answered, move to next question
+        // Both players have answered this question
         gameState.currentQuestion++;
         gameState.player1.hasAnswered = false;
         gameState.player2.hasAnswered = false;
         
-        // Switch current player
-        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-        
-        // Load next question
+        // Reset for next question
+        gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
         loadQuestion();
     } else {
-        // Other player's turn
+        // Switch to other player for same question
         gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-        gameState.selectedOption = null;
-        
-        // Load same question for other player
         loadQuestionForOtherPlayer();
     }
 }
 
 function loadQuestionForOtherPlayer() {
+    // Load the same question for the other player
     const question = gameState.questions[gameState.currentQuestion];
     
     // Update current turn indicator
@@ -684,9 +705,21 @@ function loadQuestionForOtherPlayer() {
     document.getElementById('player1-status').classList.toggle('active', gameState.currentPlayer === 1);
     document.getElementById('player2-status').classList.toggle('active', gameState.currentPlayer === 2);
     
-    // Reset selected option
+    // Reset option selection for new player
     gameState.selectedOption = null;
+    
+    // Reset options styling
+    const options = document.querySelectorAll('.option');
+    options.forEach(opt => {
+        opt.classList.remove('selected');
+        opt.style.backgroundColor = '';
+        opt.style.borderColor = '';
+        opt.style.pointerEvents = 'auto';
+    });
+    
+    // Reset UI elements
     document.getElementById('submit-answer-btn').disabled = true;
+    document.getElementById('submit-answer-btn').style.display = 'block';
     document.getElementById('next-question-btn').style.display = 'none';
     
     // Reset timer
@@ -842,9 +875,4 @@ function playAgain() {
     
     // Start quiz again
     startQuiz();
-}
-
-// Utility function to generate worksheet IDs
-function generateWorksheetId(level, subject, grade, chapter, worksheet) {
-    return `${level}${subject}${grade}${chapter.toString().padStart(2, '0')}${worksheet}`;
 }
