@@ -3,423 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Quiz Challenge - Code Activated Worksheets</title>
+    <title>📚 Worksheet Quiz Game</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
 </head>
 <body>
-    <div class="background-animation">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-    </div>
-
     <div class="container">
-        <header class="game-header">
-            <div class="header-graphics">
-                <div class="game-logo">
-                    <div class="logo-icon">🔢</div>
-                    <div class="logo-text">
-                        <h1>QUIZ <span class="highlight">CODE</span></h1>
-                        <p class="tagline">Activate Worksheets • Test Knowledge • Win Big!</p>
+        <header class="main-header">
+            <div class="logo-container">
+                <div class="logo-icon">📚</div>
+                <div class="logo-text">
+                    <h1>WORKSHEET <span class="highlight">QUIZ GAME</span></h1>
+                    <p class="subtitle">Enter Code • Upload JSON • Play Quiz</p>
+                </div>
+            </div>
+            
+            <div class="header-stats">
+                <div class="stat-card">
+                    <i class="fas fa-key stat-icon"></i>
+                    <div class="stat-content">
+                        <div class="stat-value" id="active-code">------</div>
+                        <div class="stat-label">Active Code</div>
                     </div>
                 </div>
                 
-                <div class="header-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-key"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="active-code">------</span>
-                            <span class="stat-label">Active Code</span>
-                        </div>
+                <div class="stat-card">
+                    <i class="fas fa-file-alt stat-icon"></i>
+                    <div class="stat-content">
+                        <div class="stat-value" id="worksheet-count">0</div>
+                        <div class="stat-label">Worksheets</div>
                     </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="worksheet-count">0</span>
-                            <span class="stat-label">Worksheets</span>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-question-circle"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="question-count">0</span>
-                            <span class="stat-label">Questions</span>
-                        </div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-question-circle stat-icon"></i>
+                    <div class="stat-content">
+                        <div class="stat-value" id="question-count">0</div>
+                        <div class="stat-label">Questions</div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <div class="stats-bar">
-            <div class="coin-display">
-                <div class="coin-animation">
+        <div class="game-stats">
+            <div class="stat-item">
+                <div class="stat-display">
                     <i class="fas fa-coins"></i>
-                    <div class="coin-count" id="coins">1,000</div>
+                    <span id="coins">1,000</span>
                 </div>
-                <div class="coin-label">COINS</div>
+                <div class="stat-title">COINS</div>
             </div>
             
-            <div class="multiplier-display">
-                <div class="multiplier-graphic">
-                    <div class="multiplier-value" id="multiplier">1.0x</div>
-                    <div class="multiplier-bar">
-                        <div class="multiplier-fill" id="multiplier-fill"></div>
-                    </div>
+            <div class="stat-item">
+                <div class="stat-display">
+                    <span id="multiplier">1.0x</span>
                 </div>
-                <div class="multiplier-label">MULTIPLIER</div>
+                <div class="stat-title">MULTIPLIER</div>
             </div>
             
-            <div class="streak-display">
-                <div class="streak-graphic">
-                    <div class="streak-value" id="streak">0</div>
-                    <div class="streak-fire">
-                        <i class="fas fa-fire"></i>
-                    </div>
+            <div class="stat-item">
+                <div class="stat-display">
+                    <i class="fas fa-fire"></i>
+                    <span id="streak">0</span>
                 </div>
-                <div class="streak-label">STREAK</div>
+                <div class="stat-title">STREAK</div>
             </div>
             
-            <div class="score-display">
-                <div class="score-graphic">
-                    <div class="score-value" id="score">0</div>
-                    <div class="score-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
+            <div class="stat-item">
+                <div class="stat-display">
+                    <i class="fas fa-star"></i>
+                    <span id="score">0</span>
                 </div>
-                <div class="score-label">SCORE</div>
+                <div class="stat-title">SCORE</div>
             </div>
         </div>
 
-        <main class="game-container">
-            <section class="worksheets-panel">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fas fa-key"></i>
-                        <h2>ACTIVATE WORKSHEET</h2>
-                    </div>
-                    <button class="refresh-btn" id="refresh-btn">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>SCAN FILES</span>
-                    </button>
-                </div>
-                
-                <div class="upload-section">
-                    <button class="upload-btn" id="upload-json-btn">
-                        <i class="fas fa-upload"></i>
-                        UPLOAD JSON FILE
-                    </button>
-                    <p class="upload-hint">
-                        Upload worksheets in JSON format (e.g., 301011.json)
-                    </p>
-                </div>
-                
-                <!-- CODE INPUT SECTION -->
-                <div class="code-activation-section">
-                    <div class="code-input-container">
-                        <div class="code-input-header">
-                            <i class="fas fa-terminal"></i>
-                            <h3>Enter 6-Digit Code</h3>
-                        </div>
-                        
-                        <div class="code-digits-input">
-                            <div class="digit-input" data-index="0">
-                                <input type="text" maxlength="1" pattern="[0-3]" 
-                                       title="Level (1-3)">
-                                <label>Level</label>
-                            </div>
-                            <div class="digit-input" data-index="1">
-                                <input type="text" maxlength="1" pattern="[0-5]" 
-                                       title="Subject (0-5)">
-                                <label>Subject</label>
-                            </div>
-                            <div class="digit-input" data-index="2">
-                                <input type="text" maxlength="1" pattern="[1-6]" 
-                                       title="Grade (1-6)">
-                                <label>Grade</label>
-                            </div>
-                            <div class="digit-input" data-index="3">
-                                <input type="text" maxlength="1" pattern="[0-9]" 
-                                       title="Chapter Ten">
-                                <label>Ch Ten</label>
-                            </div>
-                            <div class="digit-input" data-index="4">
-                                <input type="text" maxlength="1" pattern="[0-9]" 
-                                       title="Chapter One">
-                                <label>Ch One</label>
-                            </div>
-                            <div class="digit-input" data-index="5">
-                                <input type="text" maxlength="1" pattern="[1-9]" 
-                                       title="Worksheet (1-9)">
-                                <label>WS</label>
-                            </div>
-                        </div>
-                        
-                        <div class="code-display" id="full-code-display">
-                            <span class="code-placeholder">_ _ _ _ _ _</span>
-                        </div>
-                        
-                        <button class="activate-btn" id="activate-btn">
-                            <i class="fas fa-bolt"></i>
-                            ACTIVATE WORKSHEET
-                        </button>
+        <main class="main-content">
+            <!-- LEFT PANEL -->
+            <div class="left-panel">
+                <div class="panel-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-key"></i> ENTER 6-DIGIT CODE</h2>
                     </div>
                     
-                    <!-- CODE GUIDE -->
-                    <div class="code-guide">
-                        <div class="guide-header">
-                            <i class="fas fa-info-circle"></i>
-                            <h4>Code Format Guide</h4>
-                        </div>
-                        
-                        <div class="code-breakdown">
-                            <div class="breakdown-example">
-                                <div class="code-example">
-                                    <span class="digit-example">3</span>
-                                    <span class="digit-example">4</span>
-                                    <span class="digit-example">4</span>
-                                    <span class="digit-example">0</span>
-                                    <span class="digit-example">9</span>
-                                    <span class="digit-example">1</span>
-                                </div>
-                                <div class="example-explanation">
-                                    Upper Sec | Combined Chem | Sec 4 | Ch 09 | WS 1
-                                </div>
+                    <div class="code-input-section">
+                        <div class="digit-inputs">
+                            <div class="digit-group">
+                                <div class="digit-label">Level (1-3)</div>
+                                <input type="text" maxlength="1" id="digit-0" data-index="0" placeholder="1">
+                                <div class="digit-help">1=Primary, 2=Lower Sec, 3=Upper Sec</div>
                             </div>
                             
-                            <div class="digit-meanings">
-                                <div class="meaning-row">
-                                    <span class="digit-label">1st Digit - Level:</span>
-                                    <span class="digit-value">1=Primary, 2=Lower Sec, 3=Upper Sec</span>
-                                </div>
-                                <div class="meaning-row">
-                                    <span class="digit-label">2nd Digit - Subject:</span>
-                                    <span class="digit-value">0=Math, 1=Science, 2=Comb Physics, 3=Pure Physics, 4=Comb Chem, 5=Pure Chem</span>
-                                </div>
-                                <div class="meaning-row">
-                                    <span class="digit-label">3rd Digit - Grade:</span>
-                                    <span class="digit-value">P1-P6 (1-6) or S1-S4 (1-4)</span>
-                                </div>
-                                <div class="meaning-row">
-                                    <span class="digit-label">4th/5th - Chapter:</span>
-                                    <span class="digit-value">Tens & Ones digits (00-99)</span>
-                                </div>
-                                <div class="meaning-row">
-                                    <span class="digit-label">6th Digit - Worksheet:</span>
-                                    <span class="digit-value">Worksheet number (1-9)</span>
-                                </div>
+                            <div class="digit-group">
+                                <div class="digit-label">Subject (0-5)</div>
+                                <input type="text" maxlength="1" id="digit-1" data-index="1" placeholder="0">
+                                <div class="digit-help">0=Math, 1=Science, 2=Comb Physics, 3=Pure Physics, 4=Comb Chem, 5=Pure Chem</div>
+                            </div>
+                            
+                            <div class="digit-group">
+                                <div class="digit-label">Grade (1-6)</div>
+                                <input type="text" maxlength="1" id="digit-2" data-index="2" placeholder="1">
+                                <div class="digit-help">1=P1/S1, 2=P2/S2, 3=P3/S3, 4=P4/S4, 5=P5, 6=P6</div>
+                            </div>
+                            
+                            <div class="digit-group">
+                                <div class="digit-label">Chapter Tens (0-9)</div>
+                                <input type="text" maxlength="1" id="digit-3" data-index="3" placeholder="0">
+                            </div>
+                            
+                            <div class="digit-group">
+                                <div class="digit-label">Chapter Ones (0-9)</div>
+                                <input type="text" maxlength="1" id="digit-4" data-index="4" placeholder="1">
+                            </div>
+                            
+                            <div class="digit-group">
+                                <div class="digit-label">Worksheet (1-9)</div>
+                                <input type="text" maxlength="1" id="digit-5" data-index="5" placeholder="1">
                             </div>
                         </div>
+                        
+                        <div class="code-display">
+                            <div class="display-label">FULL CODE:</div>
+                            <div class="full-code" id="full-code">_ _ _ _ _ _</div>
+                        </div>
+                        
+                        <button class="activate-button" id="activate-btn" disabled>
+                            <i class="fas fa-bolt"></i> ACTIVATE WORKSHEET
+                        </button>
                     </div>
                 </div>
                 
-                <!-- AVAILABLE WORKSHEETS -->
-                <div class="worksheets-section">
+                <div class="panel-section">
                     <div class="section-header">
-                        <i class="fas fa-list"></i>
-                        <h3>Available Worksheets</h3>
-                        <div class="worksheet-count" id="available-count">0</div>
+                        <h2><i class="fas fa-upload"></i> UPLOAD JSON FILES</h2>
                     </div>
                     
-                    <div class="worksheets-grid" id="worksheets-list">
-                        <div class="loading-worksheets">
-                            <div class="loader"></div>
-                            <p>Scanning for worksheets...</p>
+                    <div class="upload-section">
+                        <div class="upload-area" id="upload-area">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p>Click to select JSON files</p>
+                            <p class="upload-note">File names should be 6 digits: 301011.json, 342091.json, etc.</p>
+                        </div>
+                        
+                        <div class="quick-codes">
+                            <h3>Test Codes:</h3>
+                            <div class="code-buttons">
+                                <button class="quick-code" data-code="301011">301011</button>
+                                <button class="quick-code" data-code="341011">341011</button>
+                                <button class="quick-code" data-code="342091">342091</button>
+                                <button class="quick-code" data-code="334151">334151</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <section class="game-arena">
-                <div class="game-header">
-                    <div class="game-title">
-                        <i class="fas fa-gamepad"></i>
-                        <h2 id="game-title">QUIZ ARENA</h2>
-                    </div>
-                    
-                    <div class="bet-controls">
-                        <div class="bet-card">
-                            <div class="bet-header">
-                                <i class="fas fa-dice"></i>
-                                <span>PLACE YOUR BET</span>
-                            </div>
-                            <div class="bet-amount" id="bet-amount">50</div>
-                            <div class="bet-slider-container">
-                                <input type="range" id="bet-slider" min="10" max="500" value="50" step="10" class="bet-slider">
-                                <div class="slider-ticks">
-                                    <span>10</span>
-                                    <span>250</span>
-                                    <span>500</span>
-                                </div>
-                            </div>
-                            <button class="bet-btn" id="bet-btn" disabled>
-                                <i class="fas fa-play"></i>
-                                START GAME
-                            </button>
+            </div>
+            
+            <!-- RIGHT PANEL -->
+            <div class="right-panel">
+                <div class="worksheet-info">
+                    <div class="info-header">
+                        <div class="code-display">
+                            <span class="current-code" id="current-code">------</span>
+                            <span class="status-badge" id="worksheet-status">
+                                <i class="fas fa-clock"></i> INACTIVE
+                            </span>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- ACTIVE WORKSHEET INFO -->
-                <div class="worksheet-info-card" id="worksheet-info">
-                    <div class="worksheet-info-header">
-                        <div class="info-code" id="active-worksheet-code">------</div>
-                        <div class="info-status" id="worksheet-status">
-                            <i class="fas fa-clock"></i>
-                            <span>NO WORKSHEET ACTIVE</span>
-                        </div>
+                        <h2 id="worksheet-title">NO WORKSHEET ACTIVATED</h2>
                     </div>
                     
                     <div class="worksheet-details" id="worksheet-details">
-                        <div class="no-worksheet-selected">
-                            <div class="empty-state">
-                                <i class="fas fa-key"></i>
-                                <h3>Enter a Worksheet Code</h3>
-                                <p>Use the 6-digit code system to activate a worksheet</p>
-                                <div class="quick-codes">
-                                    <button class="quick-code-btn" data-code="341011">
-                                        <span class="code">341011</span>
-                                        <span class="desc">P3 Math Ch1</span>
-                                    </button>
-                                    <button class="quick-code-btn" data-code="342091">
-                                        <span class="code">342091</span>
-                                        <span class="desc">S4 Comb Chem Ch9</span>
-                                    </button>
-                                    <button class="quick-code-btn" data-code="334151">
-                                        <span class="code">334151</span>
-                                        <span class="desc">S4 Pure Physics Ch15</span>
-                                    </button>
-                                </div>
+                        <div class="empty-state">
+                            <i class="fas fa-key empty-icon"></i>
+                            <h3>Enter a Worksheet Code</h3>
+                            <p>Use the 6-digit code system to activate a worksheet</p>
+                            <div class="folder-structure">
+                                <h4>Expected File Location:</h4>
+                                <code>Questions/[level]/[subject]/[code].json</code>
+                                <p class="structure-example">Example: Questions/upper-secondary/math/301011.json</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- QUESTION DISPLAY -->
-                <div class="question-card" id="question-card">
+                <div class="game-controls">
+                    <div class="bet-section">
+                        <h3><i class="fas fa-dice"></i> PLACE YOUR BET</h3>
+                        <div class="bet-amount">
+                            <span id="bet-value">50</span> COINS
+                        </div>
+                        <input type="range" id="bet-slider" min="10" max="500" value="50" step="10">
+                        <div class="bet-range">
+                            <span>10</span>
+                            <span>250</span>
+                            <span>500</span>
+                        </div>
+                        <button class="start-button" id="start-btn" disabled>
+                            <i class="fas fa-play"></i> START GAME
+                        </button>
+                    </div>
+                    
+                    <div class="game-buttons">
+                        <button class="game-button hint-btn" id="hint-btn" disabled>
+                            <i class="fas fa-lightbulb"></i> HINT (50)
+                        </button>
+                        <button class="game-button skip-btn" id="skip-btn" disabled>
+                            <i class="fas fa-forward"></i> SKIP (25)
+                        </button>
+                        <button class="game-button next-btn" id="next-btn" disabled>
+                            <i class="fas fa-arrow-right"></i> NEXT
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="question-area">
                     <div class="question-header">
-                        <div class="question-number" id="question-number">--</div>
-                        <div class="question-points" id="question-points">
-                            <i class="fas fa-star"></i>
-                            <span>-- POINTS</span>
+                        <div class="question-meta">
+                            <span class="question-number" id="question-number">--</span>
+                            <span class="question-points" id="question-points">-- POINTS</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <div class="progress-text" id="progress-text">0/0</div>
                         </div>
                     </div>
                     
                     <div class="question-content" id="question-content">
-                        <div class="welcome-message">
+                        <div class="welcome-screen">
                             <div class="welcome-icon">🎯</div>
-                            <h3>ACTIVATE A WORKSHEET</h3>
-                            <p>Enter a 6-digit code or select from available worksheets to start</p>
-                            <div class="game-tips">
-                                <div class="tip">
-                                    <i class="fas fa-key"></i>
-                                    <span>Use the code format: Level-Subject-Grade-Chapter-Worksheet</span>
-                                </div>
-                                <div class="tip">
-                                    <i class="fas fa-coins"></i>
-                                    <span>Higher bets = Higher rewards!</span>
-                                </div>
-                                <div class="tip">
-                                    <i class="fas fa-fire"></i>
-                                    <span>Build streaks for bigger multipliers!</span>
-                                </div>
-                            </div>
+                            <h2>ACTIVATE A WORKSHEET</h2>
+                            <p>Enter a 6-digit code above, then activate and start playing!</p>
                         </div>
                     </div>
-                </div>
-                
-                <!-- OPTIONS GRID -->
-                <div class="options-grid" id="options-grid">
-                    <!-- Options will be loaded here -->
-                </div>
-                
-                <!-- GAME CONTROLS -->
-                <div class="game-controls">
-                    <button class="control-btn hint-btn" id="hint-btn" disabled>
-                        <i class="fas fa-lightbulb"></i>
-                        <span>HINT <small>(50 coins)</small></span>
-                    </button>
                     
-                    <button class="control-btn skip-btn" id="skip-btn" disabled>
-                        <i class="fas fa-forward"></i>
-                        <span>SKIP <small>(25 coins)</small></span>
-                    </button>
-                    
-                    <button class="control-btn next-btn" id="next-btn" disabled>
-                        <i class="fas fa-arrow-right"></i>
-                        <span>NEXT QUESTION</span>
-                    </button>
-                </div>
-                
-                <!-- PROGRESS -->
-                <div class="progress-container">
-                    <div class="progress-header">
-                        <span id="progress-text">PROGRESS</span>
-                        <span id="progress-count">0/0</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
+                    <div class="options-grid" id="options-grid">
+                        <!-- Options will load here -->
                     </div>
                 </div>
                 
-                <!-- FEEDBACK -->
-                <div class="feedback-container" id="feedback-container">
-                    <div class="feedback-message" id="feedback-message">
-                        <!-- Feedback will appear here -->
-                    </div>
+                <div class="feedback-area" id="feedback-area">
+                    <div class="feedback-message" id="feedback-message"></div>
                 </div>
-            </section>
+            </div>
         </main>
 
-        <footer class="game-footer">
+        <footer class="main-footer">
             <div class="footer-content">
                 <div class="footer-info">
-                    <div class="footer-icon">
-                        <i class="fas fa-file-code"></i>
-                    </div>
-                    <div class="footer-text">
-                        <p>Worksheet Code System • JSON Auto-Detection</p>
-                        <p class="file-info">
-                            <i class="fas fa-folder"></i>
-                            Files: <code>[Level][Subject][Grade][ChapterTens][ChapterOnes][Worksheet].json</code>
-                        </p>
+                    <i class="fas fa-code"></i>
+                    <div>
+                        <h4>Worksheet Code System</h4>
+                        <p>6-digit code: Level(1) Subject(2) Grade(3) Chapter(4-5) Worksheet(6)</p>
                     </div>
                 </div>
                 
-                <div class="footer-stats">
-                    <div class="game-timer">
-                        <i class="fas fa-clock"></i>
-                        <span id="game-timer">00:00</span>
+                <div class="footer-actions">
+                    <div class="file-count">
+                        <i class="fas fa-database"></i>
+                        <span id="loaded-files">0 files loaded</span>
                     </div>
-                    <div class="accuracy-rate">
-                        <i class="fas fa-bullseye"></i>
-                        <span id="accuracy-rate">0%</span>
-                    </div>
+                    <button id="refresh-btn" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh Files
+                    </button>
+                    <button id="clear-btn" class="clear-btn">
+                        <i class="fas fa-trash"></i> Clear All
+                    </button>
                 </div>
             </div>
         </footer>
     </div>
 
-    <div class="effects-container">
-        <div id="confetti-container"></div>
-        <div id="coin-effect"></div>
-        <div id="streak-effect"></div>
-    </div>
-
-    <!-- Hidden file input for JSON upload -->
-    <input type="file" id="json-file-input" accept=".json" style="display: none;">
+    <input type="file" id="file-input" accept=".json" multiple style="display: none;">
 
     <script src="script.js"></script>
 </body>
