@@ -19,7 +19,23 @@ const gameState = {
     timer: null,
     timeRemaining: 30,
     startTime: null,
-    selectedWorksheet: "344122" // Default to your worksheet
+    selectedWorksheet: null,
+    
+    // File structure configuration
+    levels: {
+        '1': { name: 'Primary School', folder: 'primary', grades: ['1', '2', '3', '4', '5', '6'] },
+        '2': { name: 'Lower Secondary', folder: 'lower-secondary', grades: ['1', '2'] },
+        '3': { name: 'Upper Secondary', folder: 'upper-secondary', grades: ['3', '4'] }
+    },
+    
+    subjects: {
+        '0': { name: 'Mathematics', folder: 'math' },
+        '1': { name: 'Science', folder: 'science' },
+        '2': { name: 'Combined Physics', folder: 'combined-physics' },
+        '3': { name: 'Pure Physics', folder: 'pure-physics' },
+        '4': { name: 'Combined Chemistry', folder: 'combined-chemistry' },
+        '5': { name: 'Pure Chemistry', folder: 'pure-chemistry' }
+    }
 };
 
 // Power-ups configuration
@@ -31,8 +47,8 @@ const powerUps = {
     switch: { name: "Switch Scores", multiplier: 0, icon: "fas fa-exchange-alt" }
 };
 
-// Your worksheet data
-const worksheetData = {
+// Demo worksheet data for testing
+const demoWorksheetData = {
     "code": "344122",
     "title": "Sec 4 Combined Chemistry - Chapter 12: Reactivity Series (Worksheet 2)",
     "subject": "Combined Chemistry",
@@ -58,111 +74,8 @@ const worksheetData = {
             "correctAnswer": 2,
             "points": 5,
             "explanation": "Copper is below hydrogen in the reactivity series, so it cannot displace hydrogen from acids."
-        },
-        {
-            "id": 3,
-            "question": "What happens when iron is placed in copper sulfate solution?",
-            "options": ["Iron becomes coated with copper", "Copper becomes coated with iron", "No visible change", "The solution turns green"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Iron is more reactive than copper, so it displaces copper from the solution, forming a copper coating."
-        },
-        {
-            "id": 4,
-            "question": "Which metal reacts with cold water to form a hydroxide and hydrogen gas?",
-            "options": ["Sodium", "Iron", "Copper", "Silver"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Sodium reacts vigorously with cold water to form sodium hydroxide and hydrogen gas."
-        },
-        {
-            "id": 5,
-            "question": "What is the correct order of reactivity (most reactive first)?",
-            "options": ["K > Na > Ca > Mg", "Mg > Ca > Na > K", "Ca > Mg > K > Na", "Na > K > Mg > Ca"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Potassium (K) is most reactive, followed by sodium (Na), then calcium (Ca), then magnesium (Mg)."
-        },
-        {
-            "id": 6,
-            "question": "Which statement about obtaining metals from their ores is true?",
-            "options": ["Gold is usually found as a pure metal", "All metals require electricity to extract", "More reactive metals are cheaper to obtain", "Iron is always found as a pure element"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Gold is very unreactive and can be found as a pure metal in nature, while more reactive metals are always found combined in ores."
-        },
-        {
-            "id": 7,
-            "question": "What is formed when magnesium reacts with steam?",
-            "options": ["Magnesium oxide and hydrogen", "Magnesium hydroxide", "Magnesium hydride", "Magnesium and oxygen"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Magnesium reacts with steam to form magnesium oxide and hydrogen gas."
-        },
-        {
-            "id": 8,
-            "question": "Which metal will displace silver from silver nitrate solution?",
-            "options": ["Copper", "Gold", "Silver", "Platinum"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Copper is more reactive than silver and will displace it from silver nitrate solution."
-        },
-        {
-            "id": 9,
-            "question": "Why does painting prevent rusting?",
-            "options": ["Prevents oxygen and water from reaching iron", "Makes iron less reactive", "Absorbs moisture", "Produces a protective gas"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Paint forms a barrier that prevents oxygen and water from coming into contact with the iron surface."
-        },
-        {
-            "id": 10,
-            "question": "Which metal reacts with dilute acid but not with cold water?",
-            "options": ["Zinc", "Sodium", "Potassium", "Calcium"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Zinc reacts with dilute acids but does not react with cold water."
-        },
-        {
-            "id": 11,
-            "question": "What happens when copper is placed in iron sulfate solution?",
-            "options": ["No reaction", "Copper dissolves", "Iron coats the copper", "Gas bubbles form"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Copper is less reactive than iron, so it cannot displace iron from its salt solution."
-        },
-        {
-            "id": 12,
-            "question": "Which metal requires the most electricity to obtain from its ore?",
-            "options": ["Aluminum", "Iron", "Zinc", "Copper"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Aluminum is the most reactive among these and requires the most electricity to extract from its ore."
-        },
-        {
-            "id": 13,
-            "question": "What are the products when calcium reacts with water?",
-            "options": ["Calcium hydroxide and hydrogen", "Calcium oxide and hydrogen", "Calcium hydride", "Calcium carbonate"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Calcium reacts with water to form calcium hydroxide and hydrogen gas."
-        },
-        {
-            "id": 14,
-            "question": "Which metal is stored under oil to prevent reaction with air?",
-            "options": ["Sodium", "Iron", "Copper", "Aluminum"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Sodium is very reactive and reacts with oxygen and moisture in air, so it's stored under oil."
-        },
-        {
-            "id": 15,
-            "question": "What is observed when a rusty iron nail is placed in dilute acid?",
-            "options": ["The rust dissolves", "The nail becomes shiny", "Gas bubbles form on rust", "The solution turns blue"],
-            "correctAnswer": 0,
-            points: 5,
-            "explanation": "Rust (iron oxide) reacts with acid to form a soluble salt, so the rust dissolves."
         }
+        // Additional questions would be here in the full version
     ]
 };
 
@@ -177,7 +90,7 @@ const screens = {
 // Initialize the game
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
-    populateChapterOptions();
+    populateDropdowns();
     updateWorksheetInfo();
 });
 
@@ -193,23 +106,35 @@ function initializeEventListeners() {
     
     // Level selection
     document.getElementById('level-select').addEventListener('change', (e) => {
-        updateGradeOptions(e.target.value);
+        const level = e.target.value;
+        updateSubjectOptions(level);
+        updateGradeOptions(level);
+        updateChapterOptions();
+        updateWorksheetOptions();
+    });
+    
+    // Subject selection
+    document.getElementById('subject-select').addEventListener('change', () => {
+        updateChapterOptions();
+        updateWorksheetOptions();
     });
     
     // Grade selection
     document.getElementById('grade-select').addEventListener('change', () => {
-        document.getElementById('chapter-select').disabled = false;
+        updateChapterOptions();
+        updateWorksheetOptions();
     });
     
     // Chapter selection
     document.getElementById('chapter-select').addEventListener('change', () => {
-        document.getElementById('worksheet-select').disabled = false;
+        updateWorksheetOptions();
     });
     
     // Worksheet selection
     document.getElementById('worksheet-select').addEventListener('change', (e) => {
         gameState.selectedWorksheet = e.target.value;
         updateWorksheetInfo();
+        document.getElementById('start-game-btn').disabled = !gameState.selectedWorksheet;
     });
     
     // Start game button
@@ -246,13 +171,34 @@ function initializeEventListeners() {
     });
 }
 
-function populateChapterOptions() {
-    const chapterSelect = document.getElementById('chapter-select');
-    for (let i = 1; i <= 20; i++) {
+function populateDropdowns() {
+    // Populate level options
+    const levelSelect = document.getElementById('level-select');
+    for (const [code, level] of Object.entries(gameState.levels)) {
         const option = document.createElement('option');
-        option.value = i.toString().padStart(2, '0');
-        option.textContent = `Chapter ${i}`;
-        chapterSelect.appendChild(option);
+        option.value = code;
+        option.textContent = level.name;
+        levelSelect.appendChild(option);
+    }
+    
+    // Populate subject options
+    const subjectSelect = document.getElementById('subject-select');
+    for (const [code, subject] of Object.entries(gameState.subjects)) {
+        const option = document.createElement('option');
+        option.value = code;
+        option.textContent = subject.name;
+        subjectSelect.appendChild(option);
+    }
+}
+
+function updateSubjectOptions(level) {
+    const subjectSelect = document.getElementById('subject-select');
+    subjectSelect.disabled = !level;
+    
+    if (level) {
+        // Enable all subjects for demo purposes
+        // In a real implementation, you might filter subjects based on level
+        subjectSelect.disabled = false;
     }
 }
 
@@ -260,72 +206,122 @@ function updateGradeOptions(level) {
     const gradeSelect = document.getElementById('grade-select');
     gradeSelect.innerHTML = '<option value="">-- Select Grade --</option>';
     
-    if (level === '1') {
-        // Primary school
-        for (let i = 1; i <= 6; i++) {
+    if (level && gameState.levels[level]) {
+        const grades = gameState.levels[level].grades;
+        grades.forEach(grade => {
             const option = document.createElement('option');
-            option.value = i.toString();
-            option.textContent = `Primary ${i}`;
+            option.value = grade;
+            let gradeName = `Grade ${grade}`;
+            if (level === '2' || level === '3') {
+                gradeName = `Secondary ${grade}`;
+            }
+            option.textContent = gradeName;
             gradeSelect.appendChild(option);
-        }
-    } else if (level === '2') {
-        // Lower secondary
-        for (let i = 1; i <= 2; i++) {
-            const option = document.createElement('option');
-            option.value = i.toString();
-            option.textContent = `Secondary ${i}`;
-            gradeSelect.appendChild(option);
-        }
-    } else if (level === '3') {
-        // Upper secondary
-        for (let i = 3; i <= 4; i++) {
-            const option = document.createElement('option');
-            option.value = i.toString();
-            option.textContent = `Secondary ${i}`;
-            gradeSelect.appendChild(option);
-        }
+        });
+        gradeSelect.disabled = false;
+    } else {
+        gradeSelect.disabled = true;
     }
+}
+
+function updateChapterOptions() {
+    const level = document.getElementById('level-select').value;
+    const grade = document.getElementById('grade-select').value;
+    const chapterSelect = document.getElementById('chapter-select');
     
-    gradeSelect.disabled = false;
+    chapterSelect.innerHTML = '<option value="">-- Select Chapter --</option>';
+    
+    if (level && grade) {
+        // Generate chapters 1-20
+        for (let i = 1; i <= 20; i++) {
+            const option = document.createElement('option');
+            option.value = i.toString().padStart(2, '0');
+            option.textContent = `Chapter ${i}`;
+            chapterSelect.appendChild(option);
+        }
+        chapterSelect.disabled = false;
+    } else {
+        chapterSelect.disabled = true;
+    }
+}
+
+function updateWorksheetOptions() {
+    const level = document.getElementById('level-select').value;
+    const subject = document.getElementById('subject-select').value;
+    const grade = document.getElementById('grade-select').value;
+    const chapter = document.getElementById('chapter-select').value;
+    const worksheetSelect = document.getElementById('worksheet-select');
+    
+    worksheetSelect.innerHTML = '<option value="">-- Select Worksheet --</option>';
+    
+    if (level && subject && grade && chapter) {
+        // Generate worksheet options 1-3 for the selected chapter
+        for (let i = 1; i <= 3; i++) {
+            const worksheetCode = `${level}${subject}${grade}${chapter}${i}`;
+            const option = document.createElement('option');
+            option.value = worksheetCode;
+            option.textContent = `Worksheet ${i}`;
+            worksheetSelect.appendChild(option);
+        }
+        worksheetSelect.disabled = false;
+    } else {
+        worksheetSelect.disabled = true;
+    }
 }
 
 function updateWorksheetInfo() {
     const infoDiv = document.getElementById('selected-worksheet-info');
     const detailsP = document.getElementById('worksheet-details');
     
-    if (gameState.selectedWorksheet === "344122") {
+    if (gameState.selectedWorksheet) {
+        const worksheetCode = gameState.selectedWorksheet;
+        const levelCode = worksheetCode.charAt(0);
+        const subjectCode = worksheetCode.charAt(1);
+        const grade = worksheetCode.charAt(2);
+        const chapter = parseInt(worksheetCode.substring(3, 5));
+        const worksheetNum = worksheetCode.charAt(5);
+        
+        const levelName = gameState.levels[levelCode]?.name || 'Unknown Level';
+        const subjectName = gameState.subjects[subjectCode]?.name || 'Unknown Subject';
+        
+        let gradeName = `Grade ${grade}`;
+        if (levelCode === '2' || levelCode === '3') {
+            gradeName = `Secondary ${grade}`;
+        }
+        
         detailsP.innerHTML = `
-            <strong>${worksheetData.subject}</strong><br>
-            ${worksheetData.level} - Secondary 4<br>
-            ${worksheetData.topic}<br>
-            <small>${worksheetData.description}</small>
+            <strong>${subjectName}</strong><br>
+            ${levelName} - ${gradeName}<br>
+            Chapter ${chapter}, Worksheet ${worksheetNum}<br>
+            <small>Worksheet ID: ${worksheetCode}</small>
         `;
         infoDiv.style.display = 'block';
+    } else {
+        infoDiv.style.display = 'none';
     }
 }
 
 async function loadWorksheetData() {
+    if (!gameState.selectedWorksheet) {
+        alert("Please select a worksheet first!");
+        return;
+    }
+    
     // Show loading state
     const startBtn = document.getElementById('start-game-btn');
+    const originalText = startBtn.innerHTML;
     startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
     startBtn.disabled = true;
     
     try {
-        // Convert worksheet data to game format
-        gameState.questions = worksheetData.questions.map(q => ({
-            id: q.id,
-            text: q.question,
-            options: q.options.map((opt, index) => ({
-                id: String.fromCharCode(65 + index), // A, B, C, D
-                text: opt
-            })),
-            correctAnswer: String.fromCharCode(65 + q.correctAnswer), // Convert 0->A, 1->B, etc.
-            points: q.points,
-            explanation: q.explanation
-        }));
+        // For GitHub Pages, try to load from actual file
+        const success = await loadWorksheetFromFile();
         
-        console.log(`Loaded worksheet ${worksheetData.code}: ${worksheetData.title}`);
-        console.log(`Contains ${gameState.questions.length} questions`);
+        if (!success) {
+            // Fall back to demo data
+            console.log("Using demo worksheet data");
+            await loadDemoWorksheet();
+        }
         
         // Update player names on power-up screen
         document.getElementById('player1-display').textContent = gameState.player1.name;
@@ -341,11 +337,102 @@ async function loadWorksheetData() {
         
     } catch (error) {
         console.error("Error loading worksheet:", error);
-        alert("Error loading worksheet data. Please try again.");
+        alert("Error loading worksheet. Using demo questions instead.");
+        await loadDemoWorksheet();
+        showScreen('powerup');
     } finally {
-        startBtn.innerHTML = '<i class="fas fa-play"></i> Start Game with Demo';
+        startBtn.innerHTML = originalText;
         startBtn.disabled = false;
     }
+}
+
+async function loadWorksheetFromFile() {
+    const worksheetCode = gameState.selectedWorksheet;
+    const levelCode = worksheetCode.charAt(0);
+    const subjectCode = worksheetCode.charAt(1);
+    
+    const levelFolder = gameState.levels[levelCode]?.folder;
+    const subjectFolder = gameState.subjects[subjectCode]?.folder;
+    
+    if (!levelFolder || !subjectFolder) {
+        console.error("Invalid worksheet code");
+        return false;
+    }
+    
+    // Construct the file path based on your structure
+    const filePath = `data/${levelFolder}/${subjectFolder}/${worksheetCode}.json`;
+    
+    try {
+        const response = await fetch(filePath);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const worksheetData = await response.json();
+        
+        // Convert to game format
+        gameState.questions = worksheetData.questions.map(q => ({
+            id: q.id,
+            text: q.question,
+            options: q.options.map((opt, index) => ({
+                id: String.fromCharCode(65 + index), // A, B, C, D
+                text: opt
+            })),
+            correctAnswer: String.fromCharCode(65 + q.correctAnswer),
+            points: q.points || 10,
+            explanation: q.explanation || "No explanation provided."
+        }));
+        
+        console.log(`Successfully loaded worksheet: ${worksheetData.title}`);
+        
+        // Store worksheet metadata for display
+        gameState.currentWorksheetData = worksheetData;
+        
+        return true;
+        
+    } catch (error) {
+        console.log(`Could not load ${filePath}:`, error.message);
+        return false;
+    }
+}
+
+async function loadDemoWorksheet() {
+    // Use demo data
+    const worksheetData = demoWorksheetData;
+    
+    // Convert to game format
+    gameState.questions = worksheetData.questions.map(q => ({
+        id: q.id,
+        text: q.question,
+        options: q.options.map((opt, index) => ({
+            id: String.fromCharCode(65 + index),
+            text: opt
+        })),
+        correctAnswer: String.fromCharCode(65 + q.correctAnswer),
+        points: q.points || 10,
+        explanation: q.explanation || "No explanation provided."
+    }));
+    
+    // Add more demo questions if needed
+    while (gameState.questions.length < 10) {
+        const id = gameState.questions.length + 1;
+        gameState.questions.push({
+            id: id,
+            text: `Demo Question ${id}: What is the correct answer?`,
+            options: [
+                { id: 'A', text: "Option A" },
+                { id: 'B', text: "Option B" },
+                { id: 'C', text: "Option C" },
+                { id: 'D', text: "Option D" }
+            ],
+            correctAnswer: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)],
+            points: 5,
+            explanation: "This is a demo question explanation."
+        });
+    }
+    
+    gameState.currentWorksheetData = worksheetData;
+    console.log("Using demo worksheet with", gameState.questions.length, "questions");
 }
 
 function selectRandomPowerup(player) {
@@ -409,8 +496,9 @@ function startQuiz() {
     document.getElementById('player2-powerup-name').textContent = powerUps[gameState.player2.powerup]?.name || "None";
     
     // Update worksheet name
-    document.getElementById('current-worksheet-name').textContent = worksheetData.title;
-    document.getElementById('results-worksheet-name').textContent = worksheetData.title;
+    const worksheetData = gameState.currentWorksheetData || demoWorksheetData;
+    document.getElementById('current-worksheet-name').textContent = worksheetData.title || "Worksheet Challenge";
+    document.getElementById('results-worksheet-name').textContent = worksheetData.title || "Worksheet Challenge";
     
     // Reset game state
     gameState.currentQuestion = 0;
@@ -673,8 +761,6 @@ function endGame() {
 }
 
 function applyPowerup(powerupKey, playerScore, opponentScore, isPlayer1) {
-    const powerup = powerUps[powerupKey];
-    
     switch(powerupKey) {
         case 'double':
             return playerScore * 2;
@@ -719,6 +805,8 @@ function resetGame() {
     gameState.currentQuestion = 0;
     gameState.questions = [];
     gameState.selectedOption = null;
+    gameState.selectedWorksheet = null;
+    gameState.currentWorksheetData = null;
     
     if (gameState.timer) {
         clearInterval(gameState.timer);
@@ -730,14 +818,15 @@ function resetGame() {
     document.getElementById('player2-name').value = "Player 2";
     document.getElementById('level-select').value = "";
     document.getElementById('subject-select').value = "";
-    document.getElementById('grade-select').innerHTML = '<option value="">-- Select Grade --</option>';
+    document.getElementById('grade-select').value = "";
     document.getElementById('grade-select').disabled = true;
     document.getElementById('chapter-select').value = "";
     document.getElementById('chapter-select').disabled = true;
     document.getElementById('worksheet-select').value = "";
     document.getElementById('worksheet-select').disabled = true;
     document.getElementById('selected-worksheet-info').style.display = 'none';
-    document.getElementById('start-game-btn').innerHTML = '<i class="fas fa-play"></i> Start Game with Demo';
+    document.getElementById('start-game-btn').disabled = true;
+    document.getElementById('start-game-btn').innerHTML = '<i class="fas fa-play"></i> Start Game';
 }
 
 function playAgain() {
@@ -753,4 +842,9 @@ function playAgain() {
     
     // Start quiz again
     startQuiz();
+}
+
+// Utility function to generate worksheet IDs
+function generateWorksheetId(level, subject, grade, chapter, worksheet) {
+    return `${level}${subject}${grade}${chapter.toString().padStart(2, '0')}${worksheet}`;
 }

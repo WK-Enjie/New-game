@@ -48,12 +48,7 @@
                             <label for="subject-select">Subject</label>
                             <select id="subject-select" disabled>
                                 <option value="">-- Select Subject --</option>
-                                <option value="0">Mathematics</option>
-                                <option value="1">Science</option>
-                                <option value="2">Combined Physics</option>
-                                <option value="3">Pure Physics</option>
-                                <option value="4">Combined Chemistry</option>
-                                <option value="5">Pure Chemistry</option>
+                                <!-- Options will be populated by JavaScript -->
                             </select>
                         </div>
                     </div>
@@ -63,12 +58,7 @@
                             <label for="grade-select">Grade</label>
                             <select id="grade-select" disabled>
                                 <option value="">-- Select Grade --</option>
-                                <option value="1">Grade 1</option>
-                                <option value="2">Grade 2</option>
-                                <option value="3">Grade 3</option>
-                                <option value="4">Grade 4</option>
-                                <option value="5">Grade 5</option>
-                                <option value="6">Grade 6</option>
+                                <!-- Options will be populated by JavaScript -->
                             </select>
                         </div>
                         
@@ -93,15 +83,11 @@
                         <h4><i class="fas fa-info-circle"></i> Selected Worksheet</h4>
                         <p id="worksheet-details"></p>
                     </div>
-                    
-                    <div class="demo-note">
-                        <i class="fas fa-info-circle"></i> Demo: Worksheet 344122 (Combined Chemistry, Sec 4, Chapter 12) is pre-loaded
-                    </div>
                 </div>
 
                 <div class="button-group">
-                    <button id="start-game-btn" class="btn btn-primary">
-                        <i class="fas fa-play"></i> Start Game with Demo
+                    <button id="start-game-btn" class="btn btn-primary" disabled>
+                        <i class="fas fa-play"></i> Start Game
                     </button>
                     <button id="reset-btn" class="btn btn-secondary">
                         <i class="fas fa-redo"></i> Reset
