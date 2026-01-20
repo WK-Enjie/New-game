@@ -149,6 +149,18 @@ h2 {
     margin-top: 20px;
 }
 
+.demo-note {
+    background: rgba(247, 37, 133, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #f72585;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #f8bbd9;
+}
+
 .button-group {
     display: flex;
     gap: 20px;

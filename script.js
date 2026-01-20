@@ -19,27 +19,7 @@ const gameState = {
     timer: null,
     timeRemaining: 30,
     startTime: null,
-    worksheetStructure: {
-        levels: {
-            "primary": { name: "Primary School", subjects: ["math", "science"] },
-            "lower-secondary": { name: "Lower Secondary", subjects: ["math", "science"] },
-            "upper-secondary": { name: "Upper Secondary", subjects: ["math", "combined-physics", "pure-physics", "combined-chemistry", "pure-chemistry"] }
-        },
-        subjectCodes: {
-            "math": 0,
-            "science": 1,
-            "combined-physics": 2,
-            "pure-physics": 3,
-            "combined-chemistry": 4,
-            "pure-chemistry": 5
-        },
-        grades: {
-            "primary": ["1", "2", "3", "4", "5", "6"],
-            "lower-secondary": ["1", "2"],
-            "upper-secondary": ["3", "4"]
-        }
-    },
-    selectedWorksheet: null
+    selectedWorksheet: "344122" // Default to your worksheet
 };
 
 // Power-ups configuration
@@ -49,6 +29,141 @@ const powerUps = {
     increase30: { name: "+30% Points", multiplier: 1.3, icon: "fas fa-arrow-up" },
     decrease30: { name: "-30% Points", multiplier: 0.7, icon: "fas fa-arrow-down" },
     switch: { name: "Switch Scores", multiplier: 0, icon: "fas fa-exchange-alt" }
+};
+
+// Your worksheet data
+const worksheetData = {
+    "code": "344122",
+    "title": "Sec 4 Combined Chemistry - Chapter 12: Reactivity Series (Worksheet 2)",
+    "subject": "Combined Chemistry",
+    "level": "Upper Secondary",
+    "topic": "Chapter 12: Metals and Reactivity Series",
+    "difficulty": "Intermediate",
+    "author": "Chemistry Department",
+    "created": "2024-01-25",
+    "description": "Second worksheet on reactivity series, displacement reactions, and corrosion of iron.",
+    "questions": [
+        {
+            "id": 1,
+            "question": "Which metal reacts most vigorously with dilute sulfuric acid?",
+            "options": ["Magnesium", "Zinc", "Iron", "Copper"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Magnesium is highest in the reactivity series among these options, so it reacts most vigorously."
+        },
+        {
+            "id": 2,
+            "question": "Which metal will NOT displace hydrogen from dilute hydrochloric acid?",
+            "options": ["Zinc", "Iron", "Copper", "Magnesium"],
+            "correctAnswer": 2,
+            "points": 5,
+            "explanation": "Copper is below hydrogen in the reactivity series, so it cannot displace hydrogen from acids."
+        },
+        {
+            "id": 3,
+            "question": "What happens when iron is placed in copper sulfate solution?",
+            "options": ["Iron becomes coated with copper", "Copper becomes coated with iron", "No visible change", "The solution turns green"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Iron is more reactive than copper, so it displaces copper from the solution, forming a copper coating."
+        },
+        {
+            "id": 4,
+            "question": "Which metal reacts with cold water to form a hydroxide and hydrogen gas?",
+            "options": ["Sodium", "Iron", "Copper", "Silver"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Sodium reacts vigorously with cold water to form sodium hydroxide and hydrogen gas."
+        },
+        {
+            "id": 5,
+            "question": "What is the correct order of reactivity (most reactive first)?",
+            "options": ["K > Na > Ca > Mg", "Mg > Ca > Na > K", "Ca > Mg > K > Na", "Na > K > Mg > Ca"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Potassium (K) is most reactive, followed by sodium (Na), then calcium (Ca), then magnesium (Mg)."
+        },
+        {
+            "id": 6,
+            "question": "Which statement about obtaining metals from their ores is true?",
+            "options": ["Gold is usually found as a pure metal", "All metals require electricity to extract", "More reactive metals are cheaper to obtain", "Iron is always found as a pure element"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Gold is very unreactive and can be found as a pure metal in nature, while more reactive metals are always found combined in ores."
+        },
+        {
+            "id": 7,
+            "question": "What is formed when magnesium reacts with steam?",
+            "options": ["Magnesium oxide and hydrogen", "Magnesium hydroxide", "Magnesium hydride", "Magnesium and oxygen"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Magnesium reacts with steam to form magnesium oxide and hydrogen gas."
+        },
+        {
+            "id": 8,
+            "question": "Which metal will displace silver from silver nitrate solution?",
+            "options": ["Copper", "Gold", "Silver", "Platinum"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Copper is more reactive than silver and will displace it from silver nitrate solution."
+        },
+        {
+            "id": 9,
+            "question": "Why does painting prevent rusting?",
+            "options": ["Prevents oxygen and water from reaching iron", "Makes iron less reactive", "Absorbs moisture", "Produces a protective gas"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Paint forms a barrier that prevents oxygen and water from coming into contact with the iron surface."
+        },
+        {
+            "id": 10,
+            "question": "Which metal reacts with dilute acid but not with cold water?",
+            "options": ["Zinc", "Sodium", "Potassium", "Calcium"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Zinc reacts with dilute acids but does not react with cold water."
+        },
+        {
+            "id": 11,
+            "question": "What happens when copper is placed in iron sulfate solution?",
+            "options": ["No reaction", "Copper dissolves", "Iron coats the copper", "Gas bubbles form"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Copper is less reactive than iron, so it cannot displace iron from its salt solution."
+        },
+        {
+            "id": 12,
+            "question": "Which metal requires the most electricity to obtain from its ore?",
+            "options": ["Aluminum", "Iron", "Zinc", "Copper"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Aluminum is the most reactive among these and requires the most electricity to extract from its ore."
+        },
+        {
+            "id": 13,
+            "question": "What are the products when calcium reacts with water?",
+            "options": ["Calcium hydroxide and hydrogen", "Calcium oxide and hydrogen", "Calcium hydride", "Calcium carbonate"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Calcium reacts with water to form calcium hydroxide and hydrogen gas."
+        },
+        {
+            "id": 14,
+            "question": "Which metal is stored under oil to prevent reaction with air?",
+            "options": ["Sodium", "Iron", "Copper", "Aluminum"],
+            "correctAnswer": 0,
+            "points": 5,
+            "explanation": "Sodium is very reactive and reacts with oxygen and moisture in air, so it's stored under oil."
+        },
+        {
+            "id": 15,
+            "question": "What is observed when a rusty iron nail is placed in dilute acid?",
+            "options": ["The rust dissolves", "The nail becomes shiny", "Gas bubbles form on rust", "The solution turns blue"],
+            "correctAnswer": 0,
+            points: 5,
+            "explanation": "Rust (iron oxide) reacts with acid to form a soluble salt, so the rust dissolves."
+        }
+    ]
 };
 
 // DOM Elements
@@ -62,7 +177,8 @@ const screens = {
 // Initialize the game
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
-    loadWorksheetOptions();
+    populateChapterOptions();
+    updateWorksheetInfo();
 });
 
 function initializeEventListeners() {
@@ -77,42 +193,27 @@ function initializeEventListeners() {
     
     // Level selection
     document.getElementById('level-select').addEventListener('change', (e) => {
-        const level = e.target.value;
-        updateSubjectOptions(level);
-        updateGradeOptions(level);
-    });
-    
-    // Subject selection
-    document.getElementById('subject-select').addEventListener('change', () => {
-        updateChapterOptions();
+        updateGradeOptions(e.target.value);
     });
     
     // Grade selection
     document.getElementById('grade-select').addEventListener('change', () => {
-        updateChapterOptions();
+        document.getElementById('chapter-select').disabled = false;
     });
     
     // Chapter selection
     document.getElementById('chapter-select').addEventListener('change', () => {
-        updateWorksheetOptions();
+        document.getElementById('worksheet-select').disabled = false;
     });
     
     // Worksheet selection
     document.getElementById('worksheet-select').addEventListener('change', (e) => {
-        const worksheetId = e.target.value;
-        if (worksheetId) {
-            gameState.selectedWorksheet = worksheetId;
-            document.getElementById('start-game-btn').disabled = false;
-            updateWorksheetInfo(worksheetId);
-        } else {
-            document.getElementById('start-game-btn').disabled = true;
-        }
+        gameState.selectedWorksheet = e.target.value;
+        updateWorksheetInfo();
     });
     
     // Start game button
-    document.getElementById('start-game-btn').addEventListener('click', () => {
-        loadWorksheetData();
-    });
+    document.getElementById('start-game-btn').addEventListener('click', loadWorksheetData);
     
     // Reset button
     document.getElementById('reset-btn').addEventListener('click', resetGame);
@@ -145,194 +246,86 @@ function initializeEventListeners() {
     });
 }
 
-function loadWorksheetOptions() {
-    // This function would normally load from a server
-    // For GitHub Pages, we'll simulate the structure
-    console.log("Worksheet structure loaded");
-}
-
-function updateSubjectOptions(level) {
-    const subjectSelect = document.getElementById('subject-select');
-    subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
-    
-    if (level && gameState.worksheetStructure.levels[level]) {
-        const subjects = gameState.worksheetStructure.levels[level].subjects;
-        subjects.forEach(subject => {
-            const option = document.createElement('option');
-            option.value = subject;
-            option.textContent = formatSubjectName(subject);
-            subjectSelect.appendChild(option);
-        });
-        subjectSelect.disabled = false;
-    } else {
-        subjectSelect.disabled = true;
+function populateChapterOptions() {
+    const chapterSelect = document.getElementById('chapter-select');
+    for (let i = 1; i <= 20; i++) {
+        const option = document.createElement('option');
+        option.value = i.toString().padStart(2, '0');
+        option.textContent = `Chapter ${i}`;
+        chapterSelect.appendChild(option);
     }
-    
-    // Reset dependent selects
-    document.getElementById('grade-select').disabled = true;
-    document.getElementById('chapter-select').disabled = true;
-    document.getElementById('worksheet-select').disabled = true;
-    document.getElementById('grade-select').innerHTML = '<option value="">-- Select Grade --</option>';
-    document.getElementById('chapter-select').innerHTML = '<option value="">-- Select Chapter --</option>';
-    document.getElementById('worksheet-select').innerHTML = '<option value="">-- Select Worksheet --</option>';
 }
 
 function updateGradeOptions(level) {
     const gradeSelect = document.getElementById('grade-select');
     gradeSelect.innerHTML = '<option value="">-- Select Grade --</option>';
     
-    if (level && gameState.worksheetStructure.grades[level]) {
-        const grades = gameState.worksheetStructure.grades[level];
-        grades.forEach(grade => {
+    if (level === '1') {
+        // Primary school
+        for (let i = 1; i <= 6; i++) {
             const option = document.createElement('option');
-            option.value = grade;
-            option.textContent = formatGradeName(level, grade);
+            option.value = i.toString();
+            option.textContent = `Primary ${i}`;
             gradeSelect.appendChild(option);
-        });
-        gradeSelect.disabled = false;
-    } else {
-        gradeSelect.disabled = true;
-    }
-}
-
-function formatSubjectName(subject) {
-    return subject.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-}
-
-function formatGradeName(level, grade) {
-    if (level === 'primary') {
-        return `Primary ${grade}`;
-    } else if (level === 'lower-secondary') {
-        return `Secondary ${grade}`;
-    } else if (level === 'upper-secondary') {
-        return `Secondary ${grade}`;
-    }
-    return grade;
-}
-
-function updateChapterOptions() {
-    const level = document.getElementById('level-select').value;
-    const subject = document.getElementById('subject-select').value;
-    const grade = document.getElementById('grade-select').value;
-    const chapterSelect = document.getElementById('chapter-select');
-    
-    chapterSelect.innerHTML = '<option value="">-- Select Chapter --</option>';
-    
-    if (level && subject && grade) {
-        // Generate chapters 1-20 for demo purposes
-        for (let i = 1; i <= 20; i++) {
-            const option = document.createElement('option');
-            option.value = i.toString().padStart(2, '0');
-            option.textContent = `Chapter ${i}`;
-            chapterSelect.appendChild(option);
         }
-        chapterSelect.disabled = false;
-    } else {
-        chapterSelect.disabled = true;
-    }
-    
-    // Reset worksheet select
-    document.getElementById('worksheet-select').disabled = true;
-    document.getElementById('worksheet-select').innerHTML = '<option value="">-- Select Worksheet --</option>';
-}
-
-function updateWorksheetOptions() {
-    const level = document.getElementById('level-select').value;
-    const subject = document.getElementById('subject-select').value;
-    const grade = document.getElementById('grade-select').value;
-    const chapter = document.getElementById('chapter-select').value;
-    const worksheetSelect = document.getElementById('worksheet-select');
-    
-    worksheetSelect.innerHTML = '<option value="">-- Select Worksheet --</option>';
-    
-    if (level && subject && grade && chapter) {
-        // Generate worksheet options based on the file naming convention
-        const levelCode = getLevelCode(level);
-        const subjectCode = gameState.worksheetStructure.subjectCodes[subject];
-        const gradeCode = grade;
-        const chapterCode = chapter;
-        
-        // Generate 1-3 worksheets per chapter for demo
-        for (let i = 1; i <= 3; i++) {
-            const worksheetCode = `${levelCode}${subjectCode}${gradeCode}${chapterCode}${i}`;
+    } else if (level === '2') {
+        // Lower secondary
+        for (let i = 1; i <= 2; i++) {
             const option = document.createElement('option');
-            option.value = worksheetCode;
-            option.textContent = `Worksheet ${i}`;
-            worksheetSelect.appendChild(option);
+            option.value = i.toString();
+            option.textContent = `Secondary ${i}`;
+            gradeSelect.appendChild(option);
         }
-        worksheetSelect.disabled = false;
-    } else {
-        worksheetSelect.disabled = true;
+    } else if (level === '3') {
+        // Upper secondary
+        for (let i = 3; i <= 4; i++) {
+            const option = document.createElement('option');
+            option.value = i.toString();
+            option.textContent = `Secondary ${i}`;
+            gradeSelect.appendChild(option);
+        }
     }
+    
+    gradeSelect.disabled = false;
 }
 
-function getLevelCode(level) {
-    switch(level) {
-        case 'primary': return '1';
-        case 'lower-secondary': return '2';
-        case 'upper-secondary': return '3';
-        default: return '0';
-    }
-}
-
-function updateWorksheetInfo(worksheetId) {
+function updateWorksheetInfo() {
     const infoDiv = document.getElementById('selected-worksheet-info');
     const detailsP = document.getElementById('worksheet-details');
     
-    // Parse the worksheet ID
-    const levelCode = worksheetId.charAt(0);
-    const subjectCode = worksheetId.charAt(1);
-    const grade = worksheetId.charAt(2);
-    const chapter = parseInt(worksheetId.substring(3, 5));
-    const worksheetNum = worksheetId.charAt(5);
-    
-    let levelName, subjectName;
-    
-    switch(levelCode) {
-        case '1': levelName = "Primary School"; break;
-        case '2': levelName = "Lower Secondary"; break;
-        case '3': levelName = "Upper Secondary"; break;
-        default: levelName = "Unknown Level";
+    if (gameState.selectedWorksheet === "344122") {
+        detailsP.innerHTML = `
+            <strong>${worksheetData.subject}</strong><br>
+            ${worksheetData.level} - Secondary 4<br>
+            ${worksheetData.topic}<br>
+            <small>${worksheetData.description}</small>
+        `;
+        infoDiv.style.display = 'block';
     }
-    
-    // Find subject name from code
-    const subjects = gameState.worksheetStructure.subjectCodes;
-    for (const [name, code] of Object.entries(subjects)) {
-        if (code == subjectCode) {
-            subjectName = formatSubjectName(name);
-            break;
-        }
-    }
-    
-    detailsP.innerHTML = `
-        <strong>${subjectName}</strong><br>
-        ${levelName} - Grade ${grade}<br>
-        Chapter ${chapter}, Worksheet ${worksheetNum}<br>
-        <small>ID: ${worksheetId}</small>
-    `;
-    
-    infoDiv.style.display = 'block';
 }
 
 async function loadWorksheetData() {
-    const worksheetId = gameState.selectedWorksheet;
-    
-    if (!worksheetId) {
-        alert("Please select a worksheet first!");
-        return;
-    }
-    
     // Show loading state
     const startBtn = document.getElementById('start-game-btn');
     startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
     startBtn.disabled = true;
     
     try {
-        // For GitHub Pages, we'll use sample data since we can't access server files directly
-        // In a real implementation, you would fetch from: `data/${level}/${subject}/${worksheetId}.json`
-        await simulateWorksheetLoad(worksheetId);
+        // Convert worksheet data to game format
+        gameState.questions = worksheetData.questions.map(q => ({
+            id: q.id,
+            text: q.question,
+            options: q.options.map((opt, index) => ({
+                id: String.fromCharCode(65 + index), // A, B, C, D
+                text: opt
+            })),
+            correctAnswer: String.fromCharCode(65 + q.correctAnswer), // Convert 0->A, 1->B, etc.
+            points: q.points,
+            explanation: q.explanation
+        }));
+        
+        console.log(`Loaded worksheet ${worksheetData.code}: ${worksheetData.title}`);
+        console.log(`Contains ${gameState.questions.length} questions`);
         
         // Update player names on power-up screen
         document.getElementById('player1-display').textContent = gameState.player1.name;
@@ -348,124 +341,11 @@ async function loadWorksheetData() {
         
     } catch (error) {
         console.error("Error loading worksheet:", error);
-        alert("Error loading worksheet data. Using sample questions instead.");
-        createSampleQuestions();
-        showScreen('powerup');
+        alert("Error loading worksheet data. Please try again.");
     } finally {
-        startBtn.innerHTML = '<i class="fas fa-play"></i> Start Game';
+        startBtn.innerHTML = '<i class="fas fa-play"></i> Start Game with Demo';
         startBtn.disabled = false;
     }
-}
-
-async function simulateWorksheetLoad(worksheetId) {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Create sample questions based on worksheet ID
-    const levelCode = worksheetId.charAt(0);
-    const subjectCode = worksheetId.charAt(1);
-    const grade = worksheetId.charAt(2);
-    const chapter = parseInt(worksheetId.substring(3, 5));
-    
-    let subjectName = "Mathematics";
-    if (subjectCode == '1') subjectName = "Science";
-    else if (subjectCode == '2') subjectName = "Combined Physics";
-    else if (subjectCode == '3') subjectName = "Pure Physics";
-    else if (subjectCode == '4') subjectName = "Combined Chemistry";
-    else if (subjectCode == '5') subjectName = "Pure Chemistry";
-    
-    // Generate sample questions
-    gameState.questions = [];
-    const questionCount = 5; // Reduced for demo
-    
-    for (let i = 1; i <= questionCount; i++) {
-        gameState.questions.push({
-            id: i,
-            text: `${subjectName} Chapter ${chapter}, Question ${i}: What is the correct answer?`,
-            options: [
-                { id: 'A', text: "Option A" },
-                { id: 'B', text: "Option B" },
-                { id: 'C', text: "Option C" },
-                { id: 'D', text: "Option D" }
-            ],
-            correctAnswer: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)],
-            points: 10,
-            explanation: "This is the correct answer because..."
-        });
-    }
-    
-    console.log(`Loaded worksheet ${worksheetId} with ${questionCount} questions`);
-}
-
-function createSampleQuestions() {
-    // Create 5 sample questions for demo
-    gameState.questions = [
-        {
-            id: 1,
-            text: "What is 15 + 27?",
-            options: [
-                { id: 'A', text: "32" },
-                { id: 'B', text: "42" },
-                { id: 'C', text: "52" },
-                { id: 'D', text: "62" }
-            ],
-            correctAnswer: 'B',
-            points: 10,
-            explanation: "15 + 27 = 42"
-        },
-        {
-            id: 2,
-            text: "What is the capital of France?",
-            options: [
-                { id: 'A', text: "London" },
-                { id: 'B', text: "Berlin" },
-                { id: 'C', text: "Paris" },
-                { id: 'D', text: "Madrid" }
-            ],
-            correctAnswer: 'C',
-            points: 10,
-            explanation: "Paris is the capital of France"
-        },
-        {
-            id: 3,
-            text: "What is H₂O?",
-            options: [
-                { id: 'A', text: "Oxygen" },
-                { id: 'B', text: "Hydrogen" },
-                { id: 'C', text: "Carbon Dioxide" },
-                { id: 'D', text: "Water" }
-            ],
-            correctAnswer: 'D',
-            points: 15,
-            explanation: "H₂O is the chemical formula for water"
-        },
-        {
-            id: 4,
-            text: "Solve: 3x + 5 = 20",
-            options: [
-                { id: 'A', text: "x = 3" },
-                { id: 'B', text: "x = 5" },
-                { id: 'C', text: "x = 7" },
-                { id: 'D', text: "x = 9" }
-            ],
-            correctAnswer: 'B',
-            points: 15,
-            explanation: "3x = 15, so x = 5"
-        },
-        {
-            id: 5,
-            text: "What planet is known as the Red Planet?",
-            options: [
-                { id: 'A', text: "Venus" },
-                { id: 'B', text: "Mars" },
-                { id: 'C', text: "Jupiter" },
-                { id: 'D', text: "Saturn" }
-            ],
-            correctAnswer: 'B',
-            points: 10,
-            explanation: "Mars is known as the Red Planet due to iron oxide on its surface"
-        }
-    ];
 }
 
 function selectRandomPowerup(player) {
@@ -529,22 +409,8 @@ function startQuiz() {
     document.getElementById('player2-powerup-name').textContent = powerUps[gameState.player2.powerup]?.name || "None";
     
     // Update worksheet name
-    const worksheetId = gameState.selectedWorksheet;
-    const levelCode = worksheetId.charAt(0);
-    const subjectCode = worksheetId.charAt(1);
-    const grade = worksheetId.charAt(2);
-    const chapter = parseInt(worksheetId.substring(3, 5));
-    const worksheetNum = worksheetId.charAt(5);
-    
-    let subjectName = "Mathematics";
-    if (subjectCode == '1') subjectName = "Science";
-    else if (subjectCode == '2') subjectName = "Combined Physics";
-    else if (subjectCode == '3') subjectName = "Pure Physics";
-    else if (subjectCode == '4') subjectName = "Combined Chemistry";
-    else if (subjectCode == '5') subjectName = "Pure Chemistry";
-    
-    document.getElementById('current-worksheet-name').textContent = 
-        `${subjectName} - Chapter ${chapter}, Worksheet ${worksheetNum}`;
+    document.getElementById('current-worksheet-name').textContent = worksheetData.title;
+    document.getElementById('results-worksheet-name').textContent = worksheetData.title;
     
     // Reset game state
     gameState.currentQuestion = 0;
@@ -780,22 +646,6 @@ function endGame() {
     document.getElementById('player1-final-score').textContent = Math.round(player1FinalScore);
     document.getElementById('player2-final-score').textContent = Math.round(player2FinalScore);
     
-    // Update worksheet name
-    const worksheetId = gameState.selectedWorksheet;
-    const subjectCode = worksheetId.charAt(1);
-    const chapter = parseInt(worksheetId.substring(3, 5));
-    const worksheetNum = worksheetId.charAt(5);
-    
-    let subjectName = "Mathematics";
-    if (subjectCode == '1') subjectName = "Science";
-    else if (subjectCode == '2') subjectName = "Combined Physics";
-    else if (subjectCode == '3') subjectName = "Pure Physics";
-    else if (subjectCode == '4') subjectName = "Combined Chemistry";
-    else if (subjectCode == '5') subjectName = "Pure Chemistry";
-    
-    document.getElementById('results-worksheet-name').textContent = 
-        `${subjectName} - Chapter ${chapter}, Worksheet ${worksheetNum}`;
-    
     // Determine winner
     let winnerName, winningMessage;
     if (player1FinalScore > player2FinalScore) {
@@ -869,7 +719,6 @@ function resetGame() {
     gameState.currentQuestion = 0;
     gameState.questions = [];
     gameState.selectedOption = null;
-    gameState.selectedWorksheet = null;
     
     if (gameState.timer) {
         clearInterval(gameState.timer);
@@ -880,16 +729,15 @@ function resetGame() {
     document.getElementById('player1-name').value = "Player 1";
     document.getElementById('player2-name').value = "Player 2";
     document.getElementById('level-select').value = "";
-    document.getElementById('subject-select').innerHTML = '<option value="">-- Select Subject --</option>';
-    document.getElementById('subject-select').disabled = true;
+    document.getElementById('subject-select').value = "";
     document.getElementById('grade-select').innerHTML = '<option value="">-- Select Grade --</option>';
     document.getElementById('grade-select').disabled = true;
-    document.getElementById('chapter-select').innerHTML = '<option value="">-- Select Chapter --</option>';
+    document.getElementById('chapter-select').value = "";
     document.getElementById('chapter-select').disabled = true;
-    document.getElementById('worksheet-select').innerHTML = '<option value="">-- Select Worksheet --</option>';
+    document.getElementById('worksheet-select').value = "";
     document.getElementById('worksheet-select').disabled = true;
     document.getElementById('selected-worksheet-info').style.display = 'none';
-    document.getElementById('start-game-btn').disabled = true;
+    document.getElementById('start-game-btn').innerHTML = '<i class="fas fa-play"></i> Start Game with Demo';
 }
 
 function playAgain() {
