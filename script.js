@@ -3,16 +3,12 @@ const gameState = {
     player1: {
         name: "Player 1",
         score: 0,
-        powerup: null,
-        hasAttemptedCurrent: false,
-        hasAnsweredCorrectly: false
+        powerup: null
     },
     player2: {
         name: "Player 2",
         score: 0,
-        powerup: null,
-        hasAttemptedCurrent: false,
-        hasAnsweredCorrectly: false
+        powerup: null
     },
     currentPlayer: 1,
     currentQuestion: 0,
@@ -37,7 +33,10 @@ const gameState = {
         '3': { name: 'Pure Physics', folder: 'pure-physics' },
         '4': { name: 'Combined Chemistry', folder: 'combined-chemistry' },
         '5': { name: 'Pure Chemistry', folder: 'pure-chemistry' }
-    }
+    },
+    
+    // Store available worksheets
+    availableWorksheets: []
 };
 
 // Power-ups configuration
@@ -95,8 +94,8 @@ function initializeEventListeners() {
     });
     
     // Chapter selection
-    document.getElementById('chapter-select').addEventListener('change', () => {
-        updateWorksheetOptions();
+    document.getElementById('chapter-select').addEventListener('change', async () => {
+        await updateWorksheetOptions();
     });
     
     // Worksheet selection
@@ -214,7 +213,7 @@ function updateChapterOptions() {
     }
 }
 
-function updateWorksheetOptions() {
+async function updateWorksheetOptions() {
     const level = document.getElementById('level-select').value;
     const subject = document.getElementById('subject-select').value;
     const grade = document.getElementById('grade-select').value;
@@ -222,19 +221,82 @@ function updateWorksheetOptions() {
     const worksheetSelect = document.getElementById('worksheet-select');
     
     worksheetSelect.innerHTML = '<option value="">-- Select Worksheet --</option>';
+    worksheetSelect.disabled = true;
     
     if (level && subject && grade && chapter) {
-        // Generate worksheet options 1-3 for the selected chapter
-        for (let i = 1; i <= 3; i++) {
-            const worksheetCode = `${level}${subject}${grade}${chapter}${i}`;
+        // Show loading indicator
+        worksheetSelect.innerHTML = '<option value="">Loading worksheets...</option>';
+        
+        // Try to find available worksheets for this chapter
+        const availableWorksheets = await findAvailableWorksheets(level, subject, grade, chapter);
+        
+        // Clear loading message
+        worksheetSelect.innerHTML = '<option value="">-- Select Worksheet --</option>';
+        
+        if (availableWorksheets.length > 0) {
+            availableWorksheets.forEach(worksheetCode => {
+                const worksheetNum = worksheetCode.charAt(5);
+                const option = document.createElement('option');
+                option.value = worksheetCode;
+                option.textContent = `Worksheet ${worksheetNum}`;
+                worksheetSelect.appendChild(option);
+            });
+            worksheetSelect.disabled = false;
+            
+            // Store available worksheets for this chapter
+            gameState.availableWorksheets = availableWorksheets;
+        } else {
+            // No worksheets found
             const option = document.createElement('option');
-            option.value = worksheetCode;
-            option.textContent = `Worksheet ${i}`;
+            option.value = "";
+            option.textContent = "No worksheets available for this chapter";
             worksheetSelect.appendChild(option);
+            worksheetSelect.disabled = true;
         }
-        worksheetSelect.disabled = false;
-    } else {
-        worksheetSelect.disabled = true;
+    }
+}
+
+async function findAvailableWorksheets(level, subject, grade, chapter) {
+    const availableWorksheets = [];
+    
+    // Check for worksheets 1-3
+    for (let worksheetNum = 1; worksheetNum <= 3; worksheetNum++) {
+        const worksheetCode = `${level}${subject}${grade}${chapter}${worksheetNum}`;
+        const fileExists = await checkIfWorksheetExists(worksheetCode);
+        
+        if (fileExists) {
+            availableWorksheets.push(worksheetCode);
+        }
+    }
+    
+    return availableWorksheets;
+}
+
+async function checkIfWorksheetExists(worksheetCode) {
+    const levelCode = worksheetCode.charAt(0);
+    const subjectCode = worksheetCode.charAt(1);
+    
+    const levelFolder = gameState.levels[levelCode]?.folder;
+    const subjectFolder = gameState.subjects[subjectCode]?.folder;
+    
+    if (!levelFolder || !subjectFolder) {
+        return false;
+    }
+    
+    // Construct the file path
+    const filePath = `data/${levelFolder}/${subjectFolder}/${worksheetCode}.json`;
+    
+    try {
+        const response = await fetch(filePath, { method: 'HEAD' });
+        return response.ok;
+    } catch (error) {
+        // Try with GET request as fallback
+        try {
+            const response = await fetch(filePath);
+            return response.ok;
+        } catch (e) {
+            return false;
+        }
     }
 }
 
@@ -276,6 +338,14 @@ async function loadWorksheetData() {
         return;
     }
     
+    // Verify the worksheet still exists (in case of race conditions)
+    const worksheetExists = await checkIfWorksheetExists(gameState.selectedWorksheet);
+    if (!worksheetExists) {
+        alert("This worksheet is no longer available. Please select another worksheet.");
+        resetWorksheetSelection();
+        return;
+    }
+    
     // Show loading state
     const startBtn = document.getElementById('start-game-btn');
     const originalText = startBtn.innerHTML;
@@ -283,13 +353,11 @@ async function loadWorksheetData() {
     startBtn.disabled = true;
     
     try {
-        // For GitHub Pages, try to load from actual file
+        // Load the selected worksheet
         const success = await loadWorksheetFromFile();
         
         if (!success) {
-            // Fall back to demo data
-            console.log("Using demo worksheet data");
-            await loadDemoWorksheet();
+            throw new Error("Failed to load worksheet");
         }
         
         // Update player names on power-up screen
@@ -306,9 +374,8 @@ async function loadWorksheetData() {
         
     } catch (error) {
         console.error("Error loading worksheet:", error);
-        alert("Error loading worksheet. Using demo questions instead.");
-        await loadDemoWorksheet();
-        showScreen('powerup');
+        alert(`Error loading worksheet: ${error.message}. Please try another worksheet.`);
+        resetWorksheetSelection();
     } finally {
         startBtn.innerHTML = originalText;
         startBtn.disabled = false;
@@ -324,8 +391,7 @@ async function loadWorksheetFromFile() {
     const subjectFolder = gameState.subjects[subjectCode]?.folder;
     
     if (!levelFolder || !subjectFolder) {
-        console.error("Invalid worksheet code");
-        return false;
+        throw new Error("Invalid worksheet code");
     }
     
     // Construct the file path based on your structure
@@ -334,10 +400,15 @@ async function loadWorksheetFromFile() {
     try {
         const response = await fetch(filePath);
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+            throw new Error(`HTTP ${response.status}: Worksheet not found`);
         }
         
         const worksheetData = await response.json();
+        
+        // Validate worksheet data
+        if (!worksheetData.questions || !Array.isArray(worksheetData.questions) || worksheetData.questions.length === 0) {
+            throw new Error("Invalid worksheet format: No questions found");
+        }
         
         // Convert to game format
         gameState.questions = worksheetData.questions.map(q => ({
@@ -352,7 +423,7 @@ async function loadWorksheetFromFile() {
             explanation: q.explanation || "No explanation provided."
         }));
         
-        console.log(`Successfully loaded worksheet: ${worksheetData.title}`);
+        console.log(`Successfully loaded worksheet: ${worksheetData.title || worksheetCode}`);
         
         // Store worksheet metadata for display
         gameState.currentWorksheetData = worksheetData;
@@ -361,60 +432,15 @@ async function loadWorksheetFromFile() {
         
     } catch (error) {
         console.log(`Could not load ${filePath}:`, error.message);
-        return false;
+        throw error;
     }
 }
 
-async function loadDemoWorksheet() {
-    // Create simple demo questions
-    gameState.questions = [
-        {
-            id: 1,
-            text: "What is 5 + 7?",
-            options: [
-                { id: 'A', text: "10" },
-                { id: 'B', text: "11" },
-                { id: 'C', text: "12" },
-                { id: 'D', text: "13" }
-            ],
-            correctAnswer: 'C',
-            points: 5,
-            explanation: "5 + 7 = 12"
-        },
-        {
-            id: 2,
-            text: "What is the capital of France?",
-            options: [
-                { id: 'A', text: "London" },
-                { id: 'B', text: "Berlin" },
-                { id: 'C', text: "Paris" },
-                { id: 'D', text: "Madrid" }
-            ],
-            correctAnswer: 'C',
-            points: 5,
-            explanation: "Paris is the capital of France"
-        },
-        {
-            id: 3,
-            text: "What is H₂O?",
-            options: [
-                { id: 'A', text: "Oxygen" },
-                { id: 'B', text: "Hydrogen" },
-                { id: 'C', text: "Carbon Dioxide" },
-                { id: 'D', text: "Water" }
-            ],
-            correctAnswer: 'D',
-            points: 5,
-            explanation: "H₂O is the chemical formula for water"
-        }
-    ];
-    
-    gameState.currentWorksheetData = {
-        title: "Demo Worksheet",
-        subject: "General Knowledge"
-    };
-    
-    console.log("Using demo worksheet with", gameState.questions.length, "questions");
+function resetWorksheetSelection() {
+    gameState.selectedWorksheet = null;
+    document.getElementById('worksheet-select').value = "";
+    document.getElementById('selected-worksheet-info').style.display = 'none';
+    document.getElementById('start-game-btn').disabled = true;
 }
 
 function selectRandomPowerup(player) {
@@ -486,10 +512,6 @@ function startQuiz() {
     gameState.currentQuestion = 0;
     gameState.player1.score = 0;
     gameState.player2.score = 0;
-    gameState.player1.hasAttemptedCurrent = false;
-    gameState.player2.hasAttemptedCurrent = false;
-    gameState.player1.hasAnsweredCorrectly = false;
-    gameState.player2.hasAnsweredCorrectly = false;
     gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
     gameState.startTime = Date.now();
     
@@ -513,12 +535,6 @@ function loadQuestion() {
         endGame();
         return;
     }
-    
-    // Reset attempt tracking for this question
-    gameState.player1.hasAttemptedCurrent = false;
-    gameState.player2.hasAttemptedCurrent = false;
-    gameState.player1.hasAnsweredCorrectly = false;
-    gameState.player2.hasAnsweredCorrectly = false;
     
     // Update question counter
     document.getElementById('current-question').textContent = gameState.currentQuestion + 1;
@@ -607,13 +623,9 @@ function submitAnswer(isTimeout = false) {
     const isCorrect = !isTimeout && gameState.selectedOption === question.correctAnswer;
     const currentPlayer = gameState.currentPlayer === 1 ? gameState.player1 : gameState.player2;
     
-    // Mark that this player has attempted this question
-    currentPlayer.hasAttemptedCurrent = true;
-    
     // Give points if correct
     if (isCorrect) {
         currentPlayer.score += question.points;
-        currentPlayer.hasAnsweredCorrectly = true;
         
         console.log(`Player ${gameState.currentPlayer} answered correctly! Scored ${question.points} points. Total: ${currentPlayer.score}`);
         
@@ -627,47 +639,37 @@ function submitAnswer(isTimeout = false) {
         console.log(`Player ${gameState.currentPlayer} answered incorrectly.`);
     }
     
-    // Show feedback
+    // Show feedback (but don't reveal correct answer yet)
     const options = document.querySelectorAll('.option');
     options.forEach(opt => {
         opt.style.pointerEvents = 'none'; // Disable further clicks
         
-        if (opt.dataset.optionId === question.correctAnswer) {
-            // Highlight correct answer in green
-            opt.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-            opt.style.borderColor = '#4caf50';
-        } else if (opt.dataset.optionId === gameState.selectedOption && !isCorrect && !isTimeout) {
-            // Highlight wrong answer in red (if user selected wrong answer)
-            opt.style.backgroundColor = 'rgba(244, 67, 54, 0.3)';
-            opt.style.borderColor = '#f44336';
+        // Only show if the player selected this option
+        if (opt.dataset.optionId === gameState.selectedOption) {
+            if (isCorrect) {
+                opt.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+                opt.style.borderColor = '#4caf50';
+            } else if (!isTimeout) {
+                opt.style.backgroundColor = 'rgba(244, 67, 54, 0.3)';
+                opt.style.borderColor = '#f44336';
+            }
         }
     });
+    
+    // DO NOT show correct answer - keep it hidden
+    // Players should learn on their own or check after game
     
     // Show "Next Question" button immediately
     document.getElementById('submit-answer-btn').style.display = 'none';
     document.getElementById('next-question-btn').style.display = 'block';
     
-    // Update button text based on situation
+    // Update button text
     const nextButton = document.getElementById('next-question-btn');
-    if (isCorrect) {
-        nextButton.innerHTML = '<i class="fas fa-forward"></i> Next Question';
-    } else {
-        // Check if other player can attempt
-        const otherPlayer = gameState.currentPlayer === 1 ? gameState.player2 : gameState.player1;
-        if (!otherPlayer.hasAttemptedCurrent) {
-            nextButton.innerHTML = '<i class="fas fa-user-friends"></i> Switch to Other Player';
-        } else {
-            nextButton.innerHTML = '<i class="fas fa-forward"></i> Next Question';
-        }
-    }
+    nextButton.innerHTML = '<i class="fas fa-forward"></i> Next Question';
     
-    // If timeout, also show which was the correct answer
+    // If timeout, mark as wrong but don't show answer
     if (isTimeout) {
-        const correctOption = document.querySelector(`.option[data-option-id="${question.correctAnswer}"]`);
-        if (correctOption) {
-            correctOption.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-            correctOption.style.borderColor = '#4caf50';
-        }
+        console.log(`Player ${gameState.currentPlayer} ran out of time.`);
     }
 }
 
@@ -678,96 +680,20 @@ function nextQuestion() {
         gameState.timer = null;
     }
     
-    const question = gameState.questions[gameState.currentQuestion];
-    const currentPlayer = gameState.currentPlayer === 1 ? gameState.player1 : gameState.player2;
-    const otherPlayer = gameState.currentPlayer === 1 ? gameState.player2 : gameState.player1;
+    // Always move to next question
+    gameState.currentQuestion++;
     
-    // Check if current player answered correctly
-    if (currentPlayer.hasAnsweredCorrectly) {
-        // Correct answer → move to next question
-        gameState.currentQuestion++;
-        
-        // Check if we've reached the end
-        if (gameState.currentQuestion >= gameState.questions.length) {
-            endGame();
-            return;
-        }
-        
-        // Switch starting player for next question
-        gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
-        
-        // Load next question
-        loadQuestion();
-    } 
-    // Check if current player answered wrong AND other player hasn't attempted yet
-    else if (!currentPlayer.hasAnsweredCorrectly && !otherPlayer.hasAttemptedCurrent) {
-        // Wrong answer, other player can try
-        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-        
-        // Reset the question for the other player
-        resetQuestionForOtherPlayer();
+    // Check if we've reached the end
+    if (gameState.currentQuestion >= gameState.questions.length) {
+        endGame();
+        return;
     }
-    // Both players have attempted and both were wrong
-    else {
-        // Both answered wrong → move to next question
-        gameState.currentQuestion++;
-        
-        // Check if we've reached the end
-        if (gameState.currentQuestion >= gameState.questions.length) {
-            endGame();
-            return;
-        }
-        
-        // Switch starting player for next question
-        gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
-        
-        // Load next question
-        loadQuestion();
-    }
-}
-
-function resetQuestionForOtherPlayer() {
-    const question = gameState.questions[gameState.currentQuestion];
     
-    // Update current turn indicator
-    document.getElementById('player1-turn-indicator').style.display = gameState.currentPlayer === 1 ? 'block' : 'none';
-    document.getElementById('player2-turn-indicator').style.display = gameState.currentPlayer === 2 ? 'block' : 'none';
+    // Switch to other player for next question
+    gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
     
-    // Update player status active class
-    document.getElementById('player1-status').classList.toggle('active', gameState.currentPlayer === 1);
-    document.getElementById('player2-status').classList.toggle('active', gameState.currentPlayer === 2);
-    
-    // Reset option selection for new player
-    gameState.selectedOption = null;
-    
-    // Reset options styling but keep correct answer visible
-    const options = document.querySelectorAll('.option');
-    options.forEach(opt => {
-        opt.classList.remove('selected');
-        opt.style.pointerEvents = 'auto'; // Re-enable clicks
-        
-        // Keep correct answer highlighted
-        if (opt.dataset.optionId === question.correctAnswer) {
-            opt.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-            opt.style.borderColor = '#4caf50';
-        } else {
-            // Reset wrong answers
-            opt.style.backgroundColor = '';
-            opt.style.borderColor = '';
-        }
-    });
-    
-    // Reset UI elements
-    document.getElementById('submit-answer-btn').disabled = true;
-    document.getElementById('submit-answer-btn').style.display = 'block';
-    document.getElementById('next-question-btn').style.display = 'none';
-    
-    // Reset timer
-    gameState.timeRemaining = 30;
-    document.getElementById('time-remaining').textContent = gameState.timeRemaining;
-    
-    // Start timer
-    gameState.timer = setInterval(updateTimer, 1000);
+    // Load next question
+    loadQuestion();
 }
 
 function endGame() {
@@ -868,16 +794,12 @@ function resetGame() {
     gameState.player1 = {
         name: "Player 1",
         score: 0,
-        powerup: null,
-        hasAttemptedCurrent: false,
-        hasAnsweredCorrectly: false
+        powerup: null
     };
     gameState.player2 = {
         name: "Player 2",
         score: 0,
-        powerup: null,
-        hasAttemptedCurrent: false,
-        hasAnsweredCorrectly: false
+        powerup: null
     };
     gameState.currentPlayer = 1;
     gameState.currentQuestion = 0;
@@ -885,6 +807,7 @@ function resetGame() {
     gameState.selectedOption = null;
     gameState.selectedWorksheet = null;
     gameState.currentWorksheetData = null;
+    gameState.availableWorksheets = [];
     
     if (gameState.timer) {
         clearInterval(gameState.timer);
@@ -911,10 +834,6 @@ function playAgain() {
     // Reset scores but keep player names and power-ups
     gameState.player1.score = 0;
     gameState.player2.score = 0;
-    gameState.player1.hasAttemptedCurrent = false;
-    gameState.player2.hasAttemptedCurrent = false;
-    gameState.player1.hasAnsweredCorrectly = false;
-    gameState.player2.hasAnsweredCorrectly = false;
     gameState.currentQuestion = 0;
     gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
     gameState.selectedOption = null;
