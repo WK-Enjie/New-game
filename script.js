@@ -1,4 +1,4 @@
-// Simple game state
+// GAME STATE
 const game = {
     players: [
         { name: "Player 1", color: "#4a6bff", score: 0, powerups: [] },
@@ -10,362 +10,643 @@ const game = {
     selectedOption: null,
     level: null,
     subject: null,
-    pin: null
+    pin: null,
+    jsonFile: null
 };
 
-// Sample questions for different PINs
-const questionBank = {
-    "354011": [
-        { q: "What is the chemical formula for water?", options: ["H2O", "CO2", "O2", "NaCl"], correct: 0, points: 10 },
-        { q: "Who discovered penicillin?", options: ["Marie Curie", "Alexander Fleming", "Albert Einstein", "Isaac Newton"], correct: 1, points: 10 },
-        { q: "What is the atomic number of carbon?", options: ["6", "8", "12", "14"], correct: 0, points: 10 },
-        { q: "Which gas is most abundant in Earth's atmosphere?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 2, points: 10 },
-        { q: "What is the pH of pure water?", options: ["5", "6", "7", "8"], correct: 2, points: 10 }
-    ],
-    "101011": [
-        { q: "What is 5 + 3?", options: ["7", "8", "9", "10"], correct: 1, points: 10 },
-        { q: "How many sides does a triangle have?", options: ["3", "4", "5", "6"], correct: 0, points: 10 },
-        { q: "What is 10 - 4?", options: ["5", "6", "7", "8"], correct: 1, points: 10 },
-        { q: "Which shape is round?", options: ["Square", "Triangle", "Circle", "Rectangle"], correct: 2, points: 10 },
-        { q: "What is 2 × 3?", options: ["5", "6", "7", "8"], correct: 1, points: 10 }
-    ],
-    "default": [
-        { q: "What is 15 + 27?", options: ["32", "42", "52", "62"], correct: 1, points: 10 },
-        { q: "What is the capital of France?", options: ["London", "Berlin", "Paris", "Madrid"], correct: 2, points: 10 },
-        { q: "Who painted the Mona Lisa?", options: ["Van Gogh", "Picasso", "Da Vinci", "Rembrandt"], correct: 2, points: 10 },
-        { q: "What is the largest planet?", options: ["Earth", "Mars", "Jupiter", "Saturn"], correct: 2, points: 10 },
-        { q: "How many continents are there?", options: ["5", "6", "7", "8"], correct: 2, points: 10 }
-    ]
-};
-
-// Chapter data for modal
+// CHAPTER DATA
 const chapters = {
-    primary: {
-        math: ["Numbers to 10", "Number Bonds", "Addition", "Subtraction", "Shapes"],
-        science: ["Living Things", "Plants", "Animals", "Materials", "Weather"]
+    "primary": {
+        "math": ["Numbers to 10", "Number Bonds", "Addition", "Subtraction", "Shapes"],
+        "science": ["Living Things", "Plants", "Animals", "Materials", "Weather"]
     },
-    lower: {
-        math: ["Algebra", "Geometry", "Statistics", "Probability", "Fractions"],
-        science: ["Cells", "Energy", "Forces", "Matter", "Ecosystems"]
+    "lower-secondary": {
+        "math": ["Algebra", "Geometry", "Fractions", "Decimals", "Statistics"],
+        "science": ["Cells", "Energy", "Forces", "Matter", "Ecosystems"]
     },
-    upper: {
-        math: ["Calculus", "Trigonometry", "Vectors", "Complex Numbers", "Statistics"],
-        physics: ["Mechanics", "Waves", "Electricity", "Magnetism", "Thermodynamics"],
-        chemistry: ["Atomic Structure", "Chemical Bonding", "Organic Chemistry", "Acids & Bases", "Electrochemistry"]
+    "upper-secondary": {
+        "math": ["Calculus", "Trigonometry", "Vectors", "Probability", "Statistics"],
+        "combined-physics": ["Measurement", "Kinematics", "Forces", "Energy", "Waves"],
+        "pure-physics": ["Measurement", "Kinematics", "Dynamics", "Waves", "Electricity"],
+        "combined-chemistry": ["Experimental", "Atomic", "Bonding", "Acids", "Periodic"],
+        "pure-chemistry": ["Experimental", "Atomic", "Bonding", "Acids", "Organic"]
     }
 };
 
-// Initialize
+// POWER-UPS
+const powerups = [
+    { id: "increase", name: "+20% Points" },
+    { id: "decrease", name: "-20% Points" },
+    { id: "swap", name: "Swap Scores" },
+    { id: "double", name: "Double Points" }
+];
+
+// INITIALIZE
+document.addEventListener('DOMContentLoaded', init);
+
 function init() {
-    // Load players
-    game.players[0].name = document.getElementById('player1').value;
-    game.players[1].name = document.getElementById('player2').value;
-    game.players[0].color = document.getElementById('color1').value;
-    game.players[1].color = document.getElementById('color2').value;
-    
-    // Update displays
-    document.getElementById('p1name').textContent = game.players[0].name;
-    document.getElementById('p2name').textContent = game.players[1].name;
-    document.getElementById('score1').style.borderColor = game.players[0].color;
-    document.getElementById('score2').style.borderColor = game.players[1].color;
-    
-    // Setup event listeners
-    setupEvents();
-    
-    // Update subjects based on level
-    updateSubjects();
+    console.log("Initializing game...");
+    setupEventListeners();
+    updateSubjectButtons();
+    discoverAvailableWorksheets();
 }
 
-// Setup all event listeners
-function setupEvents() {
+// SETUP EVENT LISTENERS
+function setupEventListeners() {
+    console.log("Setting up event listeners...");
+    
     // Player name changes
-    document.getElementById('player1').addEventListener('input', e => {
-        game.players[0].name = e.target.value || "Player 1";
+    document.getElementById('player1').addEventListener('input', function() {
+        game.players[0].name = this.value || "Player 1";
         document.getElementById('p1name').textContent = game.players[0].name;
+        document.querySelector('#score1 .name').textContent = game.players[0].name;
     });
     
-    document.getElementById('player2').addEventListener('input', e => {
-        game.players[1].name = e.target.value || "Player 2";
+    document.getElementById('player2').addEventListener('input', function() {
+        game.players[1].name = this.value || "Player 2";
         document.getElementById('p2name').textContent = game.players[1].name;
+        document.querySelector('#score2 .name').textContent = game.players[1].name;
     });
     
     // Player color changes
-    document.getElementById('color1').addEventListener('input', e => {
+    document.getElementById('color1').addEventListener('input', function(e) {
         game.players[0].color = e.target.value;
         document.getElementById('score1').style.borderColor = e.target.value;
     });
     
-    document.getElementById('color2').addEventListener('input', e => {
+    document.getElementById('color2').addEventListener('input', function(e) {
         game.players[1].color = e.target.value;
         document.getElementById('score2').style.borderColor = e.target.value;
     });
     
     // Level selection
-    document.querySelectorAll('.level-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
-            e.target.classList.add('selected');
-            game.level = e.target.dataset.level;
-            updateSubjects();
+    document.querySelectorAll('.level-select button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.level-select button').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            game.level = this.dataset.level;
+            updateSubjectButtons();
+            discoverAvailableWorksheets();
         });
     });
     
-    // Chapter list modal
+    // Chapter list button
     document.getElementById('showChapters').addEventListener('click', showChapterList);
-    document.getElementById('closeModal').addEventListener('click', () => {
+    
+    // Modal close button
+    document.querySelector('.close').addEventListener('click', function() {
         document.getElementById('chapterModal').style.display = 'none';
     });
     
-    // Use PIN button
-    document.getElementById('usePin').addEventListener('click', usePin);
-    document.getElementById('pin').addEventListener('keypress', e => {
-        if (e.key === 'Enter') usePin();
+    // Load PIN button
+    document.getElementById('loadPin').addEventListener('click', loadPin);
+    document.getElementById('pin').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') loadPin();
     });
     
-    // Start game
+    // Start game button
     document.getElementById('start').addEventListener('click', startGame);
     
     // Power-up selection
     document.querySelectorAll('.powerup').forEach(p => {
-        p.addEventListener('click', selectPowerup);
+        p.addEventListener('click', function() {
+            const powerupType = this.dataset.type;
+            const playerBox = this.closest('.player-box');
+            const playerIndex = playerBox.querySelector('h3').id === 'p1name' ? 0 : 1;
+            selectPowerup(playerIndex, powerupType, this);
+        });
     });
     
-    // Confirm powerups
-    document.getElementById('confirmPowerups').addEventListener('click', confirmPowerups);
+    // Assign random powerups
+    document.getElementById('assignRandom').addEventListener('click', assignRandomPowerups);
     
-    // Game controls
+    // Start quiz button
+    document.getElementById('startQuiz').addEventListener('click', startQuiz);
+    
+    // Game buttons
     document.getElementById('submit').addEventListener('click', submitAnswer);
     document.getElementById('next').addEventListener('click', nextQuestion);
     
-    // Results screen
+    // Results buttons
     document.getElementById('playAgain').addEventListener('click', playAgain);
     document.getElementById('newGame').addEventListener('click', newGame);
+    
+    // Close modal on outside click
+    window.addEventListener('click', function(e) {
+        if (e.target.id === 'chapterModal') {
+            document.getElementById('chapterModal').style.display = 'none';
+        }
+    });
 }
 
-// Update subjects based on selected level
-function updateSubjects() {
+// UPDATE SUBJECT BUTTONS
+function updateSubjectButtons() {
     const container = document.getElementById('subjects');
     container.innerHTML = '';
     
     if (!game.level) return;
     
-    const subjects = game.level === '1' ? ['Math (0)', 'Science (1)'] :
-                    game.level === '2' ? ['Math (0)', 'Science (1)'] :
-                    ['Math (1)', 'Combined Physics (2)', 'Pure Physics (3)', 
-                     'Combined Chemistry (4)', 'Pure Chemistry (5)'];
+    let subjects = [];
     
-    subjects.forEach((sub, i) => {
-        const btn = document.createElement('button');
-        btn.textContent = sub;
-        btn.dataset.subject = i;
-        btn.addEventListener('click', e => {
+    if (game.level === '1') {
+        subjects = [
+            { id: 'math', name: 'Mathematics (0)', number: 0 },
+            { id: 'science', name: 'Science (1)', number: 1 }
+        ];
+    } else if (game.level === '2') {
+        subjects = [
+            { id: 'math', name: 'Mathematics (0)', number: 0 },
+            { id: 'science', name: 'Science (1)', number: 1 }
+        ];
+    } else if (game.level === '3') {
+        subjects = [
+            { id: 'math', name: 'Mathematics (1)', number: 1 },
+            { id: 'combined-physics', name: 'Combined Physics (2)', number: 2 },
+            { id: 'pure-physics', name: 'Pure Physics (3)', number: 3 },
+            { id: 'combined-chemistry', name: 'Combined Chemistry (4)', number: 4 },
+            { id: 'pure-chemistry', name: 'Pure Chemistry (5)', number: 5 }
+        ];
+    }
+    
+    subjects.forEach(subject => {
+        const button = document.createElement('button');
+        button.textContent = subject.name;
+        button.dataset.subject = subject.id;
+        button.dataset.number = subject.number;
+        
+        button.addEventListener('click', function() {
             document.querySelectorAll('#subjects button').forEach(b => b.classList.remove('selected'));
-            e.target.classList.add('selected');
-            game.subject = e.target.dataset.subject;
+            this.classList.add('selected');
+            game.subject = subject.id;
+            discoverAvailableWorksheets();
         });
-        container.appendChild(btn);
+        
+        container.appendChild(button);
     });
 }
 
-// Show chapter list modal
-function showChapterList() {
-    const list = document.getElementById('chapterList');
-    list.innerHTML = '';
+// DISCOVER AVAILABLE WORKSHEETS (MOCK - In real app, this would scan the server)
+function discoverAvailableWorksheets() {
+    const container = document.getElementById('worksheets');
+    container.innerHTML = '';
     
-    for (const [level, subjects] of Object.entries(chapters)) {
-        for (const [subject, chapterList] of Object.entries(subjects)) {
+    if (!game.level || !game.subject) return;
+    
+    // Get level folder name
+    let levelFolder = '';
+    if (game.level === '1') levelFolder = 'primary';
+    else if (game.level === '2') levelFolder = 'lower-secondary';
+    else if (game.level === '3') levelFolder = 'upper-secondary';
+    
+    // Generate example worksheets based on PIN patterns
+    const examples = generateExampleWorksheets(levelFolder, game.subject);
+    
+    examples.forEach(worksheet => {
+        const item = document.createElement('div');
+        item.className = 'worksheet-item';
+        
+        const name = document.createElement('div');
+        name.className = 'worksheet-name';
+        name.textContent = `PIN: ${worksheet.pin}`;
+        
+        const path = document.createElement('div');
+        path.className = 'worksheet-path';
+        path.textContent = `data/${levelFolder}/${game.subject}/${worksheet.pin}.json`;
+        
+        item.appendChild(name);
+        item.appendChild(path);
+        
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.worksheet-item').forEach(i => i.classList.remove('selected'));
+            this.classList.add('selected');
+            game.pin = worksheet.pin;
+            document.getElementById('pin').value = worksheet.pin;
+            loadPin(); // Auto-load when clicked
+        });
+        
+        container.appendChild(item);
+    });
+}
+
+// GENERATE EXAMPLE WORKSHEETS
+function generateExampleWorksheets(levelFolder, subject) {
+    let examples = [];
+    
+    // Generate a few example PINs based on your structure
+    if (levelFolder === 'primary') {
+        if (subject === 'math') {
+            examples = [
+                { pin: '101011', desc: 'P1 Math Ch1 WS1' },
+                { pin: '101012', desc: 'P1 Math Ch1 WS2' },
+                { pin: '102011', desc: 'P2 Math Ch1 WS1' }
+            ];
+        } else if (subject === 'science') {
+            examples = [
+                { pin: '111011', desc: 'P1 Science Ch1 WS1' },
+                { pin: '112011', desc: 'P2 Science Ch1 WS1' }
+            ];
+        }
+    } else if (levelFolder === 'lower-secondary') {
+        if (subject === 'math') {
+            examples = [
+                { pin: '211011', desc: 'Sec 1 Math Ch1 WS1' },
+                { pin: '211012', desc: 'Sec 1 Math Ch1 WS2' },
+                { pin: '212011', desc: 'Sec 2 Math Ch1 WS1' }
+            ];
+        } else if (subject === 'science') {
+            examples = [
+                { pin: '221011', desc: 'Sec 1 Science Ch1 WS1' },
+                { pin: '222011', desc: 'Sec 2 Science Ch1 WS1' }
+            ];
+        }
+    } else if (levelFolder === 'upper-secondary') {
+        if (subject === 'math') {
+            examples = [
+                { pin: '313011', desc: 'Sec 3 Math Ch1 WS1' },
+                { pin: '313012', desc: 'Sec 3 Math Ch1 WS2' },
+                { pin: '314011', desc: 'Sec 4 Math Ch1 WS1' }
+            ];
+        } else if (subject === 'combined-physics') {
+            examples = [
+                { pin: '323011', desc: 'Sec 3 Combined Physics Ch1 WS1' },
+                { pin: '323012', desc: 'Sec 3 Combined Physics Ch1 WS2' }
+            ];
+        } else if (subject === 'pure-physics') {
+            examples = [
+                { pin: '333011', desc: 'Sec 3 Pure Physics Ch1 WS1' },
+                { pin: '333012', desc: 'Sec 3 Pure Physics Ch1 WS2' }
+            ];
+        } else if (subject === 'combined-chemistry') {
+            examples = [
+                { pin: '343011', desc: 'Sec 3 Combined Chemistry Ch1 WS1' },
+                { pin: '343012', desc: 'Sec 3 Combined Chemistry Ch1 WS2' },
+                { pin: '344091', desc: 'Sec 4 Combined Chemistry Ch9 WS1' },
+                { pin: '344121', desc: 'Sec 4 Combined Chemistry Ch12 WS1' },
+                { pin: '344122', desc: 'Sec 4 Combined Chemistry Ch12 WS2' }
+            ];
+        } else if (subject === 'pure-chemistry') {
+            examples = [
+                { pin: '353011', desc: 'Sec 3 Pure Chemistry Ch1 WS1' },
+                { pin: '353012', desc: 'Sec 3 Pure Chemistry Ch1 WS2' },
+                { pin: '354011', desc: 'Sec 4 Pure Chemistry Ch1 WS1' }
+            ];
+        }
+    }
+    
+    return examples;
+}
+
+// SHOW CHAPTER LIST
+function showChapterList() {
+    const container = document.getElementById('chapterList');
+    container.innerHTML = '';
+    
+    for (const [levelName, subjects] of Object.entries(chapters)) {
+        for (const [subjectName, chapterList] of Object.entries(subjects)) {
             const section = document.createElement('div');
             section.className = 'subject-section';
             
-            const title = document.createElement('h3');
-            title.textContent = `${level.charAt(0).toUpperCase() + level.slice(1)} - ${subject}`;
+            // Get display names
+            let levelDisplay = levelName.replace('-', ' ').toUpperCase();
+            let subjectDisplay = subjectName.replace('-', ' ').toUpperCase();
+            
+            const title = document.createElement('h4');
+            title.textContent = `${levelDisplay} - ${subjectDisplay}`;
             section.appendChild(title);
             
-            const ul = document.createElement('ul');
-            chapterList.forEach((chapter, i) => {
-                const li = document.createElement('li');
-                li.textContent = `Ch ${i + 1}: ${chapter}`;
-                ul.appendChild(li);
+            const list = document.createElement('ul');
+            chapterList.forEach((chapter, index) => {
+                const item = document.createElement('li');
+                item.textContent = `Chapter ${(index + 1).toString().padStart(2, '0')}: ${chapter}`;
+                list.appendChild(item);
             });
-            section.appendChild(ul);
             
-            list.appendChild(section);
+            section.appendChild(list);
+            container.appendChild(section);
         }
     }
     
     document.getElementById('chapterModal').style.display = 'block';
 }
 
-// Use PIN to load questions
-function usePin() {
-    const pin = document.getElementById('pin').value;
-    if (pin.length !== 6 || !/^\d+$/.test(pin)) {
-        alert('Please enter a valid 6-digit PIN');
+// LOAD PIN AND FETCH JSON
+async function loadPin() {
+    const pin = document.getElementById('pin').value.trim();
+    const status = document.getElementById('jsonStatus');
+    
+    if (pin.length !== 6) {
+        status.textContent = "PIN must be 6 digits";
+        status.className = "status error";
+        return;
+    }
+    
+    if (!/^\d+$/.test(pin)) {
+        status.textContent = "PIN must contain only numbers";
+        status.className = "status error";
         return;
     }
     
     game.pin = pin;
-    game.level = pin[0];
-    game.subject = pin[1];
     
-    // Update UI to show selected PIN
-    document.querySelectorAll('.level-btn').forEach(btn => {
+    // Parse PIN
+    const level = pin[0];
+    const subjectNum = parseInt(pin[1]);
+    const grade = pin[2];
+    const chapter = pin.substring(3, 5);
+    const worksheet = pin[5];
+    
+    // Map to folder structure
+    const levelFolder = level === '1' ? 'primary' : 
+                       level === '2' ? 'lower-secondary' : 
+                       'upper-secondary';
+    
+    let subjectFolder = '';
+    if (level === '1' || level === '2') {
+        subjectFolder = subjectNum === 0 ? 'math' : 'science';
+    } else if (level === '3') {
+        if (subjectNum === 1) subjectFolder = 'math';
+        else if (subjectNum === 2) subjectFolder = 'combined-physics';
+        else if (subjectNum === 3) subjectFolder = 'pure-physics';
+        else if (subjectNum === 4) subjectFolder = 'combined-chemistry';
+        else if (subjectNum === 5) subjectFolder = 'pure-chemistry';
+    }
+    
+    // Construct file path
+    const fileName = `${pin}.json`;
+    const filePath = `data/${levelFolder}/${subjectFolder}/${fileName}`;
+    
+    // Update PIN info
+    const pinInfo = document.getElementById('pinInfo');
+    pinInfo.innerHTML = `
+        <strong>PIN:</strong> ${pin}<br>
+        <strong>Level:</strong> ${level === '1' ? 'Primary' : level === '2' ? 'Lower Secondary' : 'Upper Secondary'}<br>
+        <strong>Subject:</strong> ${getSubjectName(subjectFolder)}<br>
+        <strong>Grade:</strong> Sec ${grade}<br>
+        <strong>Chapter:</strong> ${chapter}<br>
+        <strong>Worksheet:</strong> ${worksheet}<br>
+        <strong>File Path:</strong> ${filePath}
+    `;
+    
+    // Try to load JSON file
+    try {
+        status.textContent = `Loading ${fileName}...`;
+        status.className = "status";
+        
+        const response = await fetch(filePath);
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error(`JSON file not found: ${filePath}`);
+            } else {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+        }
+        
+        const jsonData = await response.json();
+        
+        // Validate JSON structure
+        if (!jsonData.questions || !Array.isArray(jsonData.questions) || jsonData.questions.length === 0) {
+            throw new Error("Invalid JSON structure: No questions found");
+        }
+        
+        // Store the questions
+        game.questions = jsonData.questions.map(q => ({
+            q: q.question || q.q || "No question text",
+            options: q.options || ["Option A", "Option B", "Option C", "Option D"],
+            correct: q.correctAnswer || q.correct || 0,
+            points: q.points || 10,
+            explanation: q.explanation || ""
+        }));
+        
+        status.textContent = `✓ Loaded ${game.questions.length} questions from ${fileName}`;
+        status.className = "status success";
+        
+        // Update worksheet info
+        document.getElementById('worksheetInfo').textContent = 
+            `Worksheet: ${pin} - ${getSubjectName(subjectFolder)} Ch${chapter} WS${worksheet}`;
+        
+        // Update level/subject selection UI
+        updateSelectionUI(level, subjectFolder);
+        
+        console.log(`Loaded ${game.questions.length} questions from ${filePath}`);
+        
+    } catch (error) {
+        console.error("Error loading JSON:", error);
+        status.textContent = `✗ Error: ${error.message}`;
+        status.className = "status error";
+        
+        // Fallback to sample questions
+        game.questions = getSampleQuestions();
+        status.textContent += " (Using sample questions instead)";
+        
+        // Still update UI
+        document.getElementById('worksheetInfo').textContent = 
+            `Sample: ${pin} - ${getSubjectName(subjectFolder)}`;
+    }
+}
+
+// UPDATE SELECTION UI
+function updateSelectionUI(level, subject) {
+    // Select level button
+    document.querySelectorAll('.level-select button').forEach(btn => {
         btn.classList.remove('selected');
-        if (btn.dataset.level === game.level) {
+        if (btn.dataset.level === level) {
             btn.classList.add('selected');
         }
     });
     
-    updateSubjects();
-    
-    // Highlight subject based on PIN
+    // Select subject button
     setTimeout(() => {
         document.querySelectorAll('#subjects button').forEach(btn => {
             btn.classList.remove('selected');
-            if (btn.dataset.subject === game.subject) {
+            if (btn.dataset.subject === subject) {
                 btn.classList.add('selected');
             }
         });
     }, 100);
-    
-    alert(`PIN ${pin} loaded!\nLevel: ${game.level}, Subject: ${game.subject}`);
 }
 
-// Start the game
+// GET SAMPLE QUESTIONS (FALLBACK)
+function getSampleQuestions() {
+    return [
+        { q: "Sample Question 1", options: ["A", "B", "C", "D"], correct: 0, points: 10 },
+        { q: "Sample Question 2", options: ["A", "B", "C", "D"], correct: 1, points: 10 },
+        { q: "Sample Question 3", options: ["A", "B", "C", "D"], correct: 2, points: 10 },
+        { q: "Sample Question 4", options: ["A", "B", "C", "D"], correct: 3, points: 10 },
+        { q: "Sample Question 5", options: ["A", "B", "C", "D"], correct: 0, points: 10 }
+    ];
+}
+
+// GET SUBJECT NAME
+function getSubjectName(subject) {
+    const names = {
+        'math': 'Mathematics',
+        'science': 'Science',
+        'combined-physics': 'Combined Physics',
+        'pure-physics': 'Pure Physics',
+        'combined-chemistry': 'Combined Chemistry',
+        'pure-chemistry': 'Pure Chemistry'
+    };
+    return names[subject] || subject;
+}
+
+// START GAME
 function startGame() {
-    if (!game.level || !game.subject) {
-        alert('Please select level and subject or enter a PIN');
+    // Validate
+    if (!game.pin) {
+        alert("Please enter a PIN first");
         return;
     }
     
-    // Load questions based on PIN or use default
-    game.questions = questionBank[game.pin] || questionBank.default;
+    if (game.questions.length === 0) {
+        alert("No questions loaded. Please check the JSON file.");
+        return;
+    }
     
     // Switch to powerup screen
     document.getElementById('setup').classList.remove('active');
     document.getElementById('powerups').classList.add('active');
     
-    // Give random powerups to players
-    assignPowerups();
+    // Assign random powerups
+    assignRandomPowerups();
 }
 
-// Assign random powerups to players
-function assignPowerups() {
-    const powerupTypes = ['increase', 'decrease', 'swap', 'double'];
-    
-    // Clear previous selections
+// ASSIGN RANDOM POWERUPS
+function assignRandomPowerups() {
+    // Clear previous
     game.players[0].powerups = [];
     game.players[1].powerups = [];
     document.querySelectorAll('.powerup').forEach(p => p.classList.remove('selected'));
     document.getElementById('p1selected').innerHTML = '';
     document.getElementById('p2selected').innerHTML = '';
     
-    // Assign 2 random powerups to each player
-    for (let i = 0; i < 2; i++) {
-        const p1 = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
-        const p2 = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
-        
-        game.players[0].powerups.push(p1);
-        game.players[1].powerups.push(p2);
-        
-        // Show in UI (simplified - in real app would mark specific powerups)
-        addPowerupToDisplay('p1selected', p1);
-        addPowerupToDisplay('p2selected', p2);
-    }
-}
-
-function addPowerupToDisplay(elementId, type) {
-    const div = document.getElementById(elementId);
-    const span = document.createElement('span');
-    span.style.display = 'block';
-    span.style.margin = '5px 0';
-    span.style.padding = '5px';
-    span.style.background = '#e0e0e0';
-    span.style.borderRadius = '4px';
-    
-    switch(type) {
-        case 'increase': span.textContent = '+20% Points'; break;
-        case 'decrease': span.textContent = '-20% Points'; break;
-        case 'swap': span.textContent = 'Swap Scores'; break;
-        case 'double': span.textContent = 'Double Points'; break;
+    // Helper function
+    function getRandomPowerups() {
+        const shuffled = [...powerups].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, 2);
     }
     
-    div.appendChild(span);
+    // Assign
+    const p1p = getRandomPowerups();
+    const p2p = getRandomPowerups();
+    
+    game.players[0].powerups = p1p.map(p => p.id);
+    game.players[1].powerups = p2p.map(p => p.id);
+    
+    updatePowerupDisplay();
 }
 
-// Select powerup (for manual selection - not used in auto-assign)
-function selectPowerup(e) {
-    const type = e.target.dataset.type;
-    const player = e.target.closest('.player-powerups').id === 'player1' ? 0 : 1;
+// SELECT POWERUP
+function selectPowerup(playerIndex, powerupType, element) {
+    const player = game.players[playerIndex];
     
-    if (game.players[player].powerups.includes(type)) {
-        // Remove if already selected
-        game.players[player].powerups = game.players[player].powerups.filter(p => p !== type);
-        e.target.classList.remove('selected');
-    } else if (game.players[player].powerups.length < 2) {
-        // Add if less than 2
-        game.players[player].powerups.push(type);
-        e.target.classList.add('selected');
+    if (player.powerups.includes(powerupType)) {
+        player.powerups = player.powerups.filter(p => p !== powerupType);
+        element.classList.remove('selected');
+    } else if (player.powerups.length < 2) {
+        player.powerups.push(powerupType);
+        element.classList.add('selected');
+    } else {
+        alert(`${player.name} can only select 2 powerups!`);
+        return;
     }
     
     updatePowerupDisplay();
 }
 
+// UPDATE POWERUP DISPLAY
 function updatePowerupDisplay() {
-    // Simplified - would update visual display
+    document.getElementById('p1selected').innerHTML = '';
+    document.getElementById('p2selected').innerHTML = '';
+    
+    // Player 1
+    game.players[0].powerups.forEach(powerupId => {
+        const powerup = powerups.find(p => p.id === powerupId);
+        if (powerup) {
+            const div = document.createElement('div');
+            div.textContent = powerup.name;
+            div.style.cssText = 'margin: 5px 0; padding: 8px; background: #e9ecef; border-radius: 4px;';
+            document.getElementById('p1selected').appendChild(div);
+        }
+    });
+    
+    // Player 2
+    game.players[1].powerups.forEach(powerupId => {
+        const powerup = powerups.find(p => p.id === powerupId);
+        if (powerup) {
+            const div = document.createElement('div');
+            div.textContent = powerup.name;
+            div.style.cssText = 'margin: 5px 0; padding: 8px; background: #e9ecef; border-radius: 4px;';
+            document.getElementById('p2selected').appendChild(div);
+        }
+    });
 }
 
-// Confirm powerups and start quiz
-function confirmPowerups() {
-    document.getElementById('powerups').classList.remove('active');
-    document.getElementById('game').classList.add('active');
+// START QUIZ
+function startQuiz() {
+    if (game.players[0].powerups.length !== 2 || game.players[1].powerups.length !== 2) {
+        alert("Each player must have 2 powerups selected!");
+        return;
+    }
     
     // Reset game state
     game.currentPlayer = 0;
     game.currentQuestion = 0;
     game.players[0].score = 0;
     game.players[1].score = 0;
+    game.selectedOption = null;
     
+    // Switch to game screen
+    document.getElementById('powerups').classList.remove('active');
+    document.getElementById('game').classList.add('active');
+    
+    // Load first question
     loadQuestion();
 }
 
-// Load current question
+// LOAD QUESTION
 function loadQuestion() {
     const q = game.questions[game.currentQuestion];
     
+    // Update UI
     document.getElementById('qNum').textContent = game.currentQuestion + 1;
     document.getElementById('qTotal').textContent = game.questions.length;
     document.getElementById('question').textContent = q.q;
     
-    const options = document.getElementById('options');
-    options.innerHTML = '';
+    // Update options
+    const optionsContainer = document.getElementById('options');
+    optionsContainer.innerHTML = '';
     
-    q.options.forEach((opt, i) => {
-        const div = document.createElement('div');
-        div.className = 'option';
-        div.textContent = opt;
-        div.dataset.index = i;
-        div.addEventListener('click', () => selectOption(div, i));
-        options.appendChild(div);
+    q.options.forEach((option, index) => {
+        const optionElement = document.createElement('div');
+        optionElement.className = 'option';
+        optionElement.textContent = option;
+        optionElement.dataset.index = index;
+        
+        optionElement.addEventListener('click', function() {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            game.selectedOption = index;
+        });
+        
+        optionsContainer.appendChild(optionElement);
     });
     
-    document.getElementById('next').style.display = 'none';
-    document.getElementById('submit').style.display = 'block';
-    document.getElementById('feedback').textContent = '';
-    
+    // Update game state
     updateScores();
+    updateTurnInfo();
+    
+    // Reset buttons
+    document.getElementById('submit').style.display = 'block';
+    document.getElementById('next').style.display = 'none';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = '';
 }
 
-function selectOption(element, index) {
-    document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-    element.classList.add('selected');
-    game.selectedOption = index;
-}
-
-// Submit answer
+// SUBMIT ANSWER
 function submitAnswer() {
     if (game.selectedOption === null) {
-        alert('Please select an answer!');
+        alert("Please select an answer!");
         return;
     }
     
@@ -376,29 +657,31 @@ function submitAnswer() {
     if (isCorrect) {
         game.players[game.currentPlayer].score += q.points;
         document.getElementById('feedback').textContent = `Correct! +${q.points} points`;
-        document.getElementById('feedback').style.color = '#4CAF50';
+        document.getElementById('feedback').className = 'correct';
     } else {
-        document.getElementById('feedback').textContent = `Wrong! Correct answer: ${q.options[q.correct]}`;
-        document.getElementById('feedback').style.color = '#f44336';
+        document.getElementById('feedback').textContent = "Incorrect!";
+        document.getElementById('feedback').className = 'incorrect';
     }
     
-    // Highlight correct/wrong answers
-    document.querySelectorAll('.option').forEach((opt, i) => {
-        if (i === q.correct) {
+    // Highlight answers
+    document.querySelectorAll('.option').forEach((opt, index) => {
+        opt.style.pointerEvents = 'none';
+        if (index === q.correct) {
             opt.classList.add('correct');
-        } else if (i === game.selectedOption && !isCorrect) {
+        } else if (index === game.selectedOption && !isCorrect) {
             opt.classList.add('wrong');
         }
-        opt.style.pointerEvents = 'none';
     });
     
+    // Update UI
+    updateScores();
+    
+    // Show next button
     document.getElementById('submit').style.display = 'none';
     document.getElementById('next').style.display = 'block';
-    
-    updateScores();
 }
 
-// Next question
+// NEXT QUESTION
 function nextQuestion() {
     game.currentQuestion++;
     game.currentPlayer = game.currentPlayer === 0 ? 1 : 0;
@@ -411,28 +694,33 @@ function nextQuestion() {
     }
 }
 
-// Update scores display
+// UPDATE SCORES
 function updateScores() {
-    document.getElementById('score1').querySelector('.name').textContent = game.players[0].name;
-    document.getElementById('score1').querySelector('.points').textContent = game.players[0].score;
+    // Player 1
+    document.querySelector('#score1 .points').textContent = game.players[0].score;
+    document.querySelector('#score1 .name').textContent = game.players[0].name;
+    document.getElementById('score1').style.borderColor = game.players[0].color;
     
-    document.getElementById('score2').querySelector('.name').textContent = game.players[1].name;
-    document.getElementById('score2').querySelector('.points').textContent = game.players[1].score;
+    // Player 2
+    document.querySelector('#score2 .points').textContent = game.players[1].score;
+    document.querySelector('#score2 .name').textContent = game.players[1].name;
+    document.getElementById('score2').style.borderColor = game.players[1].color;
     
     // Highlight current player
     document.getElementById('score1').classList.toggle('active', game.currentPlayer === 0);
     document.getElementById('score2').classList.toggle('active', game.currentPlayer === 1);
-    
-    document.getElementById('currentPlayer').textContent = game.players[game.currentPlayer].name;
-    document.getElementById('currentPlayer').style.color = game.players[game.currentPlayer].color;
 }
 
-// End game and show results
+// UPDATE TURN INFO
+function updateTurnInfo() {
+    const player = game.players[game.currentPlayer];
+    document.getElementById('turnInfo').textContent = `${player.name}'s Turn`;
+    document.getElementById('turnInfo').style.color = player.color;
+}
+
+// END GAME
 function endGame() {
-    document.getElementById('game').classList.remove('active');
-    document.getElementById('results').classList.add('active');
-    
-    // Determine winner and loser
+    // Determine winner
     let winner, loser;
     if (game.players[0].score > game.players[1].score) {
         winner = game.players[0];
@@ -441,12 +729,12 @@ function endGame() {
         winner = game.players[1];
         loser = game.players[0];
     } else {
-        // Tie
-        winner = game.players[0];
-        loser = game.players[1];
+        const rand = Math.random();
+        winner = rand < 0.5 ? game.players[0] : game.players[1];
+        loser = winner === game.players[0] ? game.players[1] : game.players[0];
     }
     
-    // Display final scores
+    // Update results display
     document.getElementById('winnerName').textContent = winner.name;
     document.getElementById('loserName').textContent = loser.name;
     document.getElementById('winnerScore').textContent = winner.score;
@@ -454,18 +742,22 @@ function endGame() {
     
     // Apply final powerup
     applyFinalPowerup(winner, loser);
+    
+    // Switch to results screen
+    document.getElementById('game').classList.remove('active');
+    document.getElementById('results').classList.add('active');
 }
 
-// Apply final powerup
+// APPLY FINAL POWERUP
 function applyFinalPowerup(winner, loser) {
-    // Randomly select one of loser's powerups
-    const powerup = loser.powerups[Math.floor(Math.random() * loser.powerups.length)];
+    const randomIndex = Math.floor(Math.random() * loser.powerups.length);
+    const powerupId = loser.powerups[randomIndex];
     
     let newWinnerScore = winner.score;
     let newLoserScore = loser.score;
     let description = '';
     
-    switch(powerup) {
+    switch(powerupId) {
         case 'increase':
             newLoserScore = Math.floor(loser.score * 1.2);
             description = `${loser.name}'s score increased by 20%!`;
@@ -486,32 +778,34 @@ function applyFinalPowerup(winner, loser) {
     }
     
     // Update display
-    document.getElementById('powerupDesc').textContent = description;
+    document.getElementById('powerupText').textContent = description;
     document.getElementById('newWinner').textContent = winner.name;
     document.getElementById('newLoser').textContent = loser.name;
     document.getElementById('newWinnerScore').textContent = newWinnerScore;
     document.getElementById('newLoserScore').textContent = newLoserScore;
 }
 
-// Play again
+// PLAY AGAIN
 function playAgain() {
     document.getElementById('results').classList.remove('active');
     document.getElementById('powerups').classList.add('active');
-    assignPowerups();
+    assignRandomPowerups();
 }
 
-// New game
+// NEW GAME
 function newGame() {
     document.getElementById('results').classList.remove('active');
     document.getElementById('setup').classList.add('active');
     
-    // Reset PIN
-    document.getElementById('pin').value = '';
-    game.pin = null;
+    // Reset
     game.level = null;
     game.subject = null;
+    game.pin = null;
     document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+    document.getElementById('pin').value = '';
+    document.getElementById('pinInfo').innerHTML = '';
+    document.getElementById('jsonStatus').textContent = '';
+    
+    updateSubjectButtons();
+    discoverAvailableWorksheets();
 }
-
-// Start everything when page loads
-window.addEventListener('DOMContentLoaded', init);

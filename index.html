@@ -3,169 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Game</title>
+    <title>Quiz Game - JSON Loader</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-gamepad"></i> Quiz Game</h1>
+        <h1><i class="fas fa-gamepad"></i> JSON Quiz Game</h1>
         
         <!-- Setup Screen -->
         <div id="setup" class="screen active">
-            <h2><i class="fas fa-users"></i> Players</h2>
+            <h2>Player Setup</h2>
             <div class="players">
                 <div class="player">
-                    <input type="text" id="player1" value="Player 1" placeholder="Player 1 Name">
+                    <label>Player 1</label>
+                    <input type="text" id="player1" value="Player 1">
                     <input type="color" id="color1" value="#4a6bff">
                 </div>
                 <div class="player">
-                    <input type="text" id="player2" value="Player 2" placeholder="Player 2 Name">
+                    <label>Player 2</label>
+                    <input type="text" id="player2" value="Player 2">
                     <input type="color" id="color2" value="#ff6b4a">
                 </div>
             </div>
             
             <button id="showChapters" class="btn">
-                <i class="fas fa-list"></i> Show Chapter List
+                <i class="fas fa-list"></i> View Chapter List
             </button>
             
-            <h2><i class="fas fa-book"></i> Select Content</h2>
+            <h2>Select Worksheet</h2>
             
-            <div class="selection">
+            <div class="level-select">
                 <h3>Level:</h3>
-                <div class="btn-group">
-                    <button class="level-btn" data-level="1">Primary (1)</button>
-                    <button class="level-btn" data-level="2">Lower Sec (2)</button>
-                    <button class="level-btn" data-level="3">Upper Sec (3)</button>
+                <div class="buttons">
+                    <button data-level="1">Primary (1)</button>
+                    <button data-level="2">Lower Secondary (2)</button>
+                    <button data-level="3">Upper Secondary (3)</button>
                 </div>
-                
-                <h3>Subject:</h3>
-                <div id="subjects" class="btn-group">
-                    <!-- Will be filled by JS -->
-                </div>
-                
-                <h3>Enter PIN:</h3>
-                <div class="pin-input">
-                    <input type="text" id="pin" placeholder="e.g., 354011" maxlength="6">
-                    <button id="usePin" class="btn-small">Use PIN</button>
-                </div>
-                <p class="hint">PIN format: Level(1)Subject(5)Grade(4)Chapter(01)Worksheet(1)</p>
             </div>
             
-            <button id="start" class="btn primary">
-                <i class="fas fa-play"></i> Start Game
-            </button>
+            <div class="subject-select">
+                <h3>Subject:</h3>
+                <div id="subjects" class="buttons">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="pin-section">
+                <h3>Enter 6-Digit PIN:</h3>
+                <div class="pin-input">
+                    <input type="text" id="pin" placeholder="354011" maxlength="6">
+                    <button id="loadPin">Load JSON</button>
+                </div>
+                <p class="hint">Example: 354011 = Upper Sec(3), Pure Chemistry(5), Sec 4(4), Ch 1(01), WS 1(1)</p>
+                <div id="pinInfo"></div>
+                <div id="jsonStatus" class="status"></div>
+            </div>
+            
+            <div class="file-list" id="fileList">
+                <h3>Available Worksheets:</h3>
+                <div id="worksheets"></div>
+            </div>
+            
+            <button id="start" class="btn primary">Start Game</button>
         </div>
         
         <!-- Power-up Screen -->
         <div id="powerups" class="screen">
-            <h2><i class="fas fa-bolt"></i> Select Power-ups</h2>
+            <h2>Power-up Selection</h2>
+            
             <div class="powerup-container">
-                <div class="player-powerups">
+                <div class="player-box">
                     <h3 id="p1name">Player 1</h3>
-                    <div class="powerup-choices">
+                    <div class="powerup-grid">
                         <div class="powerup" data-type="increase">+20%</div>
                         <div class="powerup" data-type="decrease">-20%</div>
                         <div class="powerup" data-type="swap">Swap</div>
                         <div class="powerup" data-type="double">2x</div>
                     </div>
-                    <div class="selected">
+                    <div class="selected-powerups">
                         <h4>Selected:</h4>
                         <div id="p1selected"></div>
                     </div>
                 </div>
                 
-                <div class="player-powerups">
+                <div class="player-box">
                     <h3 id="p2name">Player 2</h3>
-                    <div class="powerup-choices">
+                    <div class="powerup-grid">
                         <div class="powerup" data-type="increase">+20%</div>
                         <div class="powerup" data-type="decrease">-20%</div>
                         <div class="powerup" data-type="swap">Swap</div>
                         <div class="powerup" data-type="double">2x</div>
                     </div>
-                    <div class="selected">
+                    <div class="selected-powerups">
                         <h4>Selected:</h4>
                         <div id="p2selected"></div>
                     </div>
                 </div>
             </div>
-            <button id="confirmPowerups" class="btn primary">
-                <i class="fas fa-check"></i> Start Quiz
-            </button>
+            
+            <button id="assignRandom" class="btn">Auto Assign</button>
+            <button id="startQuiz" class="btn primary">Start Quiz</button>
         </div>
         
         <!-- Game Screen -->
         <div id="game" class="screen">
-            <div class="scoreboard">
-                <div class="score" id="score1" style="border-color: #4a6bff;">
-                    <span class="name">Player 1</span>
-                    <span class="points">0</span>
-                </div>
-                <div class="vs">VS</div>
-                <div class="score" id="score2" style="border-color: #ff6b4a;">
-                    <span class="name">Player 2</span>
-                    <span class="points">0</span>
+            <div class="game-header">
+                <div class="worksheet-info" id="worksheetInfo">Loading...</div>
+                <div class="score-board">
+                    <div class="score active" id="score1">
+                        <div class="name">Player 1</div>
+                        <div class="points">0</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="score" id="score2">
+                        <div class="name">Player 2</div>
+                        <div class="points">0</div>
+                    </div>
                 </div>
             </div>
             
-            <div class="current-turn">
-                Current: <span id="currentPlayer">Player 1</span>
-            </div>
+            <div class="turn-info" id="turnInfo">Player 1's Turn</div>
             
             <div class="question-box">
-                <div class="q-number">Q<span id="qNum">1</span>/<span id="qTotal">5</span></div>
-                <div class="question" id="question">What is 2 + 2?</div>
+                <div class="question-number">Question <span id="qNum">1</span>/<span id="qTotal">0</span></div>
+                <div class="question" id="question">Loading question...</div>
                 <div class="options" id="options">
-                    <div class="option">3</div>
-                    <div class="option">4</div>
-                    <div class="option">5</div>
-                    <div class="option">6</div>
+                    <!-- Filled by JavaScript -->
                 </div>
             </div>
             
             <div class="controls">
-                <button id="submit" class="btn primary">
-                    <i class="fas fa-paper-plane"></i> Submit
-                </button>
-                <button id="next" class="btn">
-                    <i class="fas fa-forward"></i> Next
-                </button>
+                <button id="submit" class="btn primary">Submit</button>
+                <button id="next" class="btn">Next</button>
             </div>
             
-            <div id="feedback"></div>
+            <div class="feedback" id="feedback"></div>
         </div>
         
         <!-- Results Screen -->
         <div id="results" class="screen">
-            <h2><i class="fas fa-trophy"></i> Game Over!</h2>
+            <h2>Game Over!</h2>
             
-            <div class="final-scores">
-                <div class="final winner">
+            <div class="results-container">
+                <div class="winner-box">
                     <h3 id="winnerName">Player 1</h3>
-                    <div class="final-score" id="winnerScore">100</div>
+                    <div class="final-score" id="winnerScore">0</div>
                 </div>
-                <div class="final">
+                
+                <div class="loser-box">
                     <h3 id="loserName">Player 2</h3>
-                    <div class="final-score" id="loserScore">80</div>
+                    <div class="final-score" id="loserScore">0</div>
                 </div>
             </div>
             
             <div class="powerup-result">
-                <h3><i class="fas fa-bolt"></i> Final Power-up</h3>
-                <p id="powerupDesc">Loser's -20% applied!</p>
-                <div class="updated">
-                    <div><span id="newWinner">Player 1</span>: <span id="newWinnerScore">100</span></div>
-                    <div><span id="newLoser">Player 2</span>: <span id="newLoserScore">64</span></div>
+                <h3>Final Power-up</h3>
+                <p id="powerupText">Applying power-up...</p>
+                <div class="updated-scores">
+                    <div><span id="newWinner">Player 1</span>: <span id="newWinnerScore">0</span></div>
+                    <div><span id="newLoser">Player 2</span>: <span id="newLoserScore">0</span></div>
                 </div>
             </div>
             
             <div class="controls">
-                <button id="playAgain" class="btn primary">
-                    <i class="fas fa-redo"></i> Play Again
-                </button>
-                <button id="newGame" class="btn">
-                    <i class="fas fa-home"></i> New Game
-                </button>
+                <button id="playAgain" class="btn primary">Play Again</button>
+                <button id="newGame" class="btn">New Game</button>
             </div>
         </div>
     </div>
@@ -174,8 +177,8 @@
     <div id="chapterModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-book-open"></i> Chapter List</h2>
-                <button id="closeModal" class="close">&times;</button>
+                <h3>Chapter List</h3>
+                <button class="close">&times;</button>
             </div>
             <div class="modal-body" id="chapterList">
                 <!-- Filled by JavaScript -->
