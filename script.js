@@ -47,61 +47,6 @@ const powerUps = {
     switch: { name: "Switch Scores", multiplier: 0, icon: "fas fa-exchange-alt" }
 };
 
-// Demo worksheet data for testing
-const demoWorksheetData = {
-    "code": "344122",
-    "title": "Sec 4 Combined Chemistry - Chapter 12: Reactivity Series (Worksheet 2)",
-    "subject": "Combined Chemistry",
-    "level": "Upper Secondary",
-    "topic": "Chapter 12: Metals and Reactivity Series",
-    "difficulty": "Intermediate",
-    "author": "Chemistry Department",
-    "created": "2024-01-25",
-    "description": "Second worksheet on reactivity series, displacement reactions, and corrosion of iron.",
-    "questions": [
-        {
-            "id": 1,
-            "question": "Which metal reacts most vigorously with dilute sulfuric acid?",
-            "options": ["Magnesium", "Zinc", "Iron", "Copper"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Magnesium is highest in the reactivity series among these options, so it reacts most vigorously."
-        },
-        {
-            "id": 2,
-            "question": "Which metal will NOT displace hydrogen from dilute hydrochloric acid?",
-            "options": ["Zinc", "Iron", "Copper", "Magnesium"],
-            "correctAnswer": 2,
-            "points": 5,
-            "explanation": "Copper is below hydrogen in the reactivity series, so it cannot displace hydrogen from acids."
-        },
-        {
-            "id": 3,
-            "question": "What happens when iron is placed in copper sulfate solution?",
-            "options": ["Iron becomes coated with copper", "Copper becomes coated with iron", "No visible change", "The solution turns green"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Iron is more reactive than copper, so it displaces copper from the solution, forming a copper coating."
-        },
-        {
-            "id": 4,
-            "question": "Which metal reacts with cold water to form a hydroxide and hydrogen gas?",
-            "options": ["Sodium", "Iron", "Copper", "Silver"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Sodium reacts vigorously with cold water to form sodium hydroxide and hydrogen gas."
-        },
-        {
-            "id": 5,
-            "question": "What is the correct order of reactivity (most reactive first)?",
-            "options": ["K > Na > Ca > Mg", "Mg > Ca > Na > K", "Ca > Mg > K > Na", "Na > K > Mg > Ca"],
-            "correctAnswer": 0,
-            "points": 5,
-            "explanation": "Potassium (K) is most reactive, followed by sodium (Na), then calcium (Ca), then magnesium (Mg)."
-        }
-    ]
-};
-
 // DOM Elements
 const screens = {
     setup: document.getElementById('setup-screen'),
@@ -417,41 +362,54 @@ async function loadWorksheetFromFile() {
 }
 
 async function loadDemoWorksheet() {
-    // Use demo data
-    const worksheetData = demoWorksheetData;
-    
-    // Convert to game format
-    gameState.questions = worksheetData.questions.map(q => ({
-        id: q.id,
-        text: q.question,
-        options: q.options.map((opt, index) => ({
-            id: String.fromCharCode(65 + index),
-            text: opt
-        })),
-        correctAnswer: String.fromCharCode(65 + q.correctAnswer),
-        points: q.points || 10,
-        explanation: q.explanation || "No explanation provided."
-    }));
-    
-    // Add more demo questions if needed
-    while (gameState.questions.length < 5) {
-        const id = gameState.questions.length + 1;
-        gameState.questions.push({
-            id: id,
-            text: `Demo Question ${id}: What is the correct answer?`,
+    // Create simple demo questions
+    gameState.questions = [
+        {
+            id: 1,
+            text: "What is 5 + 7?",
             options: [
-                { id: 'A', text: "Option A" },
-                { id: 'B', text: "Option B" },
-                { id: 'C', text: "Option C" },
-                { id: 'D', text: "Option D" }
+                { id: 'A', text: "10" },
+                { id: 'B', text: "11" },
+                { id: 'C', text: "12" },
+                { id: 'D', text: "13" }
             ],
-            correctAnswer: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)],
+            correctAnswer: 'C',
             points: 5,
-            explanation: "This is a demo question explanation."
-        });
-    }
+            explanation: "5 + 7 = 12"
+        },
+        {
+            id: 2,
+            text: "What is the capital of France?",
+            options: [
+                { id: 'A', text: "London" },
+                { id: 'B', text: "Berlin" },
+                { id: 'C', text: "Paris" },
+                { id: 'D', text: "Madrid" }
+            ],
+            correctAnswer: 'C',
+            points: 5,
+            explanation: "Paris is the capital of France"
+        },
+        {
+            id: 3,
+            text: "What is H₂O?",
+            options: [
+                { id: 'A', text: "Oxygen" },
+                { id: 'B', text: "Hydrogen" },
+                { id: 'C', text: "Carbon Dioxide" },
+                { id: 'D', text: "Water" }
+            ],
+            correctAnswer: 'D',
+            points: 5,
+            explanation: "H₂O is the chemical formula for water"
+        }
+    ];
     
-    gameState.currentWorksheetData = worksheetData;
+    gameState.currentWorksheetData = {
+        title: "Demo Worksheet",
+        subject: "General Knowledge"
+    };
+    
     console.log("Using demo worksheet with", gameState.questions.length, "questions");
 }
 
@@ -516,9 +474,9 @@ function startQuiz() {
     document.getElementById('player2-powerup-name').textContent = powerUps[gameState.player2.powerup]?.name || "None";
     
     // Update worksheet name
-    const worksheetData = gameState.currentWorksheetData || demoWorksheetData;
-    document.getElementById('current-worksheet-name').textContent = worksheetData.title || "Worksheet Challenge";
-    document.getElementById('results-worksheet-name').textContent = worksheetData.title || "Worksheet Challenge";
+    const worksheetData = gameState.currentWorksheetData;
+    document.getElementById('current-worksheet-name').textContent = worksheetData?.title || "Worksheet Challenge";
+    document.getElementById('results-worksheet-name').textContent = worksheetData?.title || "Worksheet Challenge";
     
     // Reset game state
     gameState.currentQuestion = 0;
@@ -537,6 +495,12 @@ function startQuiz() {
 }
 
 function loadQuestion() {
+    // Clear any existing timer
+    if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+    }
+    
     const question = gameState.questions[gameState.currentQuestion];
     
     if (!question) {
@@ -585,6 +549,7 @@ function loadQuestion() {
     // Reset selected option
     gameState.selectedOption = null;
     document.getElementById('submit-answer-btn').disabled = true;
+    document.getElementById('submit-answer-btn').style.display = 'block';
     document.getElementById('next-question-btn').style.display = 'none';
     
     // Reset timer
@@ -592,7 +557,6 @@ function loadQuestion() {
     document.getElementById('time-remaining').textContent = gameState.timeRemaining;
     
     // Start timer
-    if (gameState.timer) clearInterval(gameState.timer);
     gameState.timer = setInterval(updateTimer, 1000);
 }
 
@@ -616,13 +580,16 @@ function updateTimer() {
     
     if (gameState.timeRemaining <= 0) {
         clearInterval(gameState.timer);
-        // Auto-submit with no answer (wrong)
-        submitAnswer(true);
+        submitAnswer(true); // Auto-submit when time runs out
     }
 }
 
 function submitAnswer(isTimeout = false) {
-    clearInterval(gameState.timer);
+    // Stop the timer
+    if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+    }
     
     const question = gameState.questions[gameState.currentQuestion];
     const isCorrect = !isTimeout && gameState.selectedOption === question.correctAnswer;
@@ -631,60 +598,73 @@ function submitAnswer(isTimeout = false) {
     // Mark player as having answered
     currentPlayer.hasAnswered = true;
     
-    // FIX: This is where score should be updated
+    // Give points if correct
     if (isCorrect) {
-        // Add points - FIXED
         currentPlayer.score += question.points;
-        console.log(`Player ${gameState.currentPlayer} scored ${question.points} points. Total: ${currentPlayer.score}`);
-    }
-    
-    // Show feedback
-    if (isCorrect) {
-        // Show correct feedback
-        const correctOption = document.querySelector(`.option[data-option-id="${question.correctAnswer}"]`);
-        correctOption.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-        correctOption.style.borderColor = '#4caf50';
+        console.log(`Player ${gameState.currentPlayer} scored ${question.points} points! Total: ${currentPlayer.score}`);
         
-        // Update score display - FIXED
+        // Update score display immediately
         if (gameState.currentPlayer === 1) {
             document.getElementById('player1-score').textContent = gameState.player1.score;
         } else {
             document.getElementById('player2-score').textContent = gameState.player2.score;
         }
-    } else if (!isTimeout) {
-        // Show incorrect feedback
-        const selectedOption = document.querySelector(`.option[data-option-id="${gameState.selectedOption}"]`);
-        if (selectedOption) {
-            selectedOption.style.backgroundColor = 'rgba(244, 67, 54, 0.3)';
-            selectedOption.style.borderColor = '#f44336';
-        }
-        
-        // Show correct answer
-        const correctOption = document.querySelector(`.option[data-option-id="${question.correctAnswer}"]`);
-        correctOption.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-        correctOption.style.borderColor = '#4caf50';
     }
     
-    // Disable all options
-    document.querySelectorAll('.option').forEach(opt => {
-        opt.style.pointerEvents = 'none';
+    // Show feedback
+    const options = document.querySelectorAll('.option');
+    options.forEach(opt => {
+        opt.style.pointerEvents = 'none'; // Disable further clicks
+        
+        if (opt.dataset.optionId === question.correctAnswer) {
+            // Highlight correct answer in green
+            opt.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+            opt.style.borderColor = '#4caf50';
+        } else if (opt.dataset.optionId === gameState.selectedOption && !isCorrect && !isTimeout) {
+            // Highlight wrong answer in red (if user selected wrong answer)
+            opt.style.backgroundColor = 'rgba(244, 67, 54, 0.3)';
+            opt.style.borderColor = '#f44336';
+        }
     });
     
-    // Show next question button
+    // Show "Next Question" button immediately
     document.getElementById('submit-answer-btn').style.display = 'none';
     document.getElementById('next-question-btn').style.display = 'block';
+    
+    // If timeout, also show which was the correct answer
+    if (isTimeout) {
+        const correctOption = document.querySelector(`.option[data-option-id="${question.correctAnswer}"]`);
+        if (correctOption) {
+            correctOption.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+            correctOption.style.borderColor = '#4caf50';
+        }
+    }
 }
 
 function nextQuestion() {
-    // FIXED: Simplified logic for moving to next question
+    // Clear timer
+    if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+    }
+    
+    // Check if both players have answered
     if (gameState.player1.hasAnswered && gameState.player2.hasAnswered) {
-        // Both players have answered this question
+        // Both players answered this question
         gameState.currentQuestion++;
-        gameState.player1.hasAnswered = false;
-        gameState.player2.hasAnswered = false;
+        
+        // Check if we've reached the end
+        if (gameState.currentQuestion >= gameState.questions.length) {
+            endGame();
+            return;
+        }
         
         // Reset for next question
+        gameState.player1.hasAnswered = false;
+        gameState.player2.hasAnswered = false;
         gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
+        
+        // Load next question
         loadQuestion();
     } else {
         // Switch to other player for same question
@@ -694,6 +674,12 @@ function nextQuestion() {
 }
 
 function loadQuestionForOtherPlayer() {
+    // Clear timer
+    if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+    }
+    
     // Load the same question for the other player
     const question = gameState.questions[gameState.currentQuestion];
     
@@ -708,13 +694,19 @@ function loadQuestionForOtherPlayer() {
     // Reset option selection for new player
     gameState.selectedOption = null;
     
-    // Reset options styling
+    // Reset options styling but keep correct/wrong answers visible
     const options = document.querySelectorAll('.option');
     options.forEach(opt => {
         opt.classList.remove('selected');
-        opt.style.backgroundColor = '';
-        opt.style.borderColor = '';
-        opt.style.pointerEvents = 'auto';
+        opt.style.pointerEvents = 'auto'; // Re-enable clicks
+        
+        // Only reset border color, keep background color for feedback
+        const currentBg = opt.style.backgroundColor;
+        if (!currentBg.includes('76, 175, 80') && !currentBg.includes('244, 67, 54')) {
+            // If not green (correct) or red (wrong), reset styling
+            opt.style.backgroundColor = '';
+            opt.style.borderColor = '';
+        }
     });
     
     // Reset UI elements
@@ -727,12 +719,15 @@ function loadQuestionForOtherPlayer() {
     document.getElementById('time-remaining').textContent = gameState.timeRemaining;
     
     // Start timer
-    if (gameState.timer) clearInterval(gameState.timer);
     gameState.timer = setInterval(updateTimer, 1000);
 }
 
 function endGame() {
-    clearInterval(gameState.timer);
+    // Clear timer
+    if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+    }
     
     // Calculate final scores with power-ups
     let player1FinalScore = gameState.player1.score;
