@@ -4,13 +4,15 @@ const gameState = {
         name: "Player 1",
         score: 0,
         powerup: null,
-        hasAnswered: false
+        hasAnswered: false,
+        answers: [] // Track which questions player has answered
     },
     player2: {
         name: "Player 2",
         score: 0,
         powerup: null,
-        hasAnswered: false
+        hasAnswered: false,
+        answers: [] // Track which questions player has answered
     },
     currentPlayer: 1,
     currentQuestion: 0,
@@ -127,7 +129,9 @@ function initializeEventListeners() {
     });
     
     // Quiz controls
-    document.getElementById('submit-answer-btn').addEventListener('click', submitAnswer);
+    document.getElementById('submit-answer-btn').addEventListener('click', () => {
+        submitAnswer(false);
+    });
     document.getElementById('next-question-btn').addEventListener('click', nextQuestion);
     
     // Results screen buttons
@@ -467,6 +471,10 @@ function checkPowerupSelection() {
 }
 
 function startQuiz() {
+    // Reset answer tracking
+    gameState.player1.answers = [];
+    gameState.player2.answers = [];
+    
     // Set up quiz screen
     document.getElementById('quiz-player1-name').textContent = gameState.player1.name;
     document.getElementById('quiz-player2-name').textContent = gameState.player2.name;
@@ -585,7 +593,7 @@ function updateTimer() {
 }
 
 function submitAnswer(isTimeout = false) {
-    // Stop the timer
+    // Stop the timer immediately
     if (gameState.timer) {
         clearInterval(gameState.timer);
         gameState.timer = null;
@@ -595,10 +603,17 @@ function submitAnswer(isTimeout = false) {
     const isCorrect = !isTimeout && gameState.selectedOption === question.correctAnswer;
     const currentPlayer = gameState.currentPlayer === 1 ? gameState.player1 : gameState.player2;
     
-    // Mark player as having answered
+    // Mark player as having answered THIS QUESTION
     currentPlayer.hasAnswered = true;
     
-    // Give points if correct
+    // Track that this player has answered this specific question
+    if (gameState.currentPlayer === 1) {
+        gameState.player1.answers.push(gameState.currentQuestion);
+    } else {
+        gameState.player2.answers.push(gameState.currentQuestion);
+    }
+    
+    // Give points if correct - FIXED THIS PART
     if (isCorrect) {
         currentPlayer.score += question.points;
         console.log(`Player ${gameState.currentPlayer} scored ${question.points} points! Total: ${currentPlayer.score}`);
@@ -648,8 +663,11 @@ function nextQuestion() {
         gameState.timer = null;
     }
     
-    // Check if both players have answered
-    if (gameState.player1.hasAnswered && gameState.player2.hasAnswered) {
+    // Check if both players have answered THIS QUESTION
+    const bothAnswered = gameState.player1.hasAnswered && gameState.player2.hasAnswered;
+    
+    // Check if we need to move to next question
+    if (bothAnswered) {
         // Both players answered this question
         gameState.currentQuestion++;
         
@@ -669,7 +687,20 @@ function nextQuestion() {
     } else {
         // Switch to other player for same question
         gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-        loadQuestionForOtherPlayer();
+        
+        // Check if the other player has already answered this question
+        const otherPlayer = gameState.currentPlayer === 1 ? gameState.player1 : gameState.player2;
+        const otherPlayerAnswered = otherPlayer.answers.includes(gameState.currentQuestion);
+        
+        if (otherPlayerAnswered) {
+            // Other player already answered, so both have answered
+            gameState.player1.hasAnswered = true;
+            gameState.player2.hasAnswered = true;
+            nextQuestion(); // Recursive call to move to next question
+        } else {
+            // Load same question for other player
+            loadQuestionForOtherPlayer();
+        }
     }
 }
 
@@ -694,19 +725,13 @@ function loadQuestionForOtherPlayer() {
     // Reset option selection for new player
     gameState.selectedOption = null;
     
-    // Reset options styling but keep correct/wrong answers visible
+    // Reset all options styling completely
     const options = document.querySelectorAll('.option');
     options.forEach(opt => {
         opt.classList.remove('selected');
+        opt.style.backgroundColor = '';
+        opt.style.borderColor = '';
         opt.style.pointerEvents = 'auto'; // Re-enable clicks
-        
-        // Only reset border color, keep background color for feedback
-        const currentBg = opt.style.backgroundColor;
-        if (!currentBg.includes('76, 175, 80') && !currentBg.includes('244, 67, 54')) {
-            // If not green (correct) or red (wrong), reset styling
-            opt.style.backgroundColor = '';
-            opt.style.borderColor = '';
-        }
     });
     
     // Reset UI elements
@@ -821,13 +846,15 @@ function resetGame() {
         name: "Player 1",
         score: 0,
         powerup: null,
-        hasAnswered: false
+        hasAnswered: false,
+        answers: []
     };
     gameState.player2 = {
         name: "Player 2",
         score: 0,
         powerup: null,
-        hasAnswered: false
+        hasAnswered: false,
+        answers: []
     };
     gameState.currentPlayer = 1;
     gameState.currentQuestion = 0;
@@ -861,6 +888,8 @@ function playAgain() {
     // Reset scores but keep player names and power-ups
     gameState.player1.score = 0;
     gameState.player2.score = 0;
+    gameState.player1.answers = [];
+    gameState.player2.answers = [];
     gameState.currentQuestion = 0;
     gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
     gameState.player1.hasAnswered = false;
