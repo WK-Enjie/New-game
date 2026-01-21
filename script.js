@@ -3,16 +3,16 @@ const gameState = {
     player1: {
         name: "Player 1",
         score: 0,
-        powerup1: null,  // First power-up
-        powerup2: null,  // Second power-up
-        appliedPowerup: null  // Which power-up was actually applied
+        powerup1: null,
+        powerup2: null,
+        appliedPowerup: null
     },
     player2: {
         name: "Player 2",
         score: 0,
-        powerup1: null,  // First power-up
-        powerup2: null,  // Second power-up
-        appliedPowerup: null  // Which power-up was actually applied
+        powerup1: null,
+        powerup2: null,
+        appliedPowerup: null
     },
     currentPlayer: 1,
     currentQuestion: 0,
@@ -23,14 +23,14 @@ const gameState = {
     startTime: null,
     selectedWorksheet: null,
     
-    // File structure configuration - FIXED: Primary 1-6 labels
     levels: {
         '1': { name: 'Primary School', folder: 'primary', grades: ['1', '2', '3', '4', '5', '6'] },
         '2': { name: 'Lower Secondary', folder: 'lower-secondary', grades: ['1', '2'] },
         '3': { name: 'Upper Secondary', folder: 'upper-secondary', grades: ['3', '4'] }
     },
     
-    subjects: {
+    // All subjects in the system
+    allSubjects: {
         '0': { name: 'Mathematics', folder: 'math' },
         '1': { name: 'Science', folder: 'science' },
         '2': { name: 'Combined Physics', folder: 'combined-physics' },
@@ -39,7 +39,13 @@ const gameState = {
         '5': { name: 'Pure Chemistry', folder: 'pure-chemistry' }
     },
     
-    // Store available worksheets and chapters
+    // Subjects available by level
+    subjectsByLevel: {
+        '1': ['0', '1'],  // Primary School: Math (0), Science (1)
+        '2': ['0', '1', '2', '4'],  // Lower Secondary: Math, Science, Combined Physics, Combined Chemistry
+        '3': ['0', '2', '3', '4', '5']  // Upper Secondary: Math, Combined Physics, Pure Physics, Combined Chemistry, Pure Chemistry
+    },
+    
     availableChapters: [],
     availableWorksheets: []
 };
@@ -117,6 +123,9 @@ function initializeEventListeners() {
     // Reset button
     document.getElementById('reset-btn').addEventListener('click', resetGame);
     
+    // View subject list button
+    document.getElementById('view-subject-list-btn').addEventListener('click', showSubjectList);
+    
     // Power-up selection buttons
     document.querySelectorAll('.select-powerup-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -174,20 +183,88 @@ function populateDropdowns() {
         option.textContent = level.name;
         levelSelect.appendChild(option);
     }
-    
-    // Populate subject options
-    const subjectSelect = document.getElementById('subject-select');
-    for (const [code, subject] of Object.entries(gameState.subjects)) {
-        const option = document.createElement('option');
-        option.value = code;
-        option.textContent = subject.name;
-        subjectSelect.appendChild(option);
-    }
 }
 
 function updateSubjectOptions(level) {
     const subjectSelect = document.getElementById('subject-select');
-    subjectSelect.disabled = !level;
+    
+    if (!level) {
+        subjectSelect.disabled = true;
+        subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+        return;
+    }
+    
+    // Clear existing options
+    subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+    
+    // Get subjects available for this level
+    const availableSubjectCodes = gameState.subjectsByLevel[level] || [];
+    
+    if (availableSubjectCodes.length === 0) {
+        subjectSelect.disabled = true;
+        const option = document.createElement('option');
+        option.value = "";
+        option.textContent = "No subjects available for this level";
+        subjectSelect.appendChild(option);
+        return;
+    }
+    
+    // Populate with available subjects
+    availableSubjectCodes.forEach(code => {
+        const subject = gameState.allSubjects[code];
+        if (subject) {
+            const option = document.createElement('option');
+            option.value = code;
+            option.textContent = subject.name;
+            subjectSelect.appendChild(option);
+        }
+    });
+    
+    subjectSelect.disabled = false;
+}
+
+function showSubjectList() {
+    const levelSelect = document.getElementById('level-select');
+    const level = levelSelect.value;
+    
+    if (!level) {
+        alert("Please select an education level first!");
+        return;
+    }
+    
+    const levelName = gameState.levels[level].name;
+    const availableSubjectCodes = gameState.subjectsByLevel[level] || [];
+    
+    if (availableSubjectCodes.length === 0) {
+        alert(`No subjects available for ${levelName}.`);
+        return;
+    }
+    
+    let subjectList = `Available subjects for ${levelName}:\n\n`;
+    
+    // Show available subjects with their codes
+    availableSubjectCodes.forEach(code => {
+        const subject = gameState.allSubjects[code];
+        if (subject) {
+            subjectList += `${code}: ${subject.name}\n`;
+        }
+    });
+    
+    // Show unavailable subjects (for reference)
+    const allSubjectCodes = Object.keys(gameState.allSubjects);
+    const unavailableSubjects = allSubjectCodes.filter(code => !availableSubjectCodes.includes(code));
+    
+    if (unavailableSubjects.length > 0) {
+        subjectList += "\nNot available for this level:\n";
+        unavailableSubjects.forEach(code => {
+            const subject = gameState.allSubjects[code];
+            if (subject) {
+                subjectList += `${code}: ${subject.name}\n`;
+            }
+        });
+    }
+    
+    alert(subjectList);
 }
 
 async function updateGradeOptions(level) {
@@ -199,7 +276,6 @@ async function updateGradeOptions(level) {
         grades.forEach(grade => {
             const option = document.createElement('option');
             option.value = grade;
-            // FIXED: Show Primary 1-6 instead of Grade 1-6
             let gradeName = `Primary ${grade}`;
             if (level === '2') {
                 gradeName = `Secondary ${grade}`;
@@ -243,13 +319,11 @@ async function updateChapterOptions() {
             });
             chapterSelect.disabled = false;
             
-            // Store available chapters
             gameState.availableChapters = availableChapters;
         } else {
-            // No chapters found
             const option = document.createElement('option');
             option.value = "";
-            option.textContent = "No chapters available";
+            option.textContent = "No chapters available for this subject/grade";
             chapterSelect.appendChild(option);
             chapterSelect.disabled = true;
         }
@@ -259,10 +333,8 @@ async function updateChapterOptions() {
 async function findAvailableChapters(level, subject, grade) {
     const availableChapters = [];
     
-    // Check for chapters 1-20
     for (let chapterNum = 1; chapterNum <= 20; chapterNum++) {
         const chapterCode = chapterNum.toString().padStart(2, '0');
-        // Check if ANY worksheet exists for this chapter
         const hasWorksheets = await checkIfChapterHasWorksheets(level, subject, grade, chapterCode);
         
         if (hasWorksheets) {
@@ -274,16 +346,15 @@ async function findAvailableChapters(level, subject, grade) {
 }
 
 async function checkIfChapterHasWorksheets(level, subject, grade, chapter) {
-    // Check for worksheets 1-3
     for (let worksheetNum = 1; worksheetNum <= 3; worksheetNum++) {
         const worksheetCode = `${level}${subject}${grade}${chapter}${worksheetNum}`;
         const fileExists = await checkIfWorksheetExists(worksheetCode);
         
         if (fileExists) {
-            return true; // At least one worksheet exists for this chapter
+            return true;
         }
     }
-    return false; // No worksheets found for this chapter
+    return false;
 }
 
 async function updateWorksheetOptions() {
@@ -297,13 +368,10 @@ async function updateWorksheetOptions() {
     worksheetSelect.disabled = true;
     
     if (level && subject && grade && chapter) {
-        // Show loading indicator
         worksheetSelect.innerHTML = '<option value="">Scanning for worksheets...</option>';
         
-        // Try to find available worksheets for this chapter
         const availableWorksheets = await findAvailableWorksheets(level, subject, grade, chapter);
         
-        // Clear loading message
         worksheetSelect.innerHTML = '<option value="">-- Select Worksheet --</option>';
         
         if (availableWorksheets.length > 0) {
@@ -316,10 +384,8 @@ async function updateWorksheetOptions() {
             });
             worksheetSelect.disabled = false;
             
-            // Store available worksheets for this chapter
             gameState.availableWorksheets = availableWorksheets;
         } else {
-            // No worksheets found
             const option = document.createElement('option');
             option.value = "";
             option.textContent = "No worksheets available for this chapter";
@@ -332,7 +398,6 @@ async function updateWorksheetOptions() {
 async function findAvailableWorksheets(level, subject, grade, chapter) {
     const availableWorksheets = [];
     
-    // Check for worksheets 1-3
     for (let worksheetNum = 1; worksheetNum <= 3; worksheetNum++) {
         const worksheetCode = `${level}${subject}${grade}${chapter}${worksheetNum}`;
         const fileExists = await checkIfWorksheetExists(worksheetCode);
@@ -350,24 +415,38 @@ async function checkIfWorksheetExists(worksheetCode) {
     const subjectCode = worksheetCode.charAt(1);
     
     const levelFolder = gameState.levels[levelCode]?.folder;
-    const subjectFolder = gameState.subjects[subjectCode]?.folder;
+    const subject = gameState.allSubjects[subjectCode];
     
-    if (!levelFolder || !subjectFolder) {
+    if (!levelFolder || !subject) {
+        console.log(`Invalid level or subject code: Level ${levelCode}, Subject ${subjectCode}`);
         return false;
     }
     
-    // Construct the file path
-    const filePath = `data/${levelFolder}/${subjectFolder}/${worksheetCode}.json`;
+    const filePath = `data/${levelFolder}/${subject.folder}/${worksheetCode}.json`;
+    
+    console.log(`Checking for worksheet: ${filePath}`);
     
     try {
         const response = await fetch(filePath, { method: 'HEAD' });
-        return response.ok;
+        if (response.ok) {
+            console.log(`Worksheet found: ${filePath}`);
+            return true;
+        } else {
+            console.log(`Worksheet not found (HTTP ${response.status}): ${filePath}`);
+            return false;
+        }
     } catch (error) {
-        // Try with GET request as fallback
         try {
             const response = await fetch(filePath);
-            return response.ok;
+            if (response.ok) {
+                console.log(`Worksheet found (GET fallback): ${filePath}`);
+                return true;
+            } else {
+                console.log(`Worksheet not found (GET HTTP ${response.status}): ${filePath}`);
+                return false;
+            }
         } catch (e) {
+            console.log(`Error checking worksheet: ${filePath}`, e.message);
             return false;
         }
     }
@@ -386,9 +465,9 @@ function updateWorksheetInfo() {
         const worksheetNum = worksheetCode.charAt(5);
         
         const levelName = gameState.levels[levelCode]?.name || 'Unknown Level';
-        const subjectName = gameState.subjects[subjectCode]?.name || 'Unknown Subject';
+        const subject = gameState.allSubjects[subjectCode];
+        const subjectName = subject?.name || 'Unknown Subject';
         
-        // FIXED: Show Primary 1-6 labels
         let gradeName = `Primary ${grade}`;
         if (levelCode === '2') {
             gradeName = `Secondary ${grade}`;
@@ -414,7 +493,6 @@ async function loadWorksheetData() {
         return;
     }
     
-    // Verify the worksheet still exists (in case of race conditions)
     const worksheetExists = await checkIfWorksheetExists(gameState.selectedWorksheet);
     if (!worksheetExists) {
         alert("This worksheet is no longer available. Please select another worksheet.");
@@ -422,29 +500,24 @@ async function loadWorksheetData() {
         return;
     }
     
-    // Show loading state
     const startBtn = document.getElementById('start-game-btn');
     const originalText = startBtn.innerHTML;
     startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
     startBtn.disabled = true;
     
     try {
-        // Load the selected worksheet
         const success = await loadWorksheetFromFile();
         
         if (!success) {
             throw new Error("Failed to load worksheet");
         }
         
-        // Update player names on power-up screen
         document.getElementById('player1-display').textContent = gameState.player1.name;
         document.getElementById('player2-display').textContent = gameState.player2.name;
         
-        // Reset power-ups
         clearPlayerPowerups(1);
         clearPlayerPowerups(2);
         
-        // Show power-up screen
         showScreen('powerup');
         
     } catch (error) {
@@ -463,34 +536,33 @@ async function loadWorksheetFromFile() {
     const subjectCode = worksheetCode.charAt(1);
     
     const levelFolder = gameState.levels[levelCode]?.folder;
-    const subjectFolder = gameState.subjects[subjectCode]?.folder;
+    const subject = gameState.allSubjects[subjectCode];
     
-    if (!levelFolder || !subjectFolder) {
+    if (!levelFolder || !subject) {
         throw new Error("Invalid worksheet code");
     }
     
-    // Construct the file path based on your structure
-    const filePath = `data/${levelFolder}/${subjectFolder}/${worksheetCode}.json`;
+    const filePath = `data/${levelFolder}/${subject.folder}/${worksheetCode}.json`;
+    
+    console.log(`Loading worksheet from: ${filePath}`);
     
     try {
         const response = await fetch(filePath);
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: Worksheet not found`);
+            throw new Error(`HTTP ${response.status}: Worksheet not found at ${filePath}`);
         }
         
         const worksheetData = await response.json();
         
-        // Validate worksheet data
         if (!worksheetData.questions || !Array.isArray(worksheetData.questions) || worksheetData.questions.length === 0) {
             throw new Error("Invalid worksheet format: No questions found");
         }
         
-        // Convert to game format
         gameState.questions = worksheetData.questions.map(q => ({
             id: q.id,
             text: q.question,
             options: q.options.map((opt, index) => ({
-                id: String.fromCharCode(65 + index), // A, B, C, D
+                id: String.fromCharCode(65 + index),
                 text: opt
             })),
             correctAnswer: String.fromCharCode(65 + q.correctAnswer),
@@ -498,9 +570,8 @@ async function loadWorksheetFromFile() {
             explanation: q.explanation || "No explanation provided."
         }));
         
-        console.log(`Successfully loaded worksheet: ${worksheetData.title || worksheetCode}`);
+        console.log(`Successfully loaded worksheet: ${worksheetData.title || worksheetCode} with ${gameState.questions.length} questions`);
         
-        // Store worksheet metadata for display
         gameState.currentWorksheetData = worksheetData;
         
         return true;
@@ -557,11 +628,9 @@ function updatePowerupDisplay(player) {
     const playerData = player === 1 ? gameState.player1 : gameState.player2;
     const playerDiv = document.getElementById(`player${player}-powerup`);
     
-    // Get the powerup slots
     const powerup1Div = playerDiv.querySelector('.selected-powerup:nth-child(1)');
     const powerup2Div = playerDiv.querySelector('.selected-powerup:nth-child(2)');
     
-    // Update powerup 1 display
     if (playerData.powerup1) {
         const powerup = powerUps[playerData.powerup1];
         powerup1Div.innerHTML = `
@@ -574,7 +643,6 @@ function updatePowerupDisplay(player) {
         powerup1Div.innerHTML = '<p class="no-powerup">Power-up 1: Not selected</p>';
     }
     
-    // Update powerup 2 display
     if (playerData.powerup2) {
         const powerup = powerUps[playerData.powerup2];
         powerup2Div.innerHTML = `
@@ -597,22 +665,18 @@ function checkPowerupSelection() {
 }
 
 function startQuiz() {
-    // Set up quiz screen
     document.getElementById('quiz-player1-name').textContent = gameState.player1.name;
     document.getElementById('quiz-player2-name').textContent = gameState.player2.name;
     
-    // Update power-up display in quiz screen
     const player1Powerups = getPlayerPowerupsText(1);
     const player2Powerups = getPlayerPowerupsText(2);
     document.getElementById('player1-powerup-name').textContent = player1Powerups;
     document.getElementById('player2-powerup-name').textContent = player2Powerups;
     
-    // Update worksheet name
     const worksheetData = gameState.currentWorksheetData;
     document.getElementById('current-worksheet-name').textContent = worksheetData?.title || "Worksheet Challenge";
     document.getElementById('results-worksheet-name').textContent = worksheetData?.title || "Worksheet Challenge";
     
-    // Reset game state
     gameState.currentQuestion = 0;
     gameState.player1.score = 0;
     gameState.player2.score = 0;
@@ -621,10 +685,8 @@ function startQuiz() {
     gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
     gameState.startTime = Date.now();
     
-    // Show quiz screen
     showScreen('quiz');
     
-    // Load first question
     loadQuestion();
 }
 
@@ -643,7 +705,6 @@ function getPlayerPowerupsText(player) {
 }
 
 function loadQuestion() {
-    // Clear any existing timer
     if (gameState.timer) {
         clearInterval(gameState.timer);
         gameState.timer = null;
@@ -656,27 +717,21 @@ function loadQuestion() {
         return;
     }
     
-    // Update question counter
     document.getElementById('current-question').textContent = gameState.currentQuestion + 1;
     document.getElementById('total-questions').textContent = gameState.questions.length;
     
-    // Update question text
     document.getElementById('question-text').textContent = question.text;
     document.getElementById('question-points').textContent = question.points;
     
-    // Update player scores
     document.getElementById('player1-score').textContent = gameState.player1.score;
     document.getElementById('player2-score').textContent = gameState.player2.score;
     
-    // Update current turn indicator
     document.getElementById('player1-turn-indicator').style.display = gameState.currentPlayer === 1 ? 'block' : 'none';
     document.getElementById('player2-turn-indicator').style.display = gameState.currentPlayer === 2 ? 'block' : 'none';
     
-    // Update player status active class
     document.getElementById('player1-status').classList.toggle('active', gameState.currentPlayer === 1);
     document.getElementById('player2-status').classList.toggle('active', gameState.currentPlayer === 2);
     
-    // Load options
     const optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = '';
     
@@ -694,27 +749,22 @@ function loadQuestion() {
         optionsContainer.appendChild(optionDiv);
     });
     
-    // Reset selected option
     gameState.selectedOption = null;
     document.getElementById('submit-answer-btn').disabled = true;
     document.getElementById('submit-answer-btn').style.display = 'block';
     document.getElementById('next-question-btn').style.display = 'none';
     
-    // Reset timer
     gameState.timeRemaining = 30;
     document.getElementById('time-remaining').textContent = gameState.timeRemaining;
     
-    // Start timer
     gameState.timer = setInterval(updateTimer, 1000);
 }
 
 function selectOption(optionId) {
-    // Deselect all options
     document.querySelectorAll('.option').forEach(opt => {
         opt.classList.remove('selected');
     });
     
-    // Select clicked option
     const selectedOption = document.querySelector(`.option[data-option-id="${optionId}"]`);
     selectedOption.classList.add('selected');
     
@@ -728,12 +778,11 @@ function updateTimer() {
     
     if (gameState.timeRemaining <= 0) {
         clearInterval(gameState.timer);
-        submitAnswer(true); // Auto-submit when time runs out
+        submitAnswer(true);
     }
 }
 
 function submitAnswer(isTimeout = false) {
-    // Stop the timer immediately
     if (gameState.timer) {
         clearInterval(gameState.timer);
         gameState.timer = null;
@@ -743,13 +792,11 @@ function submitAnswer(isTimeout = false) {
     const isCorrect = !isTimeout && gameState.selectedOption === question.correctAnswer;
     const currentPlayer = gameState.currentPlayer === 1 ? gameState.player1 : gameState.player2;
     
-    // Give points if correct
     if (isCorrect) {
         currentPlayer.score += question.points;
         
         console.log(`Player ${gameState.currentPlayer} answered correctly! Scored ${question.points} points. Total: ${currentPlayer.score}`);
         
-        // Update score display immediately
         if (gameState.currentPlayer === 1) {
             document.getElementById('player1-score').textContent = gameState.player1.score;
         } else {
@@ -759,12 +806,10 @@ function submitAnswer(isTimeout = false) {
         console.log(`Player ${gameState.currentPlayer} answered incorrectly.`);
     }
     
-    // Show feedback (but don't reveal correct answer)
     const options = document.querySelectorAll('.option');
     options.forEach(opt => {
-        opt.style.pointerEvents = 'none'; // Disable further clicks
+        opt.style.pointerEvents = 'none';
         
-        // Only show if the player selected this option
         if (opt.dataset.optionId === gameState.selectedOption) {
             if (isCorrect) {
                 opt.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
@@ -776,66 +821,52 @@ function submitAnswer(isTimeout = false) {
         }
     });
     
-    // Show "Next Question" button immediately
     document.getElementById('submit-answer-btn').style.display = 'none';
     document.getElementById('next-question-btn').style.display = 'block';
     
-    // Update button text
     const nextButton = document.getElementById('next-question-btn');
     nextButton.innerHTML = '<i class="fas fa-forward"></i> Next Question';
     
-    // If timeout, mark as wrong but don't show answer
     if (isTimeout) {
         console.log(`Player ${gameState.currentPlayer} ran out of time.`);
     }
 }
 
 function nextQuestion() {
-    // Clear timer
     if (gameState.timer) {
         clearInterval(gameState.timer);
         gameState.timer = null;
     }
     
-    // Always move to next question
     gameState.currentQuestion++;
     
-    // Check if we've reached the end
     if (gameState.currentQuestion >= gameState.questions.length) {
         endGame();
         return;
     }
     
-    // Switch to other player for next question
     gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
     
-    // Load next question
     loadQuestion();
 }
 
 function endGame() {
-    // Clear timer
     if (gameState.timer) {
         clearInterval(gameState.timer);
         gameState.timer = null;
     }
     
-    // Randomly select one power-up from each player to apply
-    // But only the winner's selected power-up will actually be applied
     selectRandomPowerupToApply();
     
-    // Calculate final scores
     let player1FinalScore = gameState.player1.score;
     let player2FinalScore = gameState.player2.score;
     
-    // Determine winner based on raw scores
     const player1RawScore = player1FinalScore;
     const player2RawScore = player2FinalScore;
     
     let winner = player1RawScore > player2RawScore ? 1 : 
                  player2RawScore > player1RawScore ? 2 : 0;
     
-    // Apply power-ups (only winner's randomly selected power-up is applied)
     if (winner === 1 && gameState.player1.appliedPowerup) {
         player1FinalScore = applyPowerup(
             gameState.player1.appliedPowerup, 
@@ -851,25 +882,20 @@ function endGame() {
             false
         );
     } else if (winner === 0) {
-        // Tie - no power-ups applied
         player1FinalScore = player1RawScore;
         player2FinalScore = player2RawScore;
     }
     
-    // Calculate completion time
     const endTime = Date.now();
     const completionTime = Math.floor((endTime - gameState.startTime) / 1000 / 60);
     document.getElementById('completion-time').textContent = completionTime;
     
-    // Update results screen
     updateResultsScreen(player1FinalScore, player2FinalScore, winner);
     
-    // Show results screen
     showScreen('results');
 }
 
 function selectRandomPowerupToApply() {
-    // For player 1: randomly select one of their two power-ups
     if (gameState.player1.powerup1 && gameState.player1.powerup2) {
         const randomChoice = Math.random() < 0.5 ? 1 : 2;
         gameState.player1.appliedPowerup = randomChoice === 1 ? 
@@ -880,7 +906,6 @@ function selectRandomPowerupToApply() {
         gameState.player1.appliedPowerup = gameState.player1.powerup2;
     }
     
-    // For player 2: randomly select one of their two power-ups
     if (gameState.player2.powerup1 && gameState.player2.powerup2) {
         const randomChoice = Math.random() < 0.5 ? 1 : 2;
         gameState.player2.appliedPowerup = randomChoice === 1 ? 
@@ -893,23 +918,18 @@ function selectRandomPowerupToApply() {
 }
 
 function updateResultsScreen(player1FinalScore, player2FinalScore, winner) {
-    // Update player names
     document.getElementById('results-player1-name').textContent = gameState.player1.name;
     document.getElementById('results-player2-name').textContent = gameState.player2.name;
     
-    // Update raw scores
     document.getElementById('player1-raw-score').textContent = gameState.player1.score;
     document.getElementById('player2-raw-score').textContent = gameState.player2.score;
     
-    // Update power-up displays
     updatePlayerPowerupDisplay(1);
     updatePlayerPowerupDisplay(2);
     
-    // Update final scores
     document.getElementById('player1-final-score').textContent = Math.round(player1FinalScore);
     document.getElementById('player2-final-score').textContent = Math.round(player2FinalScore);
     
-    // Determine and display winner
     let winnerName, winningMessage;
     if (winner === 1) {
         winnerName = gameState.player1.name;
@@ -940,10 +960,8 @@ function updatePlayerPowerupDisplay(player) {
     const powerupListDiv = document.getElementById(`player${player}-all-powerups`);
     const appliedPowerupSpan = document.getElementById(`player${player}-applied-powerup`);
     
-    // Clear current power-up list
     powerupListDiv.innerHTML = '';
     
-    // Add both selected power-ups
     if (playerData.powerup1) {
         const powerupTag = document.createElement('span');
         powerupTag.className = 'powerup-tag';
@@ -976,7 +994,6 @@ function updatePlayerPowerupDisplay(player) {
         powerupListDiv.appendChild(powerupTag);
     }
     
-    // Update applied power-up display
     if (playerData.appliedPowerup) {
         appliedPowerupSpan.textContent = powerUps[playerData.appliedPowerup].name;
         appliedPowerupSpan.style.color = '#f72585';
@@ -1009,10 +1026,8 @@ function showWorksheetContents() {
     const contentsDiv = document.getElementById('worksheet-contents');
     const contentsList = document.getElementById('contents-list');
     
-    // Clear previous contents
     contentsList.innerHTML = '';
     
-    // Add each question to the contents
     gameState.questions.forEach((question, index) => {
         const questionItem = document.createElement('div');
         questionItem.className = 'question-item';
@@ -1037,11 +1052,9 @@ function showWorksheetContents() {
         contentsList.appendChild(questionItem);
     });
     
-    // Show the contents
     contentsDiv.style.display = 'block';
     document.getElementById('view-contents-btn').style.display = 'none';
     
-    // Scroll to contents
     contentsDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -1052,17 +1065,14 @@ function hideWorksheetContents() {
 }
 
 function showScreen(screenName) {
-    // Hide all screens
     Object.values(screens).forEach(screen => {
         screen.classList.remove('active');
     });
     
-    // Show requested screen
     screens[screenName].classList.add('active');
 }
 
 function resetGame() {
-    // Reset game state
     gameState.player1 = {
         name: "Player 1",
         score: 0,
@@ -1091,7 +1101,6 @@ function resetGame() {
         gameState.timer = null;
     }
     
-    // Reset form
     document.getElementById('player1-name').value = "Player 1";
     document.getElementById('player2-name').value = "Player 2";
     document.getElementById('level-select').value = "";
@@ -1106,12 +1115,10 @@ function resetGame() {
     document.getElementById('start-game-btn').disabled = true;
     document.getElementById('start-game-btn').innerHTML = '<i class="fas fa-play"></i> Start Game';
     
-    // Hide contents if visible
     hideWorksheetContents();
 }
 
 function playAgain() {
-    // Reset scores but keep player names and power-ups
     gameState.player1.score = 0;
     gameState.player2.score = 0;
     gameState.currentQuestion = 0;
@@ -1119,6 +1126,5 @@ function playAgain() {
     gameState.selectedOption = null;
     gameState.startTime = Date.now();
     
-    // Start quiz again
     startQuiz();
 }
