@@ -1,811 +1,1002 @@
-// GAME STATE
-const game = {
-    players: [
-        { name: "Player 1", color: "#4a6bff", score: 0, powerups: [] },
-        { name: "Player 2", color: "#ff6b4a", score: 0, powerups: [] }
-    ],
-    currentPlayer: 0,
+// ========== GAME STATE ==========
+const gameState = {
+    pin: ['', '', '', '', '', ''],
+    currentDigit: 0,
     questions: [],
     currentQuestion: 0,
-    selectedOption: null,
-    level: null,
-    subject: null,
-    pin: null,
-    jsonFile: null
+    currentPlayer: 1,
+    scores: [0, 0],
+    questionsAnswered: [0, 0], // Track how many questions each player has answered
+    selectedAnswer: null,
+    answered: false,
+    powerups: {
+        1: { boxes: [1, 2, 3], available: [1, 2, 3], revealed: {} },
+        2: { boxes: [4, 5, 6], available: [4, 5, 6], revealed: {} }
+    },
+    powerupEffects: {
+        1: { type: 'double', name: 'Double Points', description: 'Double points on next correct answer' },
+        2: { type: 'bonus', name: 'Bonus +20', description: 'Add 20 bonus points' },
+        3: { type: 'steal', name: 'Steal Points', description: 'Steal 10 points from opponent' },
+        4: { type: 'swap', name: 'Swap Scores', description: 'Swap scores with opponent' },
+        5: { type: 'half', name: 'Half Points', description: 'Opponent loses half their points' },
+        6: { type: 'shield', name: 'Shield', description: 'Protect your score for next round' }
+    },
+    questionsPerPlayer: 6,
+    currentQuizCode: '',
+    quizCatalog: [],
+    usedPowerups: []
 };
 
-// CHAPTER DATA
-const chapters = {
-    "primary": {
-        "math": ["Numbers to 10", "Number Bonds", "Addition", "Subtraction", "Shapes"],
-        "science": ["Living Things", "Plants", "Animals", "Materials", "Weather"]
-    },
-    "lower-secondary": {
-        "math": ["Algebra", "Geometry", "Fractions", "Decimals", "Statistics"],
-        "science": ["Cells", "Energy", "Forces", "Matter", "Ecosystems"]
-    },
-    "upper-secondary": {
-        "math": ["Calculus", "Trigonometry", "Vectors", "Probability", "Statistics"],
-        "combined-physics": ["Measurement", "Kinematics", "Forces", "Energy", "Waves"],
-        "pure-physics": ["Measurement", "Kinematics", "Dynamics", "Waves", "Electricity"],
-        "combined-chemistry": ["Experimental", "Atomic", "Bonding", "Acids", "Periodic"],
-        "pure-chemistry": ["Experimental", "Atomic", "Bonding", "Acids", "Organic"]
-    }
+// ========== QUIZ CODE DECODER ==========
+const SUBJECTS = {
+    0: { name: 'Mathematics', folder: 'math' },
+    1: { name: 'Science', folder: 'science' },
+    2: { name: 'Combined Physics', folder: 'combined-physics' },
+    3: { name: 'Pure Physics', folder: 'pure-physics' },
+    4: { name: 'Combined Chemistry', folder: 'combined-chem' },
+    5: { name: 'Pure Chemistry', folder: 'pure-chem' }
 };
 
-// POWER-UPS
-const powerups = [
-    { id: "increase", name: "+20% Points" },
-    { id: "decrease", name: "-20% Points" },
-    { id: "swap", name: "Swap Scores" },
-    { id: "double", name: "Double Points" }
-];
+const LEVELS = {
+    1: { name: 'Primary', folder: 'primary' },
+    2: { name: 'Lower Secondary', folder: 'lower-secondary' },
+    3: { name: 'Upper Secondary', folder: 'upper-secondary' }
+};
 
-// INITIALIZE
-document.addEventListener('DOMContentLoaded', init);
-
-function init() {
-    console.log("Initializing game...");
-    setupEventListeners();
-    updateSubjectButtons();
-    discoverAvailableWorksheets();
-}
-
-// SETUP EVENT LISTENERS
-function setupEventListeners() {
-    console.log("Setting up event listeners...");
+function decodeQuizCode(code) {
+    const digits = code.split('').map(d => parseInt(d));
     
-    // Player name changes
-    document.getElementById('player1').addEventListener('input', function() {
-        game.players[0].name = this.value || "Player 1";
-        document.getElementById('p1name').textContent = game.players[0].name;
-        document.querySelector('#score1 .name').textContent = game.players[0].name;
-    });
+    if (digits.length !== 6) return null;
     
-    document.getElementById('player2').addEventListener('input', function() {
-        game.players[1].name = this.value || "Player 2";
-        document.getElementById('p2name').textContent = game.players[1].name;
-        document.querySelector('#score2 .name').textContent = game.players[1].name;
-    });
+    const [levelDigit, subjectDigit, gradeDigit, chap10, chap1, worksheet] = digits;
     
-    // Player color changes
-    document.getElementById('color1').addEventListener('input', function(e) {
-        game.players[0].color = e.target.value;
-        document.getElementById('score1').style.borderColor = e.target.value;
-    });
+    // Validate digits
+    if (levelDigit < 1 || levelDigit > 3) return null;
+    if (subjectDigit < 0 || subjectDigit > 5) return null;
     
-    document.getElementById('color2').addEventListener('input', function(e) {
-        game.players[1].color = e.target.value;
-        document.getElementById('score2').style.borderColor = e.target.value;
-    });
+    const level = LEVELS[levelDigit];
+    const subject = SUBJECTS[subjectDigit];
     
-    // Level selection
-    document.querySelectorAll('.level-select button').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.level-select button').forEach(b => b.classList.remove('selected'));
-            this.classList.add('selected');
-            game.level = this.dataset.level;
-            updateSubjectButtons();
-            discoverAvailableWorksheets();
-        });
-    });
+    // Format: XXX-XX-X
+    const formattedCode = `${levelDigit}${subjectDigit}${gradeDigit}-${chap10}${chap1}-${worksheet}`;
     
-    // Chapter list button
-    document.getElementById('showChapters').addEventListener('click', showChapterList);
+    // Build filename: XXXXXX.json (no hyphens)
+    const filename = `${levelDigit}${subjectDigit}${gradeDigit}${chap10}${chap1}${worksheet}.json`;
     
-    // Modal close button
-    document.querySelector('.close').addEventListener('click', function() {
-        document.getElementById('chapterModal').style.display = 'none';
-    });
+    // Build path: Questions/[level]/[subject]/filename.json
+    const filepath = `Questions/${level.folder}/${subject.folder}/${filename}`;
     
-    // Load PIN button
-    document.getElementById('loadPin').addEventListener('click', loadPin);
-    document.getElementById('pin').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') loadPin();
-    });
-    
-    // Start game button
-    document.getElementById('start').addEventListener('click', startGame);
-    
-    // Power-up selection
-    document.querySelectorAll('.powerup').forEach(p => {
-        p.addEventListener('click', function() {
-            const powerupType = this.dataset.type;
-            const playerBox = this.closest('.player-box');
-            const playerIndex = playerBox.querySelector('h3').id === 'p1name' ? 0 : 1;
-            selectPowerup(playerIndex, powerupType, this);
-        });
-    });
-    
-    // Assign random powerups
-    document.getElementById('assignRandom').addEventListener('click', assignRandomPowerups);
-    
-    // Start quiz button
-    document.getElementById('startQuiz').addEventListener('click', startQuiz);
-    
-    // Game buttons
-    document.getElementById('submit').addEventListener('click', submitAnswer);
-    document.getElementById('next').addEventListener('click', nextQuestion);
-    
-    // Results buttons
-    document.getElementById('playAgain').addEventListener('click', playAgain);
-    document.getElementById('newGame').addEventListener('click', newGame);
-    
-    // Close modal on outside click
-    window.addEventListener('click', function(e) {
-        if (e.target.id === 'chapterModal') {
-            document.getElementById('chapterModal').style.display = 'none';
-        }
-    });
-}
-
-// UPDATE SUBJECT BUTTONS
-function updateSubjectButtons() {
-    const container = document.getElementById('subjects');
-    container.innerHTML = '';
-    
-    if (!game.level) return;
-    
-    let subjects = [];
-    
-    if (game.level === '1') {
-        subjects = [
-            { id: 'math', name: 'Mathematics (0)', number: 0 },
-            { id: 'science', name: 'Science (1)', number: 1 }
-        ];
-    } else if (game.level === '2') {
-        subjects = [
-            { id: 'math', name: 'Mathematics (0)', number: 0 },
-            { id: 'science', name: 'Science (1)', number: 1 }
-        ];
-    } else if (game.level === '3') {
-        subjects = [
-            { id: 'math', name: 'Mathematics (1)', number: 1 },
-            { id: 'combined-physics', name: 'Combined Physics (2)', number: 2 },
-            { id: 'pure-physics', name: 'Pure Physics (3)', number: 3 },
-            { id: 'combined-chemistry', name: 'Combined Chemistry (4)', number: 4 },
-            { id: 'pure-chemistry', name: 'Pure Chemistry (5)', number: 5 }
-        ];
+    // Grade label
+    let gradeLabel = '';
+    if (levelDigit === 1) {
+        gradeLabel = `P${gradeDigit}`;
+    } else {
+        gradeLabel = `S${gradeDigit}`;
     }
     
-    subjects.forEach(subject => {
-        const button = document.createElement('button');
-        button.textContent = subject.name;
-        button.dataset.subject = subject.id;
-        button.dataset.number = subject.number;
-        
-        button.addEventListener('click', function() {
-            document.querySelectorAll('#subjects button').forEach(b => b.classList.remove('selected'));
-            this.classList.add('selected');
-            game.subject = subject.id;
-            discoverAvailableWorksheets();
-        });
-        
-        container.appendChild(button);
-    });
+    return {
+        code: formattedCode,
+        rawCode: code,
+        filename: filename,
+        filepath: filepath,
+        level: level.name,
+        subject: subject.name,
+        grade: gradeDigit,
+        gradeLabel: gradeLabel,
+        chapter: parseInt(`${chap10}${chap1}`),
+        worksheet: worksheet,
+        fullName: `${level.name} ${gradeLabel} ${subject.name} Chapter ${parseInt(`${chap10}${chap1}`)} Worksheet ${worksheet}`
+    };
 }
 
-// DISCOVER AVAILABLE WORKSHEETS (MOCK - In real app, this would scan the server)
-function discoverAvailableWorksheets() {
-    const container = document.getElementById('worksheets');
-    container.innerHTML = '';
+// ========== FILE SCANNER ==========
+async function scanForQuizzes() {
+    console.log('🔍 Scanning for quiz files...');
+    showScreen('loading-screen');
     
-    if (!game.level || !game.subject) return;
+    const loadingMessage = document.getElementById('loading-message');
+    const loadingDetails = document.getElementById('loading-details');
+    const progressBar = document.getElementById('scan-progress');
+    const foundCount = document.getElementById('quiz-found');
     
-    // Get level folder name
-    let levelFolder = '';
-    if (game.level === '1') levelFolder = 'primary';
-    else if (game.level === '2') levelFolder = 'lower-secondary';
-    else if (game.level === '3') levelFolder = 'upper-secondary';
+    gameState.quizCatalog = [];
+    let foundQuizzes = 0;
     
-    // Generate example worksheets based on PIN patterns
-    const examples = generateExampleWorksheets(levelFolder, game.subject);
+    // Define all possible paths to scan
+    const scanPaths = [
+        { level: 1, levelName: 'primary', subjects: [0, 1] },
+        { level: 2, levelName: 'lower-secondary', subjects: [0, 1] },
+        { level: 3, levelName: 'upper-secondary', subjects: [0, 2, 3, 4, 5] }
+    ];
     
-    examples.forEach(worksheet => {
-        const item = document.createElement('div');
-        item.className = 'worksheet-item';
-        
-        const name = document.createElement('div');
-        name.className = 'worksheet-name';
-        name.textContent = `PIN: ${worksheet.pin}`;
-        
-        const path = document.createElement('div');
-        path.className = 'worksheet-path';
-        path.textContent = `data/${levelFolder}/${game.subject}/${worksheet.pin}.json`;
-        
-        item.appendChild(name);
-        item.appendChild(path);
-        
-        item.addEventListener('click', function() {
-            document.querySelectorAll('.worksheet-item').forEach(i => i.classList.remove('selected'));
-            this.classList.add('selected');
-            game.pin = worksheet.pin;
-            document.getElementById('pin').value = worksheet.pin;
-            loadPin(); // Auto-load when clicked
-        });
-        
-        container.appendChild(item);
-    });
-}
-
-// GENERATE EXAMPLE WORKSHEETS
-function generateExampleWorksheets(levelFolder, subject) {
-    let examples = [];
-    
-    // Generate a few example PINs based on your structure
-    if (levelFolder === 'primary') {
-        if (subject === 'math') {
-            examples = [
-                { pin: '101011', desc: 'P1 Math Ch1 WS1' },
-                { pin: '101012', desc: 'P1 Math Ch1 WS2' },
-                { pin: '102011', desc: 'P2 Math Ch1 WS1' }
-            ];
-        } else if (subject === 'science') {
-            examples = [
-                { pin: '111011', desc: 'P1 Science Ch1 WS1' },
-                { pin: '112011', desc: 'P2 Science Ch1 WS1' }
-            ];
-        }
-    } else if (levelFolder === 'lower-secondary') {
-        if (subject === 'math') {
-            examples = [
-                { pin: '211011', desc: 'Sec 1 Math Ch1 WS1' },
-                { pin: '211012', desc: 'Sec 1 Math Ch1 WS2' },
-                { pin: '212011', desc: 'Sec 2 Math Ch1 WS1' }
-            ];
-        } else if (subject === 'science') {
-            examples = [
-                { pin: '221011', desc: 'Sec 1 Science Ch1 WS1' },
-                { pin: '222011', desc: 'Sec 2 Science Ch1 WS1' }
-            ];
-        }
-    } else if (levelFolder === 'upper-secondary') {
-        if (subject === 'math') {
-            examples = [
-                { pin: '313011', desc: 'Sec 3 Math Ch1 WS1' },
-                { pin: '313012', desc: 'Sec 3 Math Ch1 WS2' },
-                { pin: '314011', desc: 'Sec 4 Math Ch1 WS1' }
-            ];
-        } else if (subject === 'combined-physics') {
-            examples = [
-                { pin: '323011', desc: 'Sec 3 Combined Physics Ch1 WS1' },
-                { pin: '323012', desc: 'Sec 3 Combined Physics Ch1 WS2' }
-            ];
-        } else if (subject === 'pure-physics') {
-            examples = [
-                { pin: '333011', desc: 'Sec 3 Pure Physics Ch1 WS1' },
-                { pin: '333012', desc: 'Sec 3 Pure Physics Ch1 WS2' }
-            ];
-        } else if (subject === 'combined-chemistry') {
-            examples = [
-                { pin: '343011', desc: 'Sec 3 Combined Chemistry Ch1 WS1' },
-                { pin: '343012', desc: 'Sec 3 Combined Chemistry Ch1 WS2' },
-                { pin: '344091', desc: 'Sec 4 Combined Chemistry Ch9 WS1' },
-                { pin: '344121', desc: 'Sec 4 Combined Chemistry Ch12 WS1' },
-                { pin: '344122', desc: 'Sec 4 Combined Chemistry Ch12 WS2' }
-            ];
-        } else if (subject === 'pure-chemistry') {
-            examples = [
-                { pin: '353011', desc: 'Sec 3 Pure Chemistry Ch1 WS1' },
-                { pin: '353012', desc: 'Sec 3 Pure Chemistry Ch1 WS2' },
-                { pin: '354011', desc: 'Sec 4 Pure Chemistry Ch1 WS1' }
-            ];
-        }
-    }
-    
-    return examples;
-}
-
-// SHOW CHAPTER LIST
-function showChapterList() {
-    const container = document.getElementById('chapterList');
-    container.innerHTML = '';
-    
-    for (const [levelName, subjects] of Object.entries(chapters)) {
-        for (const [subjectName, chapterList] of Object.entries(subjects)) {
-            const section = document.createElement('div');
-            section.className = 'subject-section';
-            
-            // Get display names
-            let levelDisplay = levelName.replace('-', ' ').toUpperCase();
-            let subjectDisplay = subjectName.replace('-', ' ').toUpperCase();
-            
-            const title = document.createElement('h4');
-            title.textContent = `${levelDisplay} - ${subjectDisplay}`;
-            section.appendChild(title);
-            
-            const list = document.createElement('ul');
-            chapterList.forEach((chapter, index) => {
-                const item = document.createElement('li');
-                item.textContent = `Chapter ${(index + 1).toString().padStart(2, '0')}: ${chapter}`;
-                list.appendChild(item);
-            });
-            
-            section.appendChild(list);
-            container.appendChild(section);
-        }
-    }
-    
-    document.getElementById('chapterModal').style.display = 'block';
-}
-
-// LOAD PIN AND FETCH JSON
-async function loadPin() {
-    const pin = document.getElementById('pin').value.trim();
-    const status = document.getElementById('jsonStatus');
-    
-    if (pin.length !== 6) {
-        status.textContent = "PIN must be 6 digits";
-        status.className = "status error";
-        return;
-    }
-    
-    if (!/^\d+$/.test(pin)) {
-        status.textContent = "PIN must contain only numbers";
-        status.className = "status error";
-        return;
-    }
-    
-    game.pin = pin;
-    
-    // Parse PIN
-    const level = pin[0];
-    const subjectNum = parseInt(pin[1]);
-    const grade = pin[2];
-    const chapter = pin.substring(3, 5);
-    const worksheet = pin[5];
-    
-    // Map to folder structure
-    const levelFolder = level === '1' ? 'primary' : 
-                       level === '2' ? 'lower-secondary' : 
-                       'upper-secondary';
-    
-    let subjectFolder = '';
-    if (level === '1' || level === '2') {
-        subjectFolder = subjectNum === 0 ? 'math' : 'science';
-    } else if (level === '3') {
-        if (subjectNum === 1) subjectFolder = 'math';
-        else if (subjectNum === 2) subjectFolder = 'combined-physics';
-        else if (subjectNum === 3) subjectFolder = 'pure-physics';
-        else if (subjectNum === 4) subjectFolder = 'combined-chemistry';
-        else if (subjectNum === 5) subjectFolder = 'pure-chemistry';
-    }
-    
-    // Construct file path
-    const fileName = `${pin}.json`;
-    const filePath = `data/${levelFolder}/${subjectFolder}/${fileName}`;
-    
-    // Update PIN info
-    const pinInfo = document.getElementById('pinInfo');
-    pinInfo.innerHTML = `
-        <strong>PIN:</strong> ${pin}<br>
-        <strong>Level:</strong> ${level === '1' ? 'Primary' : level === '2' ? 'Lower Secondary' : 'Upper Secondary'}<br>
-        <strong>Subject:</strong> ${getSubjectName(subjectFolder)}<br>
-        <strong>Grade:</strong> Sec ${grade}<br>
-        <strong>Chapter:</strong> ${chapter}<br>
-        <strong>Worksheet:</strong> ${worksheet}<br>
-        <strong>File Path:</strong> ${filePath}
-    `;
-    
-    // Try to load JSON file
     try {
-        status.textContent = `Loading ${fileName}...`;
-        status.className = "status";
+        // Check if Questions folder exists
+        loadingMessage.textContent = 'Checking Questions folder...';
+        loadingDetails.textContent = 'Looking for quiz files...';
         
-        const response = await fetch(filePath);
+        const baseCheck = await fetch('Questions/');
+        if (!baseCheck.ok) {
+            throw new Error('Questions folder not found. Please create it with the proper structure.');
+        }
+        
+        // Scan each level and subject
+        for (let levelIdx = 0; levelIdx < scanPaths.length; levelIdx++) {
+            const levelData = scanPaths[levelIdx];
+            
+            for (let subjIdx = 0; subjIdx < levelData.subjects.length; subjIdx++) {
+                const subjectDigit = levelData.subjects[subjIdx];
+                const subject = SUBJECTS[subjectDigit];
+                
+                const path = `Questions/${levelData.levelName}/${subject.folder}/`;
+                loadingDetails.textContent = `Scanning ${levelData.levelName}/${subject.name}...`;
+                
+                // Update progress
+                const progress = ((levelIdx * levelData.subjects.length + subjIdx + 1) / 
+                                 (scanPaths.length * scanPaths.reduce((a, b) => a + b.subjects.length, 0))) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                try {
+                    // Try to get directory listing
+                    const response = await fetch(path);
+                    if (!response.ok) continue;
+                    
+                } catch (error) {
+                    console.log(`Skipping ${path}: ${error.message}`);
+                }
+            }
+        }
+        
+        // After scanning (or in development), load from localStorage or default list
+        await loadCatalogFromStorage();
+        
+        // Update progress to 100%
+        progressBar.style.width = '100%';
+        foundCount.textContent = gameState.quizCatalog.length;
+        foundQuizzes = gameState.quizCatalog.length;
+        
+        // Show completion message
+        setTimeout(() => {
+            if (foundQuizzes === 0) {
+                loadingMessage.textContent = 'No quizzes found';
+                loadingDetails.textContent = 'Add JSON quiz files to the Questions folder';
+                setTimeout(() => {
+                    showScreen('pin-screen');
+                    updateCatalogDisplay();
+                }, 2000);
+            } else {
+                loadingMessage.textContent = 'Scan complete!';
+                loadingDetails.textContent = `Found ${foundQuizzes} quiz files`;
+                setTimeout(() => {
+                    showScreen('pin-screen');
+                    updateCatalogDisplay();
+                }, 1500);
+            }
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Scan error:', error);
+        loadingMessage.textContent = 'Scan failed';
+        loadingDetails.textContent = error.message;
+        
+        setTimeout(() => {
+            showScreen('pin-screen');
+            updateCatalogDisplay();
+        }, 2000);
+    }
+}
+
+// ========== CATALOG MANAGEMENT ==========
+async function loadCatalogFromStorage() {
+    // Try to load from localStorage first
+    const storedCatalog = localStorage.getItem('quizCatalog');
+    if (storedCatalog) {
+        gameState.quizCatalog = JSON.parse(storedCatalog);
+        console.log(`📂 Loaded ${gameState.quizCatalog.length} quizzes from storage`);
+        return;
+    }
+    
+    // If no stored catalog, create from default files
+    const defaultQuizzes = [
+        { code: '101-01-1', filename: '101011.json', path: 'Questions/primary/math/101011.json', name: 'P1 Math Chapter 1' },
+        { code: '201-01-1', filename: '201011.json', path: 'Questions/lower-secondary/math/201011.json', name: 'Sec 1 Math Chapter 1' },
+        { code: '201-01-2', filename: '201012.json', path: 'Questions/lower-secondary/math/201012.json', name: 'Sec 1 Math Chapter 1 Worksheet 2' },
+        { code: '342-09-1', filename: '342091.json', path: 'Questions/upper-secondary/combined-chem/342091.json', name: 'Sec 4 Combined Chemistry Chapter 9' }
+    ];
+    
+    gameState.quizCatalog = defaultQuizzes;
+    localStorage.setItem('quizCatalog', JSON.stringify(defaultQuizzes));
+}
+
+function addQuizToCatalog(quizInfo) {
+    // Check if quiz already exists
+    const exists = gameState.quizCatalog.find(q => q.code === quizInfo.code);
+    if (!exists) {
+        gameState.quizCatalog.push({
+            code: quizInfo.code,
+            filename: quizInfo.filename,
+            path: quizInfo.filepath,
+            name: quizInfo.fullName,
+            subject: quizInfo.subject,
+            level: quizInfo.level,
+            grade: quizInfo.gradeLabel
+        });
+        
+        localStorage.setItem('quizCatalog', JSON.stringify(gameState.quizCatalog));
+        updateCatalogDisplay();
+        return true;
+    }
+    return false;
+}
+
+function updateCatalogDisplay() {
+    const catalogEl = document.getElementById('quiz-catalog');
+    const countEl = document.getElementById('quiz-count');
+    
+    if (gameState.quizCatalog.length === 0) {
+        catalogEl.innerHTML = `
+            <div class="no-quizzes">
+                <i class="fas fa-search"></i>
+                <h4>No quizzes found</h4>
+                <p>Add JSON files to the Questions folder</p>
+                <button id="refresh-catalog" class="btn small">
+                    <i class="fas fa-redo"></i> Refresh
+                </button>
+            </div>
+        `;
+        countEl.textContent = '0 quizzes';
+        return;
+    }
+    
+    // Sort quizzes by code
+    const sortedQuizzes = [...gameState.quizCatalog].sort((a, b) => a.code.localeCompare(b.code));
+    
+    catalogEl.innerHTML = sortedQuizzes.map(quiz => `
+        <div class="quiz-item" data-code="${quiz.code.replace(/-/g, '')}">
+            <div class="quiz-header">
+                <span class="quiz-code">${quiz.code}</span>
+                <span class="quiz-name">${quiz.name}</span>
+            </div>
+            <div class="quiz-details">
+                <span class="quiz-level">${quiz.level}</span> • 
+                <span class="quiz-grade">${quiz.grade}</span> • 
+                <span class="quiz-subject">${quiz.subject}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    countEl.textContent = `${gameState.quizCatalog.length} quizzes`;
+    
+    // Add click handlers
+    document.querySelectorAll('.quiz-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const code = this.dataset.code;
+            setPinFromCode(code);
+            setTimeout(submitPin, 500);
+        });
+    });
+}
+
+// ========== PIN FUNCTIONS ==========
+function updatePinDisplay() {
+    for (let i = 1; i <= 6; i++) {
+        const digitElement = document.getElementById(`digit${i}`);
+        const digitValue = gameState.pin[i - 1];
+        
+        if (digitElement) {
+            const numberEl = digitElement.querySelector('.digit-number');
+            if (numberEl) {
+                numberEl.textContent = digitValue || '_';
+            }
+            digitElement.classList.toggle('filled', digitValue !== '');
+        }
+    }
+}
+
+function addDigit(digit) {
+    if (gameState.currentDigit < 6) {
+        gameState.pin[gameState.currentDigit] = digit;
+        gameState.currentDigit++;
+        updatePinDisplay();
+    }
+}
+
+function removeLastDigit() {
+    if (gameState.currentDigit > 0) {
+        gameState.currentDigit--;
+        gameState.pin[gameState.currentDigit] = '';
+        updatePinDisplay();
+    }
+}
+
+function clearPin() {
+    gameState.pin = ['', '', '', '', '', ''];
+    gameState.currentDigit = 0;
+    updatePinDisplay();
+}
+
+function setPinFromCode(code) {
+    clearPin();
+    const digits = code.split('');
+    digits.forEach(digit => {
+        addDigit(digit);
+    });
+}
+
+// ========== SCREEN MANAGEMENT ==========
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+        targetScreen.classList.add('active');
+    }
+}
+
+// ========== LOAD QUIZ ==========
+async function loadQuizByCode(code) {
+    console.log(`🔍 Loading: ${code}`);
+    
+    // Decode the quiz code
+    const quizInfo = decodeQuizCode(code);
+    if (!quizInfo) {
+        return { 
+            success: false, 
+            error: `Invalid quiz code format: ${code}` 
+        };
+    }
+    
+    // Store current quiz code
+    gameState.currentQuizCode = quizInfo.code;
+    
+    // Update loading display
+    document.getElementById('loading-message').textContent = `Loading ${quizInfo.code}...`;
+    
+    try {
+        // Try to load the file
+        const response = await fetch(quizInfo.filepath);
         
         if (!response.ok) {
             if (response.status === 404) {
-                throw new Error(`JSON file not found: ${filePath}`);
-            } else {
-                throw new Error(`HTTP error: ${response.status}`);
+                throw new Error(`File not found: ${quizInfo.filename}`);
             }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const jsonData = await response.json();
+        const data = await response.json();
+        console.log('✅ Quiz loaded successfully');
         
-        // Validate JSON structure
-        if (!jsonData.questions || !Array.isArray(jsonData.questions) || jsonData.questions.length === 0) {
-            throw new Error("Invalid JSON structure: No questions found");
+        // Validate quiz data
+        if (!data.questions || !Array.isArray(data.questions)) {
+            throw new Error('Invalid quiz format: Missing questions array');
         }
         
-        // Store the questions
-        game.questions = jsonData.questions.map(q => ({
-            q: q.question || q.q || "No question text",
-            options: q.options || ["Option A", "Option B", "Option C", "Option D"],
-            correct: q.correctAnswer || q.correct || 0,
-            points: q.points || 10,
-            explanation: q.explanation || ""
-        }));
+        if (data.questions.length === 0) {
+            throw new Error('Quiz file is empty');
+        }
         
-        status.textContent = `✓ Loaded ${game.questions.length} questions from ${fileName}`;
-        status.className = "status success";
+        // Add to catalog if not already there
+        addQuizToCatalog(quizInfo);
         
-        // Update worksheet info
-        document.getElementById('worksheetInfo').textContent = 
-            `Worksheet: ${pin} - ${getSubjectName(subjectFolder)} Ch${chapter} WS${worksheet}`;
-        
-        // Update level/subject selection UI
-        updateSelectionUI(level, subjectFolder);
-        
-        console.log(`Loaded ${game.questions.length} questions from ${filePath}`);
+        return { 
+            success: true, 
+            data: data, 
+            info: quizInfo 
+        };
         
     } catch (error) {
-        console.error("Error loading JSON:", error);
-        status.textContent = `✗ Error: ${error.message}`;
-        status.className = "status error";
-        
-        // Fallback to sample questions
-        game.questions = getSampleQuestions();
-        status.textContent += " (Using sample questions instead)";
-        
-        // Still update UI
-        document.getElementById('worksheetInfo').textContent = 
-            `Sample: ${pin} - ${getSubjectName(subjectFolder)}`;
+        console.error('❌ Error loading quiz:', error);
+        return { 
+            success: false, 
+            error: error.message 
+        };
     }
 }
 
-// UPDATE SELECTION UI
-function updateSelectionUI(level, subject) {
-    // Select level button
-    document.querySelectorAll('.level-select button').forEach(btn => {
-        btn.classList.remove('selected');
-        if (btn.dataset.level === level) {
-            btn.classList.add('selected');
-        }
-    });
+// ========== SUBMIT PIN ==========
+async function submitPin() {
+    const pin = gameState.pin.join('');
     
-    // Select subject button
-    setTimeout(() => {
-        document.querySelectorAll('#subjects button').forEach(btn => {
-            btn.classList.remove('selected');
-            if (btn.dataset.subject === subject) {
-                btn.classList.add('selected');
+    if (pin.length !== 6) {
+        alert('Please enter all 6 digits');
+        return;
+    }
+    
+    showScreen('loading-screen');
+    document.getElementById('loading-message').textContent = 'Loading quiz...';
+    
+    try {
+        const result = await loadQuizByCode(pin);
+        
+        if (!result.success) {
+            // Check if this might be a new file not in catalog
+            const quizInfo = decodeQuizCode(pin);
+            let errorMsg = `<strong>Worksheet ${quizInfo?.code || pin} not found</strong><br><br>`;
+            errorMsg += `<div style="color: #666; font-size: 0.9rem;">`;
+            errorMsg += `Error: ${result.error}</div>`;
+            
+            // Suggest creating the file
+            if (quizInfo && result.error.includes('not found')) {
+                errorMsg += `<br><div style="background: #f0f9ff; padding: 15px; border-radius: 10px; margin-top: 15px;">`;
+                errorMsg += `<strong>Suggested file location:</strong><br>`;
+                errorMsg += `<code style="background: #e1f0ff; padding: 5px 10px; border-radius: 5px; display: inline-block; margin-top: 5px;">`;
+                errorMsg += `${quizInfo.filepath}</code>`;
+                errorMsg += `</div>`;
             }
-        });
-    }, 100);
+            
+            // Show available quizzes
+            if (gameState.quizCatalog.length > 0) {
+                errorMsg += `<br><strong>Available quizzes (${gameState.quizCatalog.length}):</strong><br>`;
+                gameState.quizCatalog.slice(0, 5).forEach(q => {
+                    errorMsg += `<div style="margin: 5px 0; padding: 8px; background: #f7fafc; border-radius: 5px;">
+                        • <strong>${q.code}</strong>: ${q.name}
+                    </div>`;
+                });
+                
+                if (gameState.quizCatalog.length > 5) {
+                    errorMsg += `<div style="color: #718096; margin-top: 5px;">
+                        ... and ${gameState.quizCatalog.length - 5} more
+                    </div>`;
+                }
+            }
+            
+            throw new Error(errorMsg);
+        }
+        
+        // Store questions and randomize
+        gameState.questions = shuffleArray([...result.data.questions]);
+        
+        // Set quiz info
+        document.getElementById('quiz-title').textContent = 
+            result.data.title || result.info.fullName;
+        document.getElementById('quiz-topic').textContent = 
+            `${result.info.subject} • ${result.info.gradeLabel}`;
+        document.getElementById('current-quiz-code').textContent = 
+            result.info.code;
+        
+        // Initialize game
+        initGame();
+        showScreen('game-screen');
+        
+    } catch (error) {
+        console.error('Failed to load quiz:', error);
+        
+        setTimeout(() => {
+            document.getElementById('error-message').innerHTML = error.message;
+            showScreen('error-screen');
+        }, 500);
+    }
 }
 
-// GET SAMPLE QUESTIONS (FALLBACK)
-function getSampleQuestions() {
-    return [
-        { q: "Sample Question 1", options: ["A", "B", "C", "D"], correct: 0, points: 10 },
-        { q: "Sample Question 2", options: ["A", "B", "C", "D"], correct: 1, points: 10 },
-        { q: "Sample Question 3", options: ["A", "B", "C", "D"], correct: 2, points: 10 },
-        { q: "Sample Question 4", options: ["A", "B", "C", "D"], correct: 3, points: 10 },
-        { q: "Sample Question 5", options: ["A", "B", "C", "D"], correct: 0, points: 10 }
-    ];
-}
-
-// GET SUBJECT NAME
-function getSubjectName(subject) {
-    const names = {
-        'math': 'Mathematics',
-        'science': 'Science',
-        'combined-physics': 'Combined Physics',
-        'pure-physics': 'Pure Physics',
-        'combined-chemistry': 'Combined Chemistry',
-        'pure-chemistry': 'Pure Chemistry'
+// ========== GAME FUNCTIONS ==========
+function initGame() {
+    gameState.currentQuestion = 0;
+    gameState.currentPlayer = 1;
+    gameState.scores = [0, 0];
+    gameState.questionsAnswered = [0, 0];
+    gameState.selectedAnswer = null;
+    gameState.answered = false;
+    gameState.usedPowerups = [];
+    
+    // Initialize powerups
+    gameState.powerups = {
+        1: { boxes: [1, 2, 3], available: [1, 2, 3], revealed: {} },
+        2: { boxes: [4, 5, 6], available: [4, 5, 6], revealed: {} }
     };
-    return names[subject] || subject;
-}
-
-// START GAME
-function startGame() {
-    // Validate
-    if (!game.pin) {
-        alert("Please enter a PIN first");
-        return;
-    }
     
-    if (game.questions.length === 0) {
-        alert("No questions loaded. Please check the JSON file.");
-        return;
-    }
-    
-    // Switch to powerup screen
-    document.getElementById('setup').classList.remove('active');
-    document.getElementById('powerups').classList.add('active');
-    
-    // Assign random powerups
-    assignRandomPowerups();
-}
-
-// ASSIGN RANDOM POWERUPS
-function assignRandomPowerups() {
-    // Clear previous
-    game.players[0].powerups = [];
-    game.players[1].powerups = [];
-    document.querySelectorAll('.powerup').forEach(p => p.classList.remove('selected'));
-    document.getElementById('p1selected').innerHTML = '';
-    document.getElementById('p2selected').innerHTML = '';
-    
-    // Helper function
-    function getRandomPowerups() {
-        const shuffled = [...powerups].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, 2);
-    }
-    
-    // Assign
-    const p1p = getRandomPowerups();
-    const p2p = getRandomPowerups();
-    
-    game.players[0].powerups = p1p.map(p => p.id);
-    game.players[1].powerups = p2p.map(p => p.id);
-    
+    updateScores();
+    updateQuestionsAnswered();
     updatePowerupDisplay();
+    updatePlayerTurn();
+    loadQuestion();
+    
+    document.getElementById('game-over').style.display = 'none';
 }
 
-// SELECT POWERUP
-function selectPowerup(playerIndex, powerupType, element) {
-    const player = game.players[playerIndex];
+function loadQuestion() {
+    // Check if game should end
+    if (gameState.questionsAnswered[0] >= gameState.questionsPerPlayer && 
+        gameState.questionsAnswered[1] >= gameState.questionsPerPlayer) {
+        endGame();
+        return;
+    }
     
-    if (player.powerups.includes(powerupType)) {
-        player.powerups = player.powerups.filter(p => p !== powerupType);
-        element.classList.remove('selected');
-    } else if (player.powerups.length < 2) {
-        player.powerups.push(powerupType);
-        element.classList.add('selected');
+    // If current player has answered all their questions, switch to other player
+    const currentPlayerIdx = gameState.currentPlayer - 1;
+    if (gameState.questionsAnswered[currentPlayerIdx] >= gameState.questionsPerPlayer) {
+        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+        updatePlayerTurn();
+    }
+    
+    const question = gameState.questions[gameState.currentQuestion];
+    
+    if (!question) {
+        // If we run out of questions, end game
+        endGame();
+        return;
+    }
+    
+    // Update counters
+    const totalQuestions = Math.min(gameState.questions.length, gameState.questionsPerPlayer * 2);
+    document.getElementById('current-q').textContent = gameState.currentQuestion + 1;
+    document.getElementById('total-q').textContent = totalQuestions;
+    document.getElementById('question-text').textContent = question.question || "Question";
+    
+    // Clear and add options (shuffle options)
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    
+    if (question.options && question.options.length) {
+        // Create array of option indices and shuffle them
+        const optionIndices = [...Array(question.options.length).keys()];
+        const shuffledIndices = shuffleArray(optionIndices);
+        
+        // Store the new correct index position
+        question.shuffledCorrect = shuffledIndices.indexOf(question.correct);
+        
+        shuffledIndices.forEach((originalIndex, displayIndex) => {
+            const optionEl = document.createElement('div');
+            optionEl.className = 'option';
+            optionEl.textContent = `${String.fromCharCode(65 + displayIndex)}) ${question.options[originalIndex]}`;
+            optionEl.dataset.index = displayIndex;
+            optionEl.dataset.originalIndex = originalIndex;
+            optionEl.onclick = () => selectOption(displayIndex);
+            container.appendChild(optionEl);
+        });
+    }
+    
+    // Reset UI
+    gameState.selectedAnswer = null;
+    gameState.answered = false;
+    
+    const submitBtn = document.getElementById('submit-answer');
+    submitBtn.disabled = true;
+    submitBtn.style.display = 'block';
+    
+    document.getElementById('next-btn').style.display = 'none';
+    
+    // Update powerup button
+    const powerupBtn = document.getElementById('use-powerup-btn');
+    const availablePowerups = gameState.powerups[gameState.currentPlayer].available.length;
+    powerupBtn.disabled = availablePowerups === 0;
+    powerupBtn.textContent = `Use Power-up (${availablePowerups} left)`;
+    
+    // Hide feedback
+    document.getElementById('answer-feedback').innerHTML = 
+        '<div class="feedback-placeholder"><i class="fas fa-lightbulb"></i> Select an answer to continue</div>';
+    
+    updateScores();
+    updatePlayerTurn();
+}
+
+function selectOption(index) {
+    if (gameState.answered) return;
+    
+    // Remove previous selection
+    document.querySelectorAll('.option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    
+    // Select new option
+    const options = document.querySelectorAll('.option');
+    if (options[index]) {
+        options[index].classList.add('selected');
+        gameState.selectedAnswer = index;
+        
+        // Enable submit button
+        document.getElementById('submit-answer').disabled = false;
+    }
+}
+
+function submitAnswer() {
+    if (gameState.answered || gameState.selectedAnswer === null) return;
+    
+    gameState.answered = true;
+    const question = gameState.questions[gameState.currentQuestion];
+    const currentPlayerIdx = gameState.currentPlayer - 1;
+    
+    // Use shuffled correct index
+    const isCorrect = gameState.selectedAnswer === question.shuffledCorrect;
+    
+    // Disable submit
+    document.getElementById('submit-answer').disabled = true;
+    
+    // Mark answers
+    document.querySelectorAll('.option').forEach((opt, index) => {
+        if (index === question.shuffledCorrect) {
+            opt.classList.add('correct');
+        } else if (index === gameState.selectedAnswer && !isCorrect) {
+            opt.classList.add('incorrect');
+        }
+    });
+    
+    // Process answer
+    if (isCorrect) {
+        const points = question.points || 10;
+        gameState.scores[currentPlayerIdx] += points;
+        
+        let feedback = `
+            <div class="feedback-correct">
+                <span>✅</span>
+                <div>
+                    <h3>Correct! +${points} points</h3>
+                    ${question.explanation ? `<p><strong>Explanation:</strong> ${question.explanation}</p>` : ''}
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('answer-feedback').innerHTML = feedback;
+        
     } else {
-        alert(`${player.name} can only select 2 powerups!`);
-        return;
+        const correctLetter = String.fromCharCode(65 + question.shuffledCorrect);
+        const correctText = question.options[question.correct];
+        
+        let feedback = `
+            <div class="feedback-incorrect">
+                <span>❌</span>
+                <div>
+                    <h3>Incorrect</h3>
+                    <p><strong>Correct answer:</strong> ${correctLetter}) ${correctText}</p>
+                    ${question.explanation ? `<p><strong>Explanation:</strong> ${question.explanation}</p>` : ''}
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('answer-feedback').innerHTML = feedback;
     }
     
-    updatePowerupDisplay();
-}
-
-// UPDATE POWERUP DISPLAY
-function updatePowerupDisplay() {
-    document.getElementById('p1selected').innerHTML = '';
-    document.getElementById('p2selected').innerHTML = '';
+    // Update questions answered count
+    gameState.questionsAnswered[currentPlayerIdx]++;
+    updateQuestionsAnswered();
     
-    // Player 1
-    game.players[0].powerups.forEach(powerupId => {
-        const powerup = powerups.find(p => p.id === powerupId);
-        if (powerup) {
-            const div = document.createElement('div');
-            div.textContent = powerup.name;
-            div.style.cssText = 'margin: 5px 0; padding: 8px; background: #e9ecef; border-radius: 4px;';
-            document.getElementById('p1selected').appendChild(div);
-        }
-    });
+    // Show next button
+    document.getElementById('next-btn').style.display = 'block';
+    updateScores();
     
-    // Player 2
-    game.players[1].powerups.forEach(powerupId => {
-        const powerup = powerups.find(p => p.id === powerupId);
-        if (powerup) {
-            const div = document.createElement('div');
-            div.textContent = powerup.name;
-            div.style.cssText = 'margin: 5px 0; padding: 8px; background: #e9ecef; border-radius: 4px;';
-            document.getElementById('p2selected').appendChild(div);
-        }
-    });
-}
-
-// START QUIZ
-function startQuiz() {
-    if (game.players[0].powerups.length !== 2 || game.players[1].powerups.length !== 2) {
-        alert("Each player must have 2 powerups selected!");
-        return;
+    // If answer was wrong, current player gets another turn
+    if (!isCorrect) {
+        // Player stays the same for next question
+    } else {
+        // Switch player for next question
+        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
     }
     
-    // Reset game state
-    game.currentPlayer = 0;
-    game.currentQuestion = 0;
-    game.players[0].score = 0;
-    game.players[1].score = 0;
-    game.selectedOption = null;
+    updatePlayerTurn();
+}
+
+function nextQuestion() {
+    gameState.currentQuestion++;
     
-    // Switch to game screen
-    document.getElementById('powerups').classList.remove('active');
-    document.getElementById('game').classList.add('active');
+    // Check if we need more questions than available
+    if (gameState.currentQuestion >= gameState.questions.length) {
+        // Re-shuffle and start from beginning if needed
+        gameState.questions = shuffleArray([...gameState.questions]);
+        gameState.currentQuestion = 0;
+    }
     
-    // Load first question
     loadQuestion();
 }
 
-// LOAD QUESTION
-function loadQuestion() {
-    const q = game.questions[game.currentQuestion];
-    
-    // Update UI
-    document.getElementById('qNum').textContent = game.currentQuestion + 1;
-    document.getElementById('qTotal').textContent = game.questions.length;
-    document.getElementById('question').textContent = q.q;
-    
-    // Update options
-    const optionsContainer = document.getElementById('options');
-    optionsContainer.innerHTML = '';
-    
-    q.options.forEach((option, index) => {
-        const optionElement = document.createElement('div');
-        optionElement.className = 'option';
-        optionElement.textContent = option;
-        optionElement.dataset.index = index;
-        
-        optionElement.addEventListener('click', function() {
-            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            game.selectedOption = index;
-        });
-        
-        optionsContainer.appendChild(optionElement);
-    });
-    
-    // Update game state
-    updateScores();
-    updateTurnInfo();
-    
-    // Reset buttons
-    document.getElementById('submit').style.display = 'block';
-    document.getElementById('next').style.display = 'none';
-    document.getElementById('feedback').textContent = '';
-    document.getElementById('feedback').className = '';
+function updateScores() {
+    document.getElementById('score1').textContent = gameState.scores[0];
+    document.getElementById('score2').textContent = gameState.scores[1];
 }
 
-// SUBMIT ANSWER
-function submitAnswer() {
-    if (game.selectedOption === null) {
-        alert("Please select an answer!");
+function updateQuestionsAnswered() {
+    document.getElementById('player1-answered').textContent = gameState.questionsAnswered[0];
+    document.getElementById('player2-answered').textContent = gameState.questionsAnswered[1];
+}
+
+function updatePlayerTurn() {
+    const player1 = document.getElementById('player1');
+    const player2 = document.getElementById('player2');
+    
+    player1.classList.toggle('active', gameState.currentPlayer === 1);
+    player2.classList.toggle('active', gameState.currentPlayer === 2);
+}
+
+function updatePowerupDisplay() {
+    // Update powerup counts
+    document.getElementById('player1-powerup-count').textContent = 
+        `${gameState.powerups[1].available.length} power-ups`;
+    document.getElementById('player2-powerup-count').textContent = 
+        `${gameState.powerups[2].available.length} power-ups`;
+    
+    // Reset all powerup boxes
+    document.querySelectorAll('.powerup-box').forEach(box => {
+        const closed = box.querySelector('.box-closed');
+        const open = box.querySelector('.box-open');
+        const boxNum = parseInt(box.dataset.box);
+        const playerNum = parseInt(box.dataset.player);
+        
+        if (gameState.powerups[playerNum].revealed[boxNum]) {
+            // Box is revealed
+            const effect = gameState.powerupEffects[boxNum];
+            closed.style.display = 'none';
+            open.style.display = 'block';
+            open.textContent = getPowerupIcon(effect.type);
+            open.title = effect.name + ': ' + effect.description;
+        } else if (gameState.powerups[playerNum].available.includes(boxNum)) {
+            // Box is available but not revealed
+            closed.style.display = 'block';
+            open.style.display = 'none';
+        } else {
+            // Box has been used
+            closed.style.display = 'block';
+            open.style.display = 'none';
+            closed.textContent = '📭';
+            closed.style.opacity = '0.5';
+        }
+    });
+}
+
+function getPowerupIcon(type) {
+    const icons = {
+        'double': '⚡',
+        'bonus': '✨',
+        'steal': '🔄',
+        'swap': '🔄',
+        'half': '➗',
+        'shield': '🛡️'
+    };
+    return icons[type] || '🎁';
+}
+
+function usePowerup() {
+    const currentPlayer = gameState.currentPlayer;
+    const availableBoxes = gameState.powerups[currentPlayer].available;
+    
+    if (availableBoxes.length === 0) {
+        alert('No power-ups available!');
         return;
     }
     
-    const q = game.questions[game.currentQuestion];
-    const isCorrect = game.selectedOption === q.correct;
+    // Select a random available powerup box
+    const randomIndex = Math.floor(Math.random() * availableBoxes.length);
+    const boxNum = availableBoxes[randomIndex];
     
-    // Update score
-    if (isCorrect) {
-        game.players[game.currentPlayer].score += q.points;
-        document.getElementById('feedback').textContent = `Correct! +${q.points} points`;
-        document.getElementById('feedback').className = 'correct';
-    } else {
-        document.getElementById('feedback').textContent = "Incorrect!";
-        document.getElementById('feedback').className = 'incorrect';
+    // Reveal the powerup
+    gameState.powerups[currentPlayer].revealed[boxNum] = true;
+    
+    // Remove from available
+    gameState.powerups[currentPlayer].available = availableBoxes.filter(b => b !== boxNum);
+    
+    // Apply the powerup effect
+    applyPowerupEffect(boxNum);
+    
+    // Update display
+    updatePowerupDisplay();
+    
+    // Update powerup button
+    const remaining = gameState.powerups[currentPlayer].available.length;
+    const powerupBtn = document.getElementById('use-powerup-btn');
+    powerupBtn.disabled = remaining === 0;
+    powerupBtn.textContent = `Use Power-up (${remaining} left)`;
+    
+    // Add to used powerups list
+    gameState.usedPowerups.push({
+        player: currentPlayer,
+        box: boxNum,
+        effect: gameState.powerupEffects[boxNum]
+    });
+}
+
+function applyPowerupEffect(boxNum) {
+    const effect = gameState.powerupEffects[boxNum];
+    const currentPlayerIdx = gameState.currentPlayer - 1;
+    const otherPlayerIdx = currentPlayerIdx === 0 ? 1 : 0;
+    
+    let message = '';
+    
+    switch(effect.type) {
+        case 'double':
+            // Double points on next correct answer
+            // This would need to be tracked for the next question
+            message = `Power-up activated: ${effect.name}! Next correct answer will give double points.`;
+            break;
+            
+        case 'bonus':
+            gameState.scores[currentPlayerIdx] += 20;
+            message = `Power-up activated: ${effect.name}! +20 points added.`;
+            break;
+            
+        case 'steal':
+            const stealAmount = Math.min(10, gameState.scores[otherPlayerIdx]);
+            gameState.scores[otherPlayerIdx] -= stealAmount;
+            gameState.scores[currentPlayerIdx] += stealAmount;
+            message = `Power-up activated: ${effect.name}! Stole ${stealAmount} points from opponent.`;
+            break;
+            
+        case 'swap':
+            [gameState.scores[currentPlayerIdx], gameState.scores[otherPlayerIdx]] = 
+            [gameState.scores[otherPlayerIdx], gameState.scores[currentPlayerIdx]];
+            message = `Power-up activated: ${effect.name}! Scores swapped.`;
+            break;
+            
+        case 'half':
+            const halfPoints = Math.floor(gameState.scores[otherPlayerIdx] / 2);
+            gameState.scores[otherPlayerIdx] -= halfPoints;
+            message = `Power-up activated: ${effect.name}! Opponent lost half their points (${halfPoints}).`;
+            break;
+            
+        case 'shield':
+            // Shield would protect from next point loss
+            // This would need to be tracked
+            message = `Power-up activated: ${effect.name}! You're protected from point loss on next round.`;
+            break;
     }
     
-    // Highlight answers
-    document.querySelectorAll('.option').forEach((opt, index) => {
-        opt.style.pointerEvents = 'none';
-        if (index === q.correct) {
-            opt.classList.add('correct');
-        } else if (index === game.selectedOption && !isCorrect) {
-            opt.classList.add('wrong');
+    // Show feedback
+    const feedbackDiv = document.getElementById('answer-feedback');
+    feedbackDiv.innerHTML = `
+        <div class="powerup-feedback">
+            <span>🎁</span>
+            <div>
+                <h3>${effect.name}</h3>
+                <p>${message}</p>
+            </div>
+        </div>
+    `;
+    
+    updateScores();
+}
+
+function endGame() {
+    const score1 = gameState.scores[0];
+    const score2 = gameState.scores[1];
+    
+    let winnerMessage = '';
+    let winnerName = '';
+    
+    if (score1 > score2) {
+        winnerMessage = 'Player 1 Wins! 🏆';
+        winnerName = 'Player 1';
+    } else if (score2 > score1) {
+        winnerMessage = 'Player 2 Wins! 🏆';
+        winnerName = 'Player 2';
+    } else {
+        winnerMessage = "It's a Tie! 🤝";
+        winnerName = 'Both Players';
+    }
+    
+    document.getElementById('winner-message').textContent = winnerMessage;
+    document.getElementById('winner-name').textContent = winnerName;
+    document.getElementById('final-score1').textContent = score1;
+    document.getElementById('final-score2').textContent = score2;
+    document.getElementById('final-answered1').textContent = gameState.questionsAnswered[0];
+    document.getElementById('final-answered2').textContent = gameState.questionsAnswered[1];
+    
+    document.getElementById('game-over').style.display = 'block';
+}
+
+// ========== UTILITY FUNCTIONS ==========
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+// ========== INITIALIZATION ==========
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 Auto-Quiz Game Initialized');
+    
+    // Initialize PIN display
+    updatePinDisplay();
+    
+    // Start scanning for quizzes
+    await loadCatalogFromStorage();
+    updateCatalogDisplay();
+    
+    // ========== EVENT LISTENERS ==========
+    // Number buttons
+    document.querySelectorAll('.key[data-key]').forEach(button => {
+        button.addEventListener('click', function() {
+            const digit = this.getAttribute('data-key');
+            addDigit(digit);
+        });
+    });
+    
+    // Clear button
+    document.getElementById('clear-btn').addEventListener('click', clearPin);
+    
+    // Submit button
+    document.getElementById('submit-pin').addEventListener('click', submitPin);
+    
+    // Scan button
+    document.getElementById('scan-quizzes').addEventListener('click', scanForQuizzes);
+    
+    // Test button
+    document.getElementById('test-pin').addEventListener('click', function() {
+        setPinFromCode('342091'); // 342-09-1
+        setTimeout(submitPin, 500);
+    });
+    
+    // Game buttons
+    document.getElementById('submit-answer').addEventListener('click', submitAnswer);
+    document.getElementById('next-btn').addEventListener('click', nextQuestion);
+    document.getElementById('home-btn').addEventListener('click', function() {
+        clearPin();
+        showScreen('pin-screen');
+    });
+    
+    // Powerup button
+    document.getElementById('use-powerup-btn').addEventListener('click', usePowerup);
+    
+    // Error screen buttons
+    document.getElementById('retry-btn')?.addEventListener('click', submitPin);
+    document.getElementById('back-to-pin-error')?.addEventListener('click', function() {
+        clearPin();
+        showScreen('pin-screen');
+    });
+    
+    // Game over buttons
+    document.getElementById('restart-btn')?.addEventListener('click', initGame);
+    document.getElementById('new-chapter-btn')?.addEventListener('click', function() {
+        clearPin();
+        showScreen('pin-screen');
+    });
+    
+    // Keyboard support
+    document.addEventListener('keydown', function(e) {
+        if (document.getElementById('pin-screen').classList.contains('active')) {
+            if (e.key >= '0' && e.key <= '9') {
+                addDigit(e.key);
+            } else if (e.key === 'Backspace') {
+                removeLastDigit();
+            } else if (e.key === 'Enter') {
+                submitPin();
+            }
         }
     });
     
-    // Update UI
-    updateScores();
-    
-    // Show next button
-    document.getElementById('submit').style.display = 'none';
-    document.getElementById('next').style.display = 'block';
-}
+    console.log('✅ All systems ready');
+    console.log('💡 Add JSON quiz files to the Questions folder');
+    console.log('📂 File naming: 3-digit level/subject/grade + 2-digit chapter + 1-digit worksheet');
+    console.log('📂 Example: 342091.json = 3(upper sec)4(comb chem)2(S4)09(chapter9)1(worksheet1)');
+});
 
-// NEXT QUESTION
-function nextQuestion() {
-    game.currentQuestion++;
-    game.currentPlayer = game.currentPlayer === 0 ? 1 : 0;
-    game.selectedOption = null;
+// ========== DEBUG & DEVELOPMENT TOOLS ==========
+window.quizTools = {
+    // Test a specific quiz
+    testQuiz: function(code) {
+        setPinFromCode(code);
+        setTimeout(submitPin, 500);
+    },
     
-    if (game.currentQuestion < game.questions.length) {
-        loadQuestion();
-    } else {
-        endGame();
+    // Clear localStorage
+    resetCatalog: function() {
+        localStorage.removeItem('quizCatalog');
+        gameState.quizCatalog = [];
+        updateCatalogDisplay();
+        console.log('Catalog reset');
+    },
+    
+    // Add a test quiz
+    addTestQuiz: function() {
+        const testQuiz = {
+            code: '201-01-1',
+            filename: '201011.json',
+            path: 'Questions/lower-secondary/math/201011.json',
+            name: 'Sec 1 Math Chapter 1',
+            subject: 'Mathematics',
+            level: 'Lower Secondary',
+            grade: 'S1'
+        };
+        
+        gameState.quizCatalog.push(testQuiz);
+        localStorage.setItem('quizCatalog', JSON.stringify(gameState.quizCatalog));
+        updateCatalogDisplay();
+        console.log('Test quiz added');
+    },
+    
+    // Show current state
+    showState: function() {
+        console.log('Current PIN:', gameState.pin);
+        console.log('Catalog size:', gameState.quizCatalog.length);
+        console.log('Catalog:', gameState.quizCatalog);
     }
-}
-
-// UPDATE SCORES
-function updateScores() {
-    // Player 1
-    document.querySelector('#score1 .points').textContent = game.players[0].score;
-    document.querySelector('#score1 .name').textContent = game.players[0].name;
-    document.getElementById('score1').style.borderColor = game.players[0].color;
-    
-    // Player 2
-    document.querySelector('#score2 .points').textContent = game.players[1].score;
-    document.querySelector('#score2 .name').textContent = game.players[1].name;
-    document.getElementById('score2').style.borderColor = game.players[1].color;
-    
-    // Highlight current player
-    document.getElementById('score1').classList.toggle('active', game.currentPlayer === 0);
-    document.getElementById('score2').classList.toggle('active', game.currentPlayer === 1);
-}
-
-// UPDATE TURN INFO
-function updateTurnInfo() {
-    const player = game.players[game.currentPlayer];
-    document.getElementById('turnInfo').textContent = `${player.name}'s Turn`;
-    document.getElementById('turnInfo').style.color = player.color;
-}
-
-// END GAME
-function endGame() {
-    // Determine winner
-    let winner, loser;
-    if (game.players[0].score > game.players[1].score) {
-        winner = game.players[0];
-        loser = game.players[1];
-    } else if (game.players[1].score > game.players[0].score) {
-        winner = game.players[1];
-        loser = game.players[0];
-    } else {
-        const rand = Math.random();
-        winner = rand < 0.5 ? game.players[0] : game.players[1];
-        loser = winner === game.players[0] ? game.players[1] : game.players[0];
-    }
-    
-    // Update results display
-    document.getElementById('winnerName').textContent = winner.name;
-    document.getElementById('loserName').textContent = loser.name;
-    document.getElementById('winnerScore').textContent = winner.score;
-    document.getElementById('loserScore').textContent = loser.score;
-    
-    // Apply final powerup
-    applyFinalPowerup(winner, loser);
-    
-    // Switch to results screen
-    document.getElementById('game').classList.remove('active');
-    document.getElementById('results').classList.add('active');
-}
-
-// APPLY FINAL POWERUP
-function applyFinalPowerup(winner, loser) {
-    const randomIndex = Math.floor(Math.random() * loser.powerups.length);
-    const powerupId = loser.powerups[randomIndex];
-    
-    let newWinnerScore = winner.score;
-    let newLoserScore = loser.score;
-    let description = '';
-    
-    switch(powerupId) {
-        case 'increase':
-            newLoserScore = Math.floor(loser.score * 1.2);
-            description = `${loser.name}'s score increased by 20%!`;
-            break;
-        case 'decrease':
-            newLoserScore = Math.floor(loser.score * 0.8);
-            description = `${loser.name}'s score decreased by 20%!`;
-            break;
-        case 'swap':
-            newWinnerScore = loser.score;
-            newLoserScore = winner.score;
-            description = `Scores swapped between ${winner.name} and ${loser.name}!`;
-            break;
-        case 'double':
-            newLoserScore = loser.score * 2;
-            description = `${loser.name}'s score doubled!`;
-            break;
-    }
-    
-    // Update display
-    document.getElementById('powerupText').textContent = description;
-    document.getElementById('newWinner').textContent = winner.name;
-    document.getElementById('newLoser').textContent = loser.name;
-    document.getElementById('newWinnerScore').textContent = newWinnerScore;
-    document.getElementById('newLoserScore').textContent = newLoserScore;
-}
-
-// PLAY AGAIN
-function playAgain() {
-    document.getElementById('results').classList.remove('active');
-    document.getElementById('powerups').classList.add('active');
-    assignRandomPowerups();
-}
-
-// NEW GAME
-function newGame() {
-    document.getElementById('results').classList.remove('active');
-    document.getElementById('setup').classList.add('active');
-    
-    // Reset
-    game.level = null;
-    game.subject = null;
-    game.pin = null;
-    document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-    document.getElementById('pin').value = '';
-    document.getElementById('pinInfo').innerHTML = '';
-    document.getElementById('jsonStatus').textContent = '';
-    
-    updateSubjectButtons();
-    discoverAvailableWorksheets();
-}
+};
