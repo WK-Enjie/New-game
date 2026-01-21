@@ -532,8 +532,11 @@ function loadQuestion() {
         const optionIndices = [...Array(question.options.length).keys()];
         const shuffledIndices = shuffleArray(optionIndices);
         
+        // Get the correct answer index - supports both "correctAnswer" and "correct"
+        const correctIndex = question.correctAnswer !== undefined ? question.correctAnswer : question.correct;
+        
         // Store the new correct index position
-        question.shuffledCorrect = shuffledIndices.indexOf(question.correct);
+        question.shuffledCorrect = shuffledIndices.indexOf(correctIndex);
         
         shuffledIndices.forEach((originalIndex, displayIndex) => {
             const optionEl = document.createElement('div');
@@ -596,6 +599,10 @@ function submitAnswer() {
     const question = gameState.questions[gameState.currentQuestion];
     const currentPlayerIdx = gameState.currentPlayer - 1;
     
+    // Get the correct answer index - supports both "correctAnswer" and "correct"
+    const correctIndex = question.correctAnswer !== undefined ? question.correctAnswer : question.correct;
+    const correctText = question.options[correctIndex];
+    
     // Use shuffled correct index
     const isCorrect = gameState.selectedAnswer === question.shuffledCorrect;
     
@@ -630,7 +637,6 @@ function submitAnswer() {
         
     } else {
         const correctLetter = String.fromCharCode(65 + question.shuffledCorrect);
-        const correctText = question.options[question.correct];
         
         let feedback = `
             <div class="feedback-incorrect">
