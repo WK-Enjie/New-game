@@ -102,7 +102,7 @@
         <div id="powerup-screen" class="screen">
             <div class="powerup-container">
                 <h2><i class="fas fa-gift"></i> Power-up Selection</h2>
-                <p class="instructions">Each player will select a random power-up that will affect their final score!</p>
+                <p class="instructions">Each player will select TWO power-ups. One will be randomly applied at the end of the game by the WINNER!</p>
                 
                 <div class="powerup-grid">
                     <div class="powerup-box" data-powerup="double">
@@ -144,27 +144,63 @@
                         <h3>Switch Scores</h3>
                         <p>Swap scores with your opponent</p>
                     </div>
+                    
+                    <div class="powerup-box" data-powerup="steal50">
+                        <div class="powerup-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <h3>Steal 50%</h3>
+                        <p>Take 50% of opponent's points</p>
+                    </div>
                 </div>
                 
                 <div class="player-powerups">
                     <div class="player-powerup" id="player1-powerup">
                         <h3><i class="fas fa-user"></i> <span id="player1-display">Player 1</span></h3>
-                        <div class="selected-powerup">
-                            <p class="no-powerup">No power-up selected yet</p>
+                        <p class="powerup-instruction">Select 2 power-ups:</p>
+                        <div class="powerup-selection">
+                            <div class="selected-powerup">
+                                <p class="no-powerup">Power-up 1: Not selected</p>
+                            </div>
+                            <div class="selected-powerup">
+                                <p class="no-powerup">Power-up 2: Not selected</p>
+                            </div>
                         </div>
-                        <button class="btn btn-small select-powerup-btn" data-player="1">
-                            <i class="fas fa-dice"></i> Select Random Power-up
-                        </button>
+                        <div class="powerup-buttons">
+                            <button class="btn btn-small select-powerup-btn" data-player="1" data-slot="1">
+                                <i class="fas fa-dice"></i> Select Power-up 1
+                            </button>
+                            <button class="btn btn-small select-powerup-btn" data-player="1" data-slot="2">
+                                <i class="fas fa-dice"></i> Select Power-up 2
+                            </button>
+                            <button class="btn btn-small btn-danger clear-powerups-btn" data-player="1">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="player-powerup" id="player2-powerup">
                         <h3><i class="fas fa-user-friends"></i> <span id="player2-display">Player 2</span></h3>
-                        <div class="selected-powerup">
-                            <p class="no-powerup">No power-up selected yet</p>
+                        <p class="powerup-instruction">Select 2 power-ups:</p>
+                        <div class="powerup-selection">
+                            <div class="selected-powerup">
+                                <p class="no-powerup">Power-up 1: Not selected</p>
+                            </div>
+                            <div class="selected-powerup">
+                                <p class="no-powerup">Power-up 2: Not selected</p>
+                            </div>
                         </div>
-                        <button class="btn btn-small select-powerup-btn" data-player="2">
-                            <i class="fas fa-dice"></i> Select Random Power-up
-                        </button>
+                        <div class="powerup-buttons">
+                            <button class="btn btn-small select-powerup-btn" data-player="2" data-slot="1">
+                                <i class="fas fa-dice"></i> Select Power-up 1
+                            </button>
+                            <button class="btn btn-small select-powerup-btn" data-player="2" data-slot="2">
+                                <i class="fas fa-dice"></i> Select Power-up 2
+                            </button>
+                            <button class="btn btn-small btn-danger clear-powerups-btn" data-player="2">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -203,7 +239,7 @@
                             <div class="player-score">Score: <span id="player1-score">0</span></div>
                         </div>
                         <div class="player-powerup-display">
-                            <small>Power-up: <span id="player1-powerup-name">None</span></small>
+                            <small>Power-ups: <span id="player1-powerup-name">None selected</span></small>
                         </div>
                         <div class="current-turn" id="player1-turn-indicator">Current Turn</div>
                     </div>
@@ -214,7 +250,7 @@
                             <div class="player-score">Score: <span id="player2-score">0</span></div>
                         </div>
                         <div class="player-powerup-display">
-                            <small>Power-up: <span id="player2-powerup-name">None</span></small>
+                            <small>Power-ups: <span id="player2-powerup-name">None selected</span></small>
                         </div>
                         <div class="current-turn" id="player2-turn-indicator">Current Turn</div>
                     </div>
@@ -271,17 +307,31 @@
                             </div>
                         </div>
                         
-                        <div class="powerup-effect">
-                            <div class="powerup-info">
-                                <i class="fas fa-gift"></i>
-                                <span>Power-up: <strong id="player1-final-powerup">None</strong></span>
+                        <div class="powerup-section">
+                            <div class="selected-powerups-info">
+                                <div class="powerup-info">
+                                    <i class="fas fa-gift"></i>
+                                    <span>Selected Power-ups:</span>
+                                </div>
+                                <div class="powerup-list" id="player1-all-powerups">
+                                    <span class="powerup-tag">None</span>
+                                    <span class="powerup-tag">None</span>
+                                </div>
                             </div>
-                            <div class="effect-arrow">
-                                <i class="fas fa-long-arrow-alt-right"></i>
-                            </div>
-                            <div class="final-score-value">
-                                <span class="final-label">Final Score</span>
-                                <span class="final-score" id="player1-final-score">0</span>
+                            
+                            <div class="applied-powerup-effect">
+                                <div class="random-selection">
+                                    <i class="fas fa-random"></i>
+                                    <span>Randomly applied:</span>
+                                    <strong id="player1-applied-powerup">None</strong>
+                                </div>
+                                <div class="effect-arrow">
+                                    <i class="fas fa-long-arrow-alt-right"></i>
+                                </div>
+                                <div class="final-score-value">
+                                    <span class="final-label">Final Score</span>
+                                    <span class="final-score" id="player1-final-score">0</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -295,17 +345,31 @@
                             </div>
                         </div>
                         
-                        <div class="powerup-effect">
-                            <div class="powerup-info">
-                                <i class="fas fa-gift"></i>
-                                <span>Power-up: <strong id="player2-final-powerup">None</strong></span>
+                        <div class="powerup-section">
+                            <div class="selected-powerups-info">
+                                <div class="powerup-info">
+                                    <i class="fas fa-gift"></i>
+                                    <span>Selected Power-ups:</span>
+                                </div>
+                                <div class="powerup-list" id="player2-all-powerups">
+                                    <span class="powerup-tag">None</span>
+                                    <span class="powerup-tag">None</span>
+                                </div>
                             </div>
-                            <div class="effect-arrow">
-                                <i class="fas fa-long-arrow-alt-right"></i>
-                            </div>
-                            <div class="final-score-value">
-                                <span class="final-label">Final Score</span>
-                                <span class="final-score" id="player2-final-score">0</span>
+                            
+                            <div class="applied-powerup-effect">
+                                <div class="random-selection">
+                                    <i class="fas fa-random"></i>
+                                    <span>Randomly applied:</span>
+                                    <strong id="player2-applied-powerup">None</strong>
+                                </div>
+                                <div class="effect-arrow">
+                                    <i class="fas fa-long-arrow-alt-right"></i>
+                                </div>
+                                <div class="final-score-value">
+                                    <span class="final-label">Final Score</span>
+                                    <span class="final-score" id="player2-final-score">0</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -317,6 +381,10 @@
                     </div>
                     <h2 id="winner-name">Player Wins!</h2>
                     <p id="winning-message">Congratulations on your victory!</p>
+                    <div class="winner-powerup-notice" id="winner-powerup-notice">
+                        <i class="fas fa-crown"></i>
+                        <span>The winner's randomly selected power-up was applied!</span>
+                    </div>
                 </div>
                 
                 <!-- Worksheet Contents Section -->

@@ -190,6 +190,16 @@ h2 {
     background: rgba(255, 255, 255, 0.2);
 }
 
+.btn-danger {
+    background: rgba(244, 67, 54, 0.2);
+    color: #ff6b6b;
+    border: 2px solid rgba(244, 67, 54, 0.3);
+}
+
+.btn-danger:hover {
+    background: rgba(244, 67, 54, 0.3);
+}
+
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -265,26 +275,41 @@ h2 {
 
 .player-powerup h3 {
     color: #4cc9f0;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.powerup-instruction {
+    color: #b0b0b0;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.powerup-selection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
 .selected-powerup {
     padding: 15px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
-    margin-bottom: 15px;
-    min-height: 60px;
+    min-height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
 .no-powerup {
     color: #888;
     font-style: italic;
+    font-size: 0.9rem;
 }
 
 .has-powerup {
@@ -293,6 +318,18 @@ h2 {
     gap: 10px;
     color: #4cc9f0;
     font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.powerup-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.clear-powerups-btn {
+    grid-column: span 2;
 }
 
 /* Quiz Screen */
@@ -343,7 +380,7 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .player-header h3 {
@@ -355,6 +392,12 @@ h2 {
     font-size: 1.5rem;
     font-weight: bold;
     color: #4cc9f0;
+}
+
+.player-powerup-display {
+    color: #b0b0b0;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
 }
 
 .current-turn {
@@ -516,21 +559,59 @@ h2 {
     color: #4cc9f0;
 }
 
-.powerup-effect {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+.powerup-section {
     background: rgba(0, 0, 0, 0.3);
     padding: 20px;
     border-radius: 10px;
+}
+
+.selected-powerups-info {
+    margin-bottom: 20px;
 }
 
 .powerup-info {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #4cc9f0;
+}
+
+.powerup-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.powerup-tag {
+    background: rgba(76, 201, 240, 0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    border: 1px solid rgba(76, 201, 240, 0.3);
+}
+
+.applied-powerup-effect {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.random-selection {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #f72585;
+}
+
+.random-selection i {
+    font-size: 1.2rem;
 }
 
 .effect-arrow {
@@ -579,6 +660,19 @@ h2 {
 #winning-message {
     color: #b0b0b0;
     font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.winner-powerup-notice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: gold;
+    font-size: 1rem;
+    background: rgba(247, 37, 133, 0.2);
+    padding: 10px;
+    border-radius: 8px;
 }
 
 /* Worksheet Contents Section */
@@ -680,7 +774,19 @@ h2 {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
     
-    .powerup-effect {
+    .powerup-selection {
+        grid-template-columns: 1fr;
+    }
+    
+    .powerup-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .clear-powerups-btn {
+        grid-column: span 1;
+    }
+    
+    .applied-powerup-effect {
         flex-direction: column;
         text-align: center;
     }

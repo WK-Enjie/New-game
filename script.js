@@ -3,12 +3,16 @@ const gameState = {
     player1: {
         name: "Player 1",
         score: 0,
-        powerup: null
+        powerup1: null,  // First power-up
+        powerup2: null,  // Second power-up
+        appliedPowerup: null  // Which power-up was actually applied
     },
     player2: {
         name: "Player 2",
         score: 0,
-        powerup: null
+        powerup1: null,  // First power-up
+        powerup2: null,  // Second power-up
+        appliedPowerup: null  // Which power-up was actually applied
     },
     currentPlayer: 1,
     currentQuestion: 0,
@@ -46,7 +50,8 @@ const powerUps = {
     halve: { name: "Halve Points", multiplier: 0.5, icon: "fas fa-divide" },
     increase30: { name: "+30% Points", multiplier: 1.3, icon: "fas fa-arrow-up" },
     decrease30: { name: "-30% Points", multiplier: 0.7, icon: "fas fa-arrow-down" },
-    switch: { name: "Switch Scores", multiplier: 0, icon: "fas fa-exchange-alt" }
+    switch: { name: "Switch Scores", multiplier: 0, icon: "fas fa-exchange-alt" },
+    steal50: { name: "Steal 50%", multiplier: 0, icon: "fas fa-hand-holding-usd" }
 };
 
 // DOM Elements
@@ -115,8 +120,18 @@ function initializeEventListeners() {
     // Power-up selection buttons
     document.querySelectorAll('.select-powerup-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const player = e.target.dataset.player || e.target.closest('.select-powerup-btn').dataset.player;
-            selectRandomPowerup(parseInt(player));
+            const button = e.target.closest('.select-powerup-btn');
+            const player = parseInt(button.dataset.player);
+            const slot = parseInt(button.dataset.slot);
+            selectRandomPowerup(player, slot);
+        });
+    });
+    
+    // Clear powerups buttons
+    document.querySelectorAll('.clear-powerups-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const player = parseInt(e.target.closest('.clear-powerups-btn').dataset.player);
+            clearPlayerPowerups(player);
         });
     });
     
@@ -426,9 +441,8 @@ async function loadWorksheetData() {
         document.getElementById('player2-display').textContent = gameState.player2.name;
         
         // Reset power-ups
-        gameState.player1.powerup = null;
-        gameState.player2.powerup = null;
-        updatePowerupDisplay();
+        clearPlayerPowerups(1);
+        clearPlayerPowerups(2);
         
         // Show power-up screen
         showScreen('powerup');
@@ -504,65 +518,94 @@ function resetWorksheetSelection() {
     document.getElementById('start-game-btn').disabled = true;
 }
 
-function selectRandomPowerup(player) {
+function selectRandomPowerup(player, slot) {
     const powerupKeys = Object.keys(powerUps);
     const randomPowerupKey = powerupKeys[Math.floor(Math.random() * powerupKeys.length)];
     
     if (player === 1) {
-        gameState.player1.powerup = randomPowerupKey;
+        if (slot === 1) {
+            gameState.player1.powerup1 = randomPowerupKey;
+        } else {
+            gameState.player1.powerup2 = randomPowerupKey;
+        }
     } else {
-        gameState.player2.powerup = randomPowerupKey;
+        if (slot === 1) {
+            gameState.player2.powerup1 = randomPowerupKey;
+        } else {
+            gameState.player2.powerup2 = randomPowerupKey;
+        }
     }
     
-    updatePowerupDisplay();
+    updatePowerupDisplay(player);
     checkPowerupSelection();
 }
 
-function updatePowerupDisplay() {
-    // Update player 1 power-up display
-    const player1PowerupDiv = document.querySelector('#player1-powerup .selected-powerup');
-    if (gameState.player1.powerup) {
-        const powerup = powerUps[gameState.player1.powerup];
-        player1PowerupDiv.innerHTML = `
-            <div class="has-powerup">
-                <i class="${powerup.icon}"></i>
-                <span>${powerup.name}</span>
-            </div>
-        `;
+function clearPlayerPowerups(player) {
+    if (player === 1) {
+        gameState.player1.powerup1 = null;
+        gameState.player1.powerup2 = null;
     } else {
-        player1PowerupDiv.innerHTML = '<p class="no-powerup">No power-up selected yet</p>';
+        gameState.player2.powerup1 = null;
+        gameState.player2.powerup2 = null;
     }
     
-    // Update player 2 power-up display
-    const player2PowerupDiv = document.querySelector('#player2-powerup .selected-powerup');
-    if (gameState.player2.powerup) {
-        const powerup = powerUps[gameState.player2.powerup];
-        player2PowerupDiv.innerHTML = `
+    updatePowerupDisplay(player);
+    checkPowerupSelection();
+}
+
+function updatePowerupDisplay(player) {
+    const playerData = player === 1 ? gameState.player1 : gameState.player2;
+    const playerDiv = document.getElementById(`player${player}-powerup`);
+    
+    // Get the powerup slots
+    const powerup1Div = playerDiv.querySelector('.selected-powerup:nth-child(1)');
+    const powerup2Div = playerDiv.querySelector('.selected-powerup:nth-child(2)');
+    
+    // Update powerup 1 display
+    if (playerData.powerup1) {
+        const powerup = powerUps[playerData.powerup1];
+        powerup1Div.innerHTML = `
             <div class="has-powerup">
                 <i class="${powerup.icon}"></i>
                 <span>${powerup.name}</span>
             </div>
         `;
     } else {
-        player2PowerupDiv.innerHTML = '<p class="no-powerup">No power-up selected yet</p>';
+        powerup1Div.innerHTML = '<p class="no-powerup">Power-up 1: Not selected</p>';
+    }
+    
+    // Update powerup 2 display
+    if (playerData.powerup2) {
+        const powerup = powerUps[playerData.powerup2];
+        powerup2Div.innerHTML = `
+            <div class="has-powerup">
+                <i class="${powerup.icon}"></i>
+                <span>${powerup.name}</span>
+            </div>
+        `;
+    } else {
+        powerup2Div.innerHTML = '<p class="no-powerup">Power-up 2: Not selected</p>';
     }
 }
 
 function checkPowerupSelection() {
     const startQuizBtn = document.getElementById('start-quiz-btn');
-    if (gameState.player1.powerup && gameState.player2.powerup) {
-        startQuizBtn.disabled = false;
-    } else {
-        startQuizBtn.disabled = true;
-    }
+    const player1Ready = gameState.player1.powerup1 && gameState.player1.powerup2;
+    const player2Ready = gameState.player2.powerup1 && gameState.player2.powerup2;
+    
+    startQuizBtn.disabled = !(player1Ready && player2Ready);
 }
 
 function startQuiz() {
     // Set up quiz screen
     document.getElementById('quiz-player1-name').textContent = gameState.player1.name;
     document.getElementById('quiz-player2-name').textContent = gameState.player2.name;
-    document.getElementById('player1-powerup-name').textContent = powerUps[gameState.player1.powerup]?.name || "None";
-    document.getElementById('player2-powerup-name').textContent = powerUps[gameState.player2.powerup]?.name || "None";
+    
+    // Update power-up display in quiz screen
+    const player1Powerups = getPlayerPowerupsText(1);
+    const player2Powerups = getPlayerPowerupsText(2);
+    document.getElementById('player1-powerup-name').textContent = player1Powerups;
+    document.getElementById('player2-powerup-name').textContent = player2Powerups;
     
     // Update worksheet name
     const worksheetData = gameState.currentWorksheetData;
@@ -573,6 +616,8 @@ function startQuiz() {
     gameState.currentQuestion = 0;
     gameState.player1.score = 0;
     gameState.player2.score = 0;
+    gameState.player1.appliedPowerup = null;
+    gameState.player2.appliedPowerup = null;
     gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
     gameState.startTime = Date.now();
     
@@ -581,6 +626,20 @@ function startQuiz() {
     
     // Load first question
     loadQuestion();
+}
+
+function getPlayerPowerupsText(player) {
+    const playerData = player === 1 ? gameState.player1 : gameState.player2;
+    const powerups = [];
+    
+    if (playerData.powerup1) {
+        powerups.push(powerUps[playerData.powerup1].name);
+    }
+    if (playerData.powerup2) {
+        powerups.push(powerUps[playerData.powerup2].name);
+    }
+    
+    return powerups.length > 0 ? powerups.join(", ") : "None selected";
 }
 
 function loadQuestion() {
@@ -761,17 +820,40 @@ function endGame() {
         gameState.timer = null;
     }
     
-    // Calculate final scores with power-ups
+    // Randomly select one power-up from each player to apply
+    // But only the winner's selected power-up will actually be applied
+    selectRandomPowerupToApply();
+    
+    // Calculate final scores
     let player1FinalScore = gameState.player1.score;
     let player2FinalScore = gameState.player2.score;
     
-    // Apply power-ups
-    if (gameState.player1.powerup) {
-        player1FinalScore = applyPowerup(gameState.player1.powerup, player1FinalScore, player2FinalScore, true);
-    }
+    // Determine winner based on raw scores
+    const player1RawScore = player1FinalScore;
+    const player2RawScore = player2FinalScore;
     
-    if (gameState.player2.powerup) {
-        player2FinalScore = applyPowerup(gameState.player2.powerup, player2FinalScore, player1FinalScore, false);
+    let winner = player1RawScore > player2RawScore ? 1 : 
+                 player2RawScore > player1RawScore ? 2 : 0;
+    
+    // Apply power-ups (only winner's randomly selected power-up is applied)
+    if (winner === 1 && gameState.player1.appliedPowerup) {
+        player1FinalScore = applyPowerup(
+            gameState.player1.appliedPowerup, 
+            player1FinalScore, 
+            player2FinalScore, 
+            true
+        );
+    } else if (winner === 2 && gameState.player2.appliedPowerup) {
+        player2FinalScore = applyPowerup(
+            gameState.player2.appliedPowerup, 
+            player2FinalScore, 
+            player1FinalScore, 
+            false
+        );
+    } else if (winner === 0) {
+        // Tie - no power-ups applied
+        player1FinalScore = player1RawScore;
+        player2FinalScore = player2RawScore;
     }
     
     // Calculate completion time
@@ -780,44 +862,128 @@ function endGame() {
     document.getElementById('completion-time').textContent = completionTime;
     
     // Update results screen
+    updateResultsScreen(player1FinalScore, player2FinalScore, winner);
+    
+    // Show results screen
+    showScreen('results');
+}
+
+function selectRandomPowerupToApply() {
+    // For player 1: randomly select one of their two power-ups
+    if (gameState.player1.powerup1 && gameState.player1.powerup2) {
+        const randomChoice = Math.random() < 0.5 ? 1 : 2;
+        gameState.player1.appliedPowerup = randomChoice === 1 ? 
+            gameState.player1.powerup1 : gameState.player1.powerup2;
+    } else if (gameState.player1.powerup1) {
+        gameState.player1.appliedPowerup = gameState.player1.powerup1;
+    } else if (gameState.player1.powerup2) {
+        gameState.player1.appliedPowerup = gameState.player1.powerup2;
+    }
+    
+    // For player 2: randomly select one of their two power-ups
+    if (gameState.player2.powerup1 && gameState.player2.powerup2) {
+        const randomChoice = Math.random() < 0.5 ? 1 : 2;
+        gameState.player2.appliedPowerup = randomChoice === 1 ? 
+            gameState.player2.powerup1 : gameState.player2.powerup2;
+    } else if (gameState.player2.powerup1) {
+        gameState.player2.appliedPowerup = gameState.player2.powerup1;
+    } else if (gameState.player2.powerup2) {
+        gameState.player2.appliedPowerup = gameState.player2.powerup2;
+    }
+}
+
+function updateResultsScreen(player1FinalScore, player2FinalScore, winner) {
+    // Update player names
     document.getElementById('results-player1-name').textContent = gameState.player1.name;
     document.getElementById('results-player2-name').textContent = gameState.player2.name;
     
+    // Update raw scores
     document.getElementById('player1-raw-score').textContent = gameState.player1.score;
     document.getElementById('player2-raw-score').textContent = gameState.player2.score;
     
-    document.getElementById('player1-final-powerup').textContent = 
-        powerUps[gameState.player1.powerup]?.name || "None";
-    document.getElementById('player2-final-powerup').textContent = 
-        powerUps[gameState.player2.powerup]?.name || "None";
+    // Update power-up displays
+    updatePlayerPowerupDisplay(1);
+    updatePlayerPowerupDisplay(2);
     
+    // Update final scores
     document.getElementById('player1-final-score').textContent = Math.round(player1FinalScore);
     document.getElementById('player2-final-score').textContent = Math.round(player2FinalScore);
     
-    // Determine winner
+    // Determine and display winner
     let winnerName, winningMessage;
-    if (player1FinalScore > player2FinalScore) {
+    if (winner === 1) {
         winnerName = gameState.player1.name;
         winningMessage = `${winnerName} wins with ${Math.round(player1FinalScore)} points!`;
         document.getElementById('player1-final').classList.add('winner');
         document.getElementById('player2-final').classList.remove('winner');
-    } else if (player2FinalScore > player1FinalScore) {
+        document.getElementById('winner-powerup-notice').style.display = 'flex';
+    } else if (winner === 2) {
         winnerName = gameState.player2.name;
         winningMessage = `${winnerName} wins with ${Math.round(player2FinalScore)} points!`;
         document.getElementById('player2-final').classList.add('winner');
         document.getElementById('player1-final').classList.remove('winner');
+        document.getElementById('winner-powerup-notice').style.display = 'flex';
     } else {
         winnerName = "It's a tie!";
         winningMessage = "Both players have the same score!";
         document.getElementById('player1-final').classList.add('winner');
         document.getElementById('player2-final').classList.add('winner');
+        document.getElementById('winner-powerup-notice').style.display = 'none';
     }
     
     document.getElementById('winner-name').textContent = winnerName;
     document.getElementById('winning-message').textContent = winningMessage;
+}
+
+function updatePlayerPowerupDisplay(player) {
+    const playerData = player === 1 ? gameState.player1 : gameState.player2;
+    const powerupListDiv = document.getElementById(`player${player}-all-powerups`);
+    const appliedPowerupSpan = document.getElementById(`player${player}-applied-powerup`);
     
-    // Show results screen
-    showScreen('results');
+    // Clear current power-up list
+    powerupListDiv.innerHTML = '';
+    
+    // Add both selected power-ups
+    if (playerData.powerup1) {
+        const powerupTag = document.createElement('span');
+        powerupTag.className = 'powerup-tag';
+        powerupTag.textContent = powerUps[playerData.powerup1].name;
+        if (playerData.appliedPowerup === playerData.powerup1) {
+            powerupTag.style.background = 'rgba(247, 37, 133, 0.3)';
+            powerupTag.style.borderColor = '#f72585';
+        }
+        powerupListDiv.appendChild(powerupTag);
+    } else {
+        const powerupTag = document.createElement('span');
+        powerupTag.className = 'powerup-tag';
+        powerupTag.textContent = 'None';
+        powerupListDiv.appendChild(powerupTag);
+    }
+    
+    if (playerData.powerup2) {
+        const powerupTag = document.createElement('span');
+        powerupTag.className = 'powerup-tag';
+        powerupTag.textContent = powerUps[playerData.powerup2].name;
+        if (playerData.appliedPowerup === playerData.powerup2) {
+            powerupTag.style.background = 'rgba(247, 37, 133, 0.3)';
+            powerupTag.style.borderColor = '#f72585';
+        }
+        powerupListDiv.appendChild(powerupTag);
+    } else {
+        const powerupTag = document.createElement('span');
+        powerupTag.className = 'powerup-tag';
+        powerupTag.textContent = 'None';
+        powerupListDiv.appendChild(powerupTag);
+    }
+    
+    // Update applied power-up display
+    if (playerData.appliedPowerup) {
+        appliedPowerupSpan.textContent = powerUps[playerData.appliedPowerup].name;
+        appliedPowerupSpan.style.color = '#f72585';
+    } else {
+        appliedPowerupSpan.textContent = 'None';
+        appliedPowerupSpan.style.color = '#b0b0b0';
+    }
 }
 
 function applyPowerup(powerupKey, playerScore, opponentScore, isPlayer1) {
@@ -832,6 +998,8 @@ function applyPowerup(powerupKey, playerScore, opponentScore, isPlayer1) {
             return playerScore * 0.7;
         case 'switch':
             return opponentScore;
+        case 'steal50':
+            return playerScore + (opponentScore * 0.5);
         default:
             return playerScore;
     }
@@ -898,12 +1066,16 @@ function resetGame() {
     gameState.player1 = {
         name: "Player 1",
         score: 0,
-        powerup: null
+        powerup1: null,
+        powerup2: null,
+        appliedPowerup: null
     };
     gameState.player2 = {
         name: "Player 2",
         score: 0,
-        powerup: null
+        powerup1: null,
+        powerup2: null,
+        appliedPowerup: null
     };
     gameState.currentPlayer = 1;
     gameState.currentQuestion = 0;
