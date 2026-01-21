@@ -149,18 +149,6 @@ h2 {
     margin-top: 20px;
 }
 
-.demo-note {
-    background: rgba(247, 37, 133, 0.1);
-    padding: 15px;
-    border-radius: 8px;
-    border-left: 4px solid #f72585;
-    margin-top: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #f8bbd9;
-}
-
 .button-group {
     display: flex;
     gap: 20px;
@@ -593,6 +581,86 @@ h2 {
     font-size: 1.2rem;
 }
 
+/* Worksheet Contents Section */
+.worksheet-contents-section {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+#view-contents-btn {
+    margin-bottom: 20px;
+}
+
+.worksheet-contents {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 20px;
+    border: 2px solid rgba(76, 201, 240, 0.2);
+}
+
+.worksheet-contents h3 {
+    color: #4cc9f0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#contents-list {
+    text-align: left;
+}
+
+.question-item {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4361ee;
+}
+
+.question-item h4 {
+    color: #4cc9f0;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.question-options {
+    margin: 15px 0;
+}
+
+.option-item {
+    padding: 8px 12px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border-left: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.correct-option {
+    background: rgba(76, 175, 80, 0.2);
+    border-left-color: #4caf50;
+    font-weight: bold;
+}
+
+.question-explanation {
+    background: rgba(67, 97, 238, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    color: #b0b0b0;
+}
+
+.question-explanation strong {
+    color: #4cc9f0;
+}
+
+#hide-contents-btn {
+    margin-top: 20px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .player-setup, .player-powerups, .players-status, .final-scores {
@@ -610,6 +678,11 @@ h2 {
     
     .powerup-grid {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .powerup-effect {
+        flex-direction: column;
+        text-align: center;
     }
     
     h1 {

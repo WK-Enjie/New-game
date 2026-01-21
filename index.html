@@ -6,6 +6,8 @@
     <title>Worksheet Battle Game</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
     <div class="container">
@@ -37,7 +39,10 @@
                         <div class="form-group">
                             <label for="level-select">Education Level</label>
                             <select id="level-select">
-                                
+                                <option value="">-- Select Level --</option>
+                                <option value="1">Primary School</option>
+                                <option value="2">Lower Secondary</option>
+                                <option value="3">Upper Secondary</option>
                             </select>
                         </div>
                         
@@ -312,6 +317,23 @@
                     </div>
                     <h2 id="winner-name">Player Wins!</h2>
                     <p id="winning-message">Congratulations on your victory!</p>
+                </div>
+                
+                <!-- Worksheet Contents Section -->
+                <div class="worksheet-contents-section">
+                    <button id="view-contents-btn" class="btn btn-secondary">
+                        <i class="fas fa-book"></i> View Worksheet Contents
+                    </button>
+                    
+                    <div id="worksheet-contents" class="worksheet-contents" style="display: none;">
+                        <h3><i class="fas fa-file-alt"></i> Worksheet Questions & Answers</h3>
+                        <div id="contents-list">
+                            <!-- Questions and answers will be displayed here -->
+                        </div>
+                        <button id="hide-contents-btn" class="btn btn-small">
+                            <i class="fas fa-times"></i> Hide Contents
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="button-group">

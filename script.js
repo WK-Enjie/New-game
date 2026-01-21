@@ -19,7 +19,7 @@ const gameState = {
     startTime: null,
     selectedWorksheet: null,
     
-    // File structure configuration
+    // File structure configuration - FIXED: Primary 1-6 labels
     levels: {
         '1': { name: 'Primary School', folder: 'primary', grades: ['1', '2', '3', '4', '5', '6'] },
         '2': { name: 'Lower Secondary', folder: 'lower-secondary', grades: ['1', '2'] },
@@ -35,7 +35,8 @@ const gameState = {
         '5': { name: 'Pure Chemistry', folder: 'pure-chemistry' }
     },
     
-    // Store available worksheets
+    // Store available worksheets and chapters
+    availableChapters: [],
     availableWorksheets: []
 };
 
@@ -73,23 +74,23 @@ function initializeEventListeners() {
     });
     
     // Level selection
-    document.getElementById('level-select').addEventListener('change', (e) => {
+    document.getElementById('level-select').addEventListener('change', async (e) => {
         const level = e.target.value;
         updateSubjectOptions(level);
-        updateGradeOptions(level);
+        await updateGradeOptions(level);
         updateChapterOptions();
         updateWorksheetOptions();
     });
     
     // Subject selection
-    document.getElementById('subject-select').addEventListener('change', () => {
-        updateChapterOptions();
+    document.getElementById('subject-select').addEventListener('change', async () => {
+        await updateChapterOptions();
         updateWorksheetOptions();
     });
     
     // Grade selection
-    document.getElementById('grade-select').addEventListener('change', () => {
-        updateChapterOptions();
+    document.getElementById('grade-select').addEventListener('change', async () => {
+        await updateChapterOptions();
         updateWorksheetOptions();
     });
     
@@ -139,6 +140,10 @@ function initializeEventListeners() {
         resetGame();
         showScreen('setup');
     });
+    
+    // Contents buttons
+    document.getElementById('view-contents-btn').addEventListener('click', showWorksheetContents);
+    document.getElementById('hide-contents-btn').addEventListener('click', hideWorksheetContents);
 }
 
 function populateDropdowns() {
@@ -170,7 +175,7 @@ function updateSubjectOptions(level) {
     subjectSelect.disabled = !level;
 }
 
-function updateGradeOptions(level) {
+async function updateGradeOptions(level) {
     const gradeSelect = document.getElementById('grade-select');
     gradeSelect.innerHTML = '<option value="">-- Select Grade --</option>';
     
@@ -179,8 +184,11 @@ function updateGradeOptions(level) {
         grades.forEach(grade => {
             const option = document.createElement('option');
             option.value = grade;
-            let gradeName = `Grade ${grade}`;
-            if (level === '2' || level === '3') {
+            // FIXED: Show Primary 1-6 instead of Grade 1-6
+            let gradeName = `Primary ${grade}`;
+            if (level === '2') {
+                gradeName = `Secondary ${grade}`;
+            } else if (level === '3') {
                 gradeName = `Secondary ${grade}`;
             }
             option.textContent = gradeName;
@@ -192,25 +200,75 @@ function updateGradeOptions(level) {
     }
 }
 
-function updateChapterOptions() {
+async function updateChapterOptions() {
     const level = document.getElementById('level-select').value;
+    const subject = document.getElementById('subject-select').value;
     const grade = document.getElementById('grade-select').value;
     const chapterSelect = document.getElementById('chapter-select');
     
     chapterSelect.innerHTML = '<option value="">-- Select Chapter --</option>';
+    chapterSelect.disabled = true;
     
-    if (level && grade) {
-        // Generate chapters 1-20
-        for (let i = 1; i <= 20; i++) {
+    if (level && subject && grade) {
+        // Show loading indicator
+        chapterSelect.innerHTML = '<option value="">Scanning for chapters...</option>';
+        
+        // Find available chapters for this grade and subject
+        const availableChapters = await findAvailableChapters(level, subject, grade);
+        
+        // Clear loading message
+        chapterSelect.innerHTML = '<option value="">-- Select Chapter --</option>';
+        
+        if (availableChapters.length > 0) {
+            availableChapters.forEach(chapter => {
+                const option = document.createElement('option');
+                option.value = chapter;
+                option.textContent = `Chapter ${parseInt(chapter)}`;
+                chapterSelect.appendChild(option);
+            });
+            chapterSelect.disabled = false;
+            
+            // Store available chapters
+            gameState.availableChapters = availableChapters;
+        } else {
+            // No chapters found
             const option = document.createElement('option');
-            option.value = i.toString().padStart(2, '0');
-            option.textContent = `Chapter ${i}`;
+            option.value = "";
+            option.textContent = "No chapters available";
             chapterSelect.appendChild(option);
+            chapterSelect.disabled = true;
         }
-        chapterSelect.disabled = false;
-    } else {
-        chapterSelect.disabled = true;
     }
+}
+
+async function findAvailableChapters(level, subject, grade) {
+    const availableChapters = [];
+    
+    // Check for chapters 1-20
+    for (let chapterNum = 1; chapterNum <= 20; chapterNum++) {
+        const chapterCode = chapterNum.toString().padStart(2, '0');
+        // Check if ANY worksheet exists for this chapter
+        const hasWorksheets = await checkIfChapterHasWorksheets(level, subject, grade, chapterCode);
+        
+        if (hasWorksheets) {
+            availableChapters.push(chapterCode);
+        }
+    }
+    
+    return availableChapters;
+}
+
+async function checkIfChapterHasWorksheets(level, subject, grade, chapter) {
+    // Check for worksheets 1-3
+    for (let worksheetNum = 1; worksheetNum <= 3; worksheetNum++) {
+        const worksheetCode = `${level}${subject}${grade}${chapter}${worksheetNum}`;
+        const fileExists = await checkIfWorksheetExists(worksheetCode);
+        
+        if (fileExists) {
+            return true; // At least one worksheet exists for this chapter
+        }
+    }
+    return false; // No worksheets found for this chapter
 }
 
 async function updateWorksheetOptions() {
@@ -225,7 +283,7 @@ async function updateWorksheetOptions() {
     
     if (level && subject && grade && chapter) {
         // Show loading indicator
-        worksheetSelect.innerHTML = '<option value="">Loading worksheets...</option>';
+        worksheetSelect.innerHTML = '<option value="">Scanning for worksheets...</option>';
         
         // Try to find available worksheets for this chapter
         const availableWorksheets = await findAvailableWorksheets(level, subject, grade, chapter);
@@ -315,8 +373,11 @@ function updateWorksheetInfo() {
         const levelName = gameState.levels[levelCode]?.name || 'Unknown Level';
         const subjectName = gameState.subjects[subjectCode]?.name || 'Unknown Subject';
         
-        let gradeName = `Grade ${grade}`;
-        if (levelCode === '2' || levelCode === '3') {
+        // FIXED: Show Primary 1-6 labels
+        let gradeName = `Primary ${grade}`;
+        if (levelCode === '2') {
+            gradeName = `Secondary ${grade}`;
+        } else if (levelCode === '3') {
             gradeName = `Secondary ${grade}`;
         }
         
@@ -639,7 +700,7 @@ function submitAnswer(isTimeout = false) {
         console.log(`Player ${gameState.currentPlayer} answered incorrectly.`);
     }
     
-    // Show feedback (but don't reveal correct answer yet)
+    // Show feedback (but don't reveal correct answer)
     const options = document.querySelectorAll('.option');
     options.forEach(opt => {
         opt.style.pointerEvents = 'none'; // Disable further clicks
@@ -655,9 +716,6 @@ function submitAnswer(isTimeout = false) {
             }
         }
     });
-    
-    // DO NOT show correct answer - keep it hidden
-    // Players should learn on their own or check after game
     
     // Show "Next Question" button immediately
     document.getElementById('submit-answer-btn').style.display = 'none';
@@ -779,6 +837,52 @@ function applyPowerup(powerupKey, playerScore, opponentScore, isPlayer1) {
     }
 }
 
+function showWorksheetContents() {
+    const contentsDiv = document.getElementById('worksheet-contents');
+    const contentsList = document.getElementById('contents-list');
+    
+    // Clear previous contents
+    contentsList.innerHTML = '';
+    
+    // Add each question to the contents
+    gameState.questions.forEach((question, index) => {
+        const questionItem = document.createElement('div');
+        questionItem.className = 'question-item';
+        
+        const correctAnswer = question.options.find(opt => opt.id === question.correctAnswer);
+        
+        questionItem.innerHTML = `
+            <h4>Question ${index + 1}: ${question.text}</h4>
+            <div class="question-options">
+                ${question.options.map(opt => `
+                    <div class="option-item ${opt.id === question.correctAnswer ? 'correct-option' : ''}">
+                        ${opt.id}. ${opt.text}
+                    </div>
+                `).join('')}
+            </div>
+            <div class="question-explanation">
+                <strong>Answer:</strong> ${correctAnswer ? correctAnswer.id + '. ' + correctAnswer.text : 'Unknown'}<br>
+                <strong>Explanation:</strong> ${question.explanation || 'No explanation provided.'}
+            </div>
+        `;
+        
+        contentsList.appendChild(questionItem);
+    });
+    
+    // Show the contents
+    contentsDiv.style.display = 'block';
+    document.getElementById('view-contents-btn').style.display = 'none';
+    
+    // Scroll to contents
+    contentsDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideWorksheetContents() {
+    const contentsDiv = document.getElementById('worksheet-contents');
+    contentsDiv.style.display = 'none';
+    document.getElementById('view-contents-btn').style.display = 'block';
+}
+
 function showScreen(screenName) {
     // Hide all screens
     Object.values(screens).forEach(screen => {
@@ -807,6 +911,7 @@ function resetGame() {
     gameState.selectedOption = null;
     gameState.selectedWorksheet = null;
     gameState.currentWorksheetData = null;
+    gameState.availableChapters = [];
     gameState.availableWorksheets = [];
     
     if (gameState.timer) {
@@ -828,6 +933,9 @@ function resetGame() {
     document.getElementById('selected-worksheet-info').style.display = 'none';
     document.getElementById('start-game-btn').disabled = true;
     document.getElementById('start-game-btn').innerHTML = '<i class="fas fa-play"></i> Start Game';
+    
+    // Hide contents if visible
+    hideWorksheetContents();
 }
 
 function playAgain() {
