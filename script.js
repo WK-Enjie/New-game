@@ -4,15 +4,15 @@ const gameState = {
         name: "Player 1",
         score: 0,
         powerup: null,
-        hasAnswered: false,
-        answers: [] // Track which questions player has answered
+        hasAttemptedCurrent: false,
+        hasAnsweredCorrectly: false
     },
     player2: {
         name: "Player 2",
         score: 0,
         powerup: null,
-        hasAnswered: false,
-        answers: [] // Track which questions player has answered
+        hasAttemptedCurrent: false,
+        hasAnsweredCorrectly: false
     },
     currentPlayer: 1,
     currentQuestion: 0,
@@ -471,10 +471,6 @@ function checkPowerupSelection() {
 }
 
 function startQuiz() {
-    // Reset answer tracking
-    gameState.player1.answers = [];
-    gameState.player2.answers = [];
-    
     // Set up quiz screen
     document.getElementById('quiz-player1-name').textContent = gameState.player1.name;
     document.getElementById('quiz-player2-name').textContent = gameState.player2.name;
@@ -490,8 +486,10 @@ function startQuiz() {
     gameState.currentQuestion = 0;
     gameState.player1.score = 0;
     gameState.player2.score = 0;
-    gameState.player1.hasAnswered = false;
-    gameState.player2.hasAnswered = false;
+    gameState.player1.hasAttemptedCurrent = false;
+    gameState.player2.hasAttemptedCurrent = false;
+    gameState.player1.hasAnsweredCorrectly = false;
+    gameState.player2.hasAnsweredCorrectly = false;
     gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
     gameState.startTime = Date.now();
     
@@ -515,6 +513,12 @@ function loadQuestion() {
         endGame();
         return;
     }
+    
+    // Reset attempt tracking for this question
+    gameState.player1.hasAttemptedCurrent = false;
+    gameState.player2.hasAttemptedCurrent = false;
+    gameState.player1.hasAnsweredCorrectly = false;
+    gameState.player2.hasAnsweredCorrectly = false;
     
     // Update question counter
     document.getElementById('current-question').textContent = gameState.currentQuestion + 1;
@@ -603,20 +607,15 @@ function submitAnswer(isTimeout = false) {
     const isCorrect = !isTimeout && gameState.selectedOption === question.correctAnswer;
     const currentPlayer = gameState.currentPlayer === 1 ? gameState.player1 : gameState.player2;
     
-    // Mark player as having answered THIS QUESTION
-    currentPlayer.hasAnswered = true;
+    // Mark that this player has attempted this question
+    currentPlayer.hasAttemptedCurrent = true;
     
-    // Track that this player has answered this specific question
-    if (gameState.currentPlayer === 1) {
-        gameState.player1.answers.push(gameState.currentQuestion);
-    } else {
-        gameState.player2.answers.push(gameState.currentQuestion);
-    }
-    
-    // Give points if correct - FIXED THIS PART
+    // Give points if correct
     if (isCorrect) {
         currentPlayer.score += question.points;
-        console.log(`Player ${gameState.currentPlayer} scored ${question.points} points! Total: ${currentPlayer.score}`);
+        currentPlayer.hasAnsweredCorrectly = true;
+        
+        console.log(`Player ${gameState.currentPlayer} answered correctly! Scored ${question.points} points. Total: ${currentPlayer.score}`);
         
         // Update score display immediately
         if (gameState.currentPlayer === 1) {
@@ -624,6 +623,8 @@ function submitAnswer(isTimeout = false) {
         } else {
             document.getElementById('player2-score').textContent = gameState.player2.score;
         }
+    } else {
+        console.log(`Player ${gameState.currentPlayer} answered incorrectly.`);
     }
     
     // Show feedback
@@ -646,6 +647,20 @@ function submitAnswer(isTimeout = false) {
     document.getElementById('submit-answer-btn').style.display = 'none';
     document.getElementById('next-question-btn').style.display = 'block';
     
+    // Update button text based on situation
+    const nextButton = document.getElementById('next-question-btn');
+    if (isCorrect) {
+        nextButton.innerHTML = '<i class="fas fa-forward"></i> Next Question';
+    } else {
+        // Check if other player can attempt
+        const otherPlayer = gameState.currentPlayer === 1 ? gameState.player2 : gameState.player1;
+        if (!otherPlayer.hasAttemptedCurrent) {
+            nextButton.innerHTML = '<i class="fas fa-user-friends"></i> Switch to Other Player';
+        } else {
+            nextButton.innerHTML = '<i class="fas fa-forward"></i> Next Question';
+        }
+    }
+    
     // If timeout, also show which was the correct answer
     if (isTimeout) {
         const correctOption = document.querySelector(`.option[data-option-id="${question.correctAnswer}"]`);
@@ -663,12 +678,13 @@ function nextQuestion() {
         gameState.timer = null;
     }
     
-    // Check if both players have answered THIS QUESTION
-    const bothAnswered = gameState.player1.hasAnswered && gameState.player2.hasAnswered;
+    const question = gameState.questions[gameState.currentQuestion];
+    const currentPlayer = gameState.currentPlayer === 1 ? gameState.player1 : gameState.player2;
+    const otherPlayer = gameState.currentPlayer === 1 ? gameState.player2 : gameState.player1;
     
-    // Check if we need to move to next question
-    if (bothAnswered) {
-        // Both players answered this question
+    // Check if current player answered correctly
+    if (currentPlayer.hasAnsweredCorrectly) {
+        // Correct answer → move to next question
         gameState.currentQuestion++;
         
         // Check if we've reached the end
@@ -677,41 +693,40 @@ function nextQuestion() {
             return;
         }
         
-        // Reset for next question
-        gameState.player1.hasAnswered = false;
-        gameState.player2.hasAnswered = false;
+        // Switch starting player for next question
         gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
         
         // Load next question
         loadQuestion();
-    } else {
-        // Switch to other player for same question
+    } 
+    // Check if current player answered wrong AND other player hasn't attempted yet
+    else if (!currentPlayer.hasAnsweredCorrectly && !otherPlayer.hasAttemptedCurrent) {
+        // Wrong answer, other player can try
         gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
         
-        // Check if the other player has already answered this question
-        const otherPlayer = gameState.currentPlayer === 1 ? gameState.player1 : gameState.player2;
-        const otherPlayerAnswered = otherPlayer.answers.includes(gameState.currentQuestion);
+        // Reset the question for the other player
+        resetQuestionForOtherPlayer();
+    }
+    // Both players have attempted and both were wrong
+    else {
+        // Both answered wrong → move to next question
+        gameState.currentQuestion++;
         
-        if (otherPlayerAnswered) {
-            // Other player already answered, so both have answered
-            gameState.player1.hasAnswered = true;
-            gameState.player2.hasAnswered = true;
-            nextQuestion(); // Recursive call to move to next question
-        } else {
-            // Load same question for other player
-            loadQuestionForOtherPlayer();
+        // Check if we've reached the end
+        if (gameState.currentQuestion >= gameState.questions.length) {
+            endGame();
+            return;
         }
+        
+        // Switch starting player for next question
+        gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
+        
+        // Load next question
+        loadQuestion();
     }
 }
 
-function loadQuestionForOtherPlayer() {
-    // Clear timer
-    if (gameState.timer) {
-        clearInterval(gameState.timer);
-        gameState.timer = null;
-    }
-    
-    // Load the same question for the other player
+function resetQuestionForOtherPlayer() {
     const question = gameState.questions[gameState.currentQuestion];
     
     // Update current turn indicator
@@ -725,13 +740,21 @@ function loadQuestionForOtherPlayer() {
     // Reset option selection for new player
     gameState.selectedOption = null;
     
-    // Reset all options styling completely
+    // Reset options styling but keep correct answer visible
     const options = document.querySelectorAll('.option');
     options.forEach(opt => {
         opt.classList.remove('selected');
-        opt.style.backgroundColor = '';
-        opt.style.borderColor = '';
         opt.style.pointerEvents = 'auto'; // Re-enable clicks
+        
+        // Keep correct answer highlighted
+        if (opt.dataset.optionId === question.correctAnswer) {
+            opt.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+            opt.style.borderColor = '#4caf50';
+        } else {
+            // Reset wrong answers
+            opt.style.backgroundColor = '';
+            opt.style.borderColor = '';
+        }
     });
     
     // Reset UI elements
@@ -846,15 +869,15 @@ function resetGame() {
         name: "Player 1",
         score: 0,
         powerup: null,
-        hasAnswered: false,
-        answers: []
+        hasAttemptedCurrent: false,
+        hasAnsweredCorrectly: false
     };
     gameState.player2 = {
         name: "Player 2",
         score: 0,
         powerup: null,
-        hasAnswered: false,
-        answers: []
+        hasAttemptedCurrent: false,
+        hasAnsweredCorrectly: false
     };
     gameState.currentPlayer = 1;
     gameState.currentQuestion = 0;
@@ -888,12 +911,12 @@ function playAgain() {
     // Reset scores but keep player names and power-ups
     gameState.player1.score = 0;
     gameState.player2.score = 0;
-    gameState.player1.answers = [];
-    gameState.player2.answers = [];
+    gameState.player1.hasAttemptedCurrent = false;
+    gameState.player2.hasAttemptedCurrent = false;
+    gameState.player1.hasAnsweredCorrectly = false;
+    gameState.player2.hasAnsweredCorrectly = false;
     gameState.currentQuestion = 0;
     gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
-    gameState.player1.hasAnswered = false;
-    gameState.player2.hasAnswered = false;
     gameState.selectedOption = null;
     gameState.startTime = Date.now();
     
