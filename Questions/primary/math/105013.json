@@ -1,0 +1,113 @@
+{
+  "code": "105022",
+  "title": "P5 Math Worksheet 2: Advanced Word Problems",
+  "subject": "Mathematics - Primary 5",
+  "grade": "Primary 5",
+  "chapter": "1",
+  "description": "Advanced problem-solving with equal at first, repeated deduction, excess-shortage, and grouping concepts.",
+  "duration": "60 minutes",
+  "instructions": "Answer all questions. Use models, logical deduction, or systematic listing.",
+  "questions": [
+    {
+      "id": 1,
+      "question": "Box A and Box B contained the same number of marbles. After 35 marbles were removed from Box A and 15 marbles were added to Box B, Box B had twice as many marbles as Box A. How many marbles were in Box A at first?",
+      "options": [
+        "85",
+        "90",
+        "95",
+        "100"
+      ],
+      "correctAnswer": 0,
+      "points": 25,
+      "explanation": "Draw model with equal units at first.\nAfter changes: B has 1 unit + 15, A has 1 unit − 35.\nB is 2 times A, so: 1 unit + 15 = 2 × (1 unit − 35) = 2 units − 70.\nBring like terms together: 15 + 70 = 2 units − 1 unit → 85 = 1 unit.\nSo Box A had 85 marbles at first.",
+      "type": "equal_at_first_then_operation"
+    },
+    {
+      "id": 2,
+      "question": "There were 120 red balls and 48 blue balls in a bag. Every time, 5 red balls and 3 blue balls were taken out together. How many red balls were left when all the blue balls were taken out?",
+      "options": [
+        "40",
+        "45",
+        "50",
+        "55"
+      ],
+      "correctAnswer": 0,
+      "points": 20,
+      "explanation": "Blue balls finish in: 48 ÷ 3 = 16 removals.\nRed balls taken out: 16 × 5 = 80.\nRed balls left: 120 − 80 = 40.",
+      "type": "simultaneous_reduction"
+    },
+    {
+      "id": 3,
+      "question": "A group of students shared a bag of stickers. If each student gets 7 stickers, there will be 4 stickers left. If each student gets 9 stickers, they will be short of 12 stickers. How many students are there?",
+      "options": [
+        "8",
+        "9",
+        "10",
+        "11"
+      ],
+      "correctAnswer": 0,
+      "points": 25,
+      "explanation": "Difference in stickers per student = 9 − 7 = 2.\nTotal difference in stickers between the two cases = 4 (extra) + 12 (short) = 16 stickers.\nNumber of students = 16 ÷ 2 = 8.",
+      "type": "excess_shortage"
+    },
+    {
+      "id": 4,
+      "question": "Mr. Tan sold each burger for $5 and each hotdog for $3. He sold a total of 50 burgers and hotdogs and collected $190. How many burgers did he sell?",
+      "options": [
+        "20",
+        "25",
+        "30",
+        "35"
+      ],
+      "correctAnswer": 0,
+      "points": 25,
+      "explanation": "Assume all 50 were hotdogs: 50 × $3 = $150.\nActual: $190. Difference = $40.\nEach burger gives $2 more than a hotdog ($5 − $3 = $2).\nNumber of burgers = $40 ÷ $2 = 20.",
+      "type": "assumption_problem"
+    },
+    {
+      "id": 5,
+      "question": "In a test, for every correct answer, 4 marks were awarded. For every wrong answer, 1 mark was deducted. Sam attempted 30 questions and scored 75 marks. How many questions did he answer correctly?",
+      "options": [
+        "21",
+        "22",
+        "23",
+        "24"
+      ],
+      "correctAnswer": 0,
+      "points": 25,
+      "explanation": "Assume all 30 correct: 30 × 4 = 120 marks.\nActual: 75. Difference = 45 marks.\nEach wrong answer causes a loss of 5 marks compared to a correct one (4 not gained + 1 deducted).\nNumber wrong = 45 ÷ 5 = 9.\nNumber correct = 30 − 9 = 21.",
+      "type": "assumption_problem"
+    },
+    {
+      "id": 6,
+      "question": "A farmer has ducks and goats. There are 35 heads and 94 legs altogether. How many goats are there?",
+      "options": [
+        "12",
+        "14",
+        "16",
+        "18"
+      ],
+      "correctAnswer": 0,
+      "points": 20,
+      "explanation": "Assume all 35 are ducks: 35 × 2 = 70 legs.\nActual legs: 94. Difference = 24 legs.\nEach goat has 2 more legs than a duck.\nNumber of goats = 24 ÷ 2 = 12.",
+      "type": "assumption_problem"
+    },
+    {
+      "id": 7,
+      "question": "Some students are seated in rows. If 7 students sit in each row, 4 students are left and 3 rows are empty. If 9 students sit in each row, 2 students are left and 5 rows are empty. How many students are there?",
+      "options": [
+        "74",
+        "78",
+        "82",
+        "86"
+      ],
+      "correctAnswer": 0,
+      "points": 30,
+      "explanation": "Case 1: With 7 per row, 3 empty rows.\nLet rows filled = R1.\nTotal rows = R1 + 3\nStudents = 7 × R1 + 4.\n\nCase 2: With 9 per row, 5 empty rows.\nLet rows filled = R2.\nTotal rows = R2 + 5\nStudents = 9 × R2 + 2.\n\nTotal rows same: R1 + 3 = R2 + 5 → R1 = R2 + 2.\nStudents same: 7 × R1 + 4 = 9 × R2 + 2.\nSubstitute R1 = R2 + 2:\n7(R2 + 2) + 4 = 9R2 + 2\n7R2 + 14 + 4 = 9R2 + 2\n7R2 + 18 = 9R2 + 2\n18 − 2 = 9R2 − 7R2\n16 = 2R2\nR2 = 8\n\nStudents = 9 × 8 + 2 = 72 + 2 = 74.",
+      "type": "seating_arrangement"
+    }
+  ],
+  "created": "2024-01-16",
+  "author": "Math Department",
+  "tags": ["word_problems", "advanced", "models", "excess_shortage", "P5"]
+}
